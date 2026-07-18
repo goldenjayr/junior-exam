@@ -1,8 +1,8 @@
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { problems, parseProblemIds, type Problem } from "@/lib/problems";
-import { runProblem, formatValue, type RunResult } from "@/lib/runner";
+import { runProblemSandboxed, formatValue, type RunResult } from "@/lib/runner";
 import CodeEditor from "@/components/CodeEditor";
 
 const statusLabel: Record<string, string> = {
@@ -33,17 +33,28 @@ function Exam() {
   const [results, setResults] = useState<Record<number, RunResult>>({});
   const [applicantName, setApplicantName] = useState("");
 
+  // ponytail: localStorage so a refresh doesn't wipe the applicant's work.
+  const storageKey = `exam-answers:${searchParams.get("p") ?? "all"}`;
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) ?? "{}");
+      setAnswers((a) => ({ ...a, ...saved }));
+    } catch {}
+  }, [storageKey]);
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(answers));
+  }, [answers, storageKey]);
+
   // ponytail: PDF via the browser's print dialog (Save as PDF) on a
   // print-only report — no pdf library needed.
-  function submitResults() {
-    setResults(
-      Object.fromEntries(
-        examProblems.map((p) => [
-          p.id,
-          runProblem(p, answers[p.id] ?? p.starterCode),
-        ])
-      )
+  async function submitResults() {
+    const entries = await Promise.all(
+      examProblems.map(async (p) => [
+        p.id,
+        await runProblemSandboxed(p, answers[p.id] ?? p.starterCode),
+      ])
     );
+    setResults(Object.fromEntries(entries));
     // Browsers use document.title as the default PDF filename.
     setTimeout(() => {
       const prev = document.title;
@@ -304,12 +315,10 @@ function Exam() {
                   </button>
                   <button
                     type="button"
-                    onClick={() =>
-                      setResults((r) => ({
-                        ...r,
-                        [problem.id]: runProblem(problem, code),
-                      }))
-                    }
+                    onClick={async () => {
+                      const result = await runProblemSandboxed(problem, code);
+                      setResults((r) => ({ ...r, [problem.id]: result }));
+                    }}
                     className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95"
                   >
                     Run Tests

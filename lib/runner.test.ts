@@ -58,6 +58,24 @@ test("missing function is reported", () => {
   assert.strictEqual(r.status, "error");
 });
 
+test("object equality ignores key order", () => {
+  const minMax = problems.find((p) => p.fnName === "minMax")!;
+  const r = runProblem(
+    minMax,
+    "function minMax(ns){ return { max: Math.max(...ns), min: Math.min(...ns) }; }"
+  );
+  assert.strictEqual(r.status, "passed");
+});
+
+test("wrong values still fail", () => {
+  const minMax = problems.find((p) => p.fnName === "minMax")!;
+  const r = runProblem(
+    minMax,
+    "function minMax(ns){ return { min: 0, max: 0 }; }"
+  );
+  assert.strictEqual(r.status, "failed");
+});
+
 test("parseProblemIds filters invalid ids", () => {
   assert.deepStrictEqual(parseProblemIds("1,2,999,abc,2"), [1, 2]);
   assert.deepStrictEqual(parseProblemIds(null), []);

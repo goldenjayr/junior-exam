@@ -13,21 +13,54 @@ export type RunResult = {
   error?: string;
 };
 
-function deepEqual(a: unknown, b: unknown): boolean {
-  if (a === undefined || b === undefined) return a === b;
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-
 export function formatValue(value: unknown): string {
   if (value === undefined) return "undefined";
   if (typeof value === "string") return JSON.stringify(value);
   return JSON.stringify(value, null, 2) ?? String(value);
 }
 
-// ponytail: runs candidate code with new Function in the browser tab.
-// Fine for a supervised local assessment; move to a sandboxed iframe/worker
-// if this ever runs untrusted code on a shared host.
+// Self-contained on purpose: runProblemSandboxed ships this whole function
+// into a Web Worker via toString(), so it must not reference module scope.
 export function runProblem(problem: Problem, code: string): RunResult {
+  function deepEqual(a: unknown, b: unknown): boolean {
+    if (Object.is(a, b)) return true;
+    if (
+      typeof a !== "object" ||
+      typeof b !== "object" ||
+      a === null ||
+      b === null
+    )
+      return false;
+    if (Array.isArray(a) !== Array.isArray(b)) return false;
+    if (Array.isArray(a) && Array.isArray(b))
+      return (
+        a.length === b.length && a.every((v, i) => deepEqual(v, b[i]))
+      );
+    const ka = Object.keys(a);
+    const kb = Object.keys(b);
+    return (
+      ka.length === kb.length &&
+      ka.every(
+        (k) =>
+          Object.hasOwn(b, k) &&
+          deepEqual(
+            (a as Record<string, unknown>)[k],
+            (b as Record<string, unknown>)[k]
+          )
+      )
+    );
+  }
+
+  // Keep worker results postMessage-safe (drops functions, symbols, etc.).
+  function sanitize(value: unknown): unknown {
+    if (value === undefined) return undefined;
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch {
+      return String(value);
+    }
+  }
+
   let fn: (...args: unknown[]) => unknown;
   try {
     fn = new Function(
@@ -44,7 +77,11 @@ export function runProblem(problem: Problem, code: string): RunResult {
   const tests: TestResult[] = problem.tests.map((test) => {
     try {
       const actual = fn(...structuredClone(test.args));
-      return { test, passed: deepEqual(actual, test.expected), actual };
+      return {
+        test,
+        passed: deepEqual(actual, test.expected),
+        actual: sanitize(actual),
+      };
     } catch (error) {
       return {
         test,
@@ -58,4 +95,49 @@ export function runProblem(problem: Problem, code: string): RunResult {
     status: tests.every((t) => t.passed) ? "passed" : "failed",
     tests,
   };
+}
+
+// Runs candidate code in a Web Worker so infinite loops can't freeze the
+// exam tab — the worker is terminated after timeoutMs. Falls back to the
+// synchronous runner where Worker is unavailable (tests, SSR).
+export function runProblemSandboxed(
+  problem: Problem,
+  code: string,
+  timeoutMs = 3000
+): Promise<RunResult> {
+  if (typeof Worker === "undefined")
+    return Promise.resolve(runProblem(problem, code));
+
+  const src = `const run = ${runProblem.toString()};
+onmessage = (e) => postMessage(run(e.data.problem, e.data.code));`;
+  const url = URL.createObjectURL(
+    new Blob([src], { type: "application/javascript" })
+  );
+  const worker = new Worker(url);
+
+  return new Promise<RunResult>((resolve) => {
+    worker.postMessage({ problem, code });
+    const timer = setTimeout(() => {
+      worker.terminate();
+      resolve({
+        status: "error",
+        tests: [],
+        error: `Your code took longer than ${timeoutMs / 1000} seconds to run — check for infinite loops.`,
+      });
+    }, timeoutMs);
+    worker.onmessage = (e) => {
+      clearTimeout(timer);
+      worker.terminate();
+      resolve(e.data as RunResult);
+    };
+    worker.onerror = (e) => {
+      clearTimeout(timer);
+      worker.terminate();
+      resolve({
+        status: "error",
+        tests: [],
+        error: e.message || "Your code could not be executed.",
+      });
+    };
+  }).finally(() => URL.revokeObjectURL(url));
 }
