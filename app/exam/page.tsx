@@ -44,7 +44,13 @@ function Exam() {
         ])
       )
     );
-    setTimeout(() => window.print(), 50);
+    // Browsers use document.title as the default PDF filename.
+    setTimeout(() => {
+      const prev = document.title;
+      document.title = `${applicantName.trim() || "Applicant"} - JavaScript Assessment`;
+      window.print();
+      document.title = prev;
+    }, 50);
   }
 
   const problem = examProblems.find((p) => p.id === selectedId);
@@ -99,37 +105,120 @@ function Exam() {
           </div>
         </header>
 
-        <section className="hidden print:block">
-          <h1 className="text-2xl font-bold">
-            JavaScript Assessment — Results
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Applicant: {applicantName || "(not provided)"} · Date:{" "}
-            {new Date().toLocaleDateString()} · Score: {passedCount} /{" "}
-            {examProblems.length}
-          </p>
-          {examProblems.map((p) => {
+        <section className="hidden [print-color-adjust:exact] print:block">
+          <div className="flex items-end justify-between border-b-4 border-blue-600 pb-4">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-blue-600">
+                Junior JavaScript Assessment
+              </p>
+              <h1 className="mt-1 text-3xl font-bold">
+                {applicantName.trim() || "Applicant"}
+              </h1>
+              <p className="mt-1 text-sm text-slate-500">
+                Results Report · {new Date().toLocaleDateString()}
+              </p>
+            </div>
+            <div className="rounded-xl border-2 border-blue-600 px-5 py-3 text-center">
+              <p className="text-3xl font-bold text-blue-600">
+                {passedCount}/{examProblems.length}
+              </p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Problems Solved
+              </p>
+            </div>
+          </div>
+
+          <table className="mt-5 w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b-2 border-slate-300 text-left text-[11px] uppercase tracking-wider text-slate-500">
+                <th className="py-2 pr-2 font-bold">#</th>
+                <th className="py-2 pr-2 font-bold">Problem</th>
+                <th className="py-2 pr-2 font-bold">Difficulty</th>
+                <th className="py-2 pr-2 font-bold">Tests</th>
+                <th className="py-2 font-bold">Result</th>
+              </tr>
+            </thead>
+            <tbody>
+              {examProblems.map((p, i) => {
+                const r = results[p.id];
+                const passed = r?.tests.filter((t) => t.passed).length ?? 0;
+                return (
+                  <tr key={p.id} className="border-b border-slate-200">
+                    <td className="py-2 pr-2 text-slate-400">{i + 1}</td>
+                    <td className="py-2 pr-2 font-semibold">{p.title}</td>
+                    <td className="py-2 pr-2 capitalize text-slate-500">
+                      {p.difficulty}
+                    </td>
+                    <td className="py-2 pr-2 text-slate-500">
+                      {r ? `${passed}/${r.tests.length}` : "—"}
+                    </td>
+                    <td className="py-2">
+                      <span
+                        className={`font-bold ${
+                          r?.status === "passed"
+                            ? "text-green-700"
+                            : r
+                            ? "text-red-700"
+                            : "text-slate-400"
+                        }`}
+                      >
+                        {r
+                          ? r.status === "passed"
+                            ? "✓ Passed"
+                            : r.status === "error"
+                            ? "✗ Error"
+                            : "✗ Failed"
+                          : "Not attempted"}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          <h2 className="mt-8 text-[11px] font-bold uppercase tracking-widest text-slate-500">
+            Submitted Solutions
+          </h2>
+          {examProblems.map((p, i) => {
             const r = results[p.id];
             return (
-              <div
-                key={p.id}
-                className="mt-6 break-inside-avoid border-t border-slate-300 pt-4"
-              >
-                <h2 className="text-lg font-bold">
-                  {p.title} —{" "}
-                  {r ? statusLabel[r.status] : "Not attempted"}
-                  {r?.status === "failed" &&
-                    ` (${r.tests.filter((t) => t.passed).length}/${r.tests.length} tests)`}
-                </h2>
-                {r?.error && (
-                  <p className="mt-1 font-mono text-sm">{r.error}</p>
-                )}
-                <pre className="mt-2 overflow-hidden whitespace-pre-wrap rounded border border-slate-300 p-3 font-mono text-xs">
+              <div key={p.id} className="mt-4 break-inside-avoid">
+                <div className="flex items-center justify-between rounded-t-lg border border-slate-300 bg-slate-100 px-3 py-2">
+                  <p className="text-sm font-bold">
+                    {i + 1}. {p.title}
+                    <span className="ml-2 font-normal capitalize text-slate-500">
+                      {p.difficulty} · {p.category}
+                    </span>
+                  </p>
+                  <span
+                    className={`text-xs font-bold ${
+                      r?.status === "passed"
+                        ? "text-green-700"
+                        : r
+                        ? "text-red-700"
+                        : "text-slate-400"
+                    }`}
+                  >
+                    {r ? statusLabel[r.status] : "Not attempted"}
+                  </span>
+                </div>
+                <pre className="overflow-hidden whitespace-pre-wrap rounded-b-lg border border-t-0 border-slate-300 p-3 font-mono text-[11px] leading-relaxed">
                   {answers[p.id] ?? p.starterCode}
                 </pre>
+                {r?.error && (
+                  <p className="mt-1 font-mono text-xs text-red-700">
+                    Runtime error: {r.error}
+                  </p>
+                )}
               </div>
             );
           })}
+
+          <p className="mt-8 border-t border-slate-200 pt-3 text-center text-[10px] text-slate-400">
+            Generated by Junior JavaScript Assessment · results are
+            self-reported from the applicant&apos;s browser
+          </p>
         </section>
 
         <div className="grid items-start gap-6 print:hidden lg:grid-cols-[280px_minmax(0,1fr)]">
