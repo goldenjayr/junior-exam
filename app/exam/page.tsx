@@ -358,92 +358,120 @@ function Exam() {
               />
             </div>
 
-            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-sm font-bold">Test Cases</h3>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {problem.tests.map((t, i) => (
-                  <div
-                    key={i}
-                    className="rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs"
-                  >
-                    <p className="overflow-x-auto whitespace-nowrap text-slate-600">
-                      {callLabel(problem, t)}
-                    </p>
-                    <p className="mt-1 font-sans text-[11px] font-semibold text-slate-400">
-                      Expected
-                    </p>
-                    <pre className="overflow-x-auto whitespace-pre-wrap">
-                      {formatValue(t.expected)}
-                    </pre>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-sm font-bold">Test Results</h3>
-                {result && (
-                  <span
-                    className={`animate-pop rounded-full px-2.5 py-1 text-xs font-bold ${statusBadge[result.status]}`}
-                  >
-                    {statusLabel[result.status]}
+            <div className="mt-5 grid items-start gap-4 lg:grid-cols-2">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <h3 className="flex items-center gap-2 text-sm font-bold">
+                  Test Cases
+                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+                    {problem.tests.length}
                   </span>
-                )}
+                </h3>
+                <div className="mt-3 flex flex-col gap-2">
+                  {problem.tests.map((t, i) => (
+                    <div
+                      key={i}
+                      className="rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs"
+                    >
+                      <p className="flex items-baseline gap-2">
+                        <span className="shrink-0 font-sans text-[11px] font-bold text-slate-400">
+                          {i + 1}
+                        </span>
+                        <span className="overflow-x-auto whitespace-nowrap text-slate-600">
+                          {callLabel(problem, t)}
+                        </span>
+                      </p>
+                      <p className="mt-2 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                        Expected
+                      </p>
+                      <pre className="mt-0.5 overflow-x-auto whitespace-pre-wrap text-slate-800">
+                        {formatValue(t.expected)}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {!result && (
-                <p className="mt-3 text-sm text-slate-400">
-                  Run the tests to see your results.
-                </p>
-              )}
-
-              {result?.error && (
-                <pre className="mt-3 overflow-x-auto whitespace-pre-wrap font-mono text-sm text-red-700">
-                  {result.error}
-                </pre>
-              )}
-
-              {result?.tests.map((t, i) => (
-                <div
-                  key={i}
-                  style={{ animationDelay: `${i * 60}ms` }}
-                  className={`animate-fade-up mt-3 rounded-lg border p-3 text-sm ${
-                    t.passed
-                      ? "border-green-200 bg-green-50"
-                      : "border-red-200 bg-red-50"
-                  }`}
-                >
-                  <p className="font-bold">
-                    {t.passed ? "✓" : "✗"} Test {i + 1}
-                    <span className="ml-2 font-mono font-normal text-slate-600">
-                      {callLabel(problem, t.test)}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="flex items-center gap-2 text-sm font-bold">
+                    Test Results
+                    {result && result.tests.length > 0 && (
+                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+                        {result.tests.filter((t) => t.passed).length}/
+                        {result.tests.length}
+                      </span>
+                    )}
+                  </h3>
+                  {result && (
+                    <span
+                      className={`animate-pop rounded-full px-2.5 py-1 text-xs font-bold ${statusBadge[result.status]}`}
+                    >
+                      {statusLabel[result.status]}
                     </span>
-                  </p>
-                  {!t.passed && (
-                    <div className="mt-2 grid gap-2 font-mono text-xs sm:grid-cols-2">
-                      <div>
-                        <p className="mb-1 font-sans font-semibold text-slate-500">
-                          Expected
-                        </p>
-                        <pre className="overflow-x-auto whitespace-pre-wrap">
-                          {formatValue(t.test.expected)}
-                        </pre>
-                      </div>
-                      <div>
-                        <p className="mb-1 font-sans font-semibold text-slate-500">
-                          {t.error ? "Error" : "Received"}
-                        </p>
-                        <pre
-                          className={`overflow-x-auto whitespace-pre-wrap ${t.error ? "text-red-700" : ""}`}
-                        >
-                          {t.error ?? formatValue(t.actual)}
-                        </pre>
-                      </div>
-                    </div>
                   )}
                 </div>
-              ))}
+
+                {!result && (
+                  <div className="mt-3 grid min-h-32 place-items-center rounded-lg border border-dashed border-slate-300 text-sm text-slate-400">
+                    Run the tests to see your results here.
+                  </div>
+                )}
+
+                {result?.error && (
+                  <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-lg border border-red-200 bg-red-50 p-3 font-mono text-sm text-red-700">
+                    {result.error}
+                  </pre>
+                )}
+
+                <div className="mt-3 flex flex-col gap-2">
+                  {result?.tests.map((t, i) => (
+                    <div
+                      key={i}
+                      style={{ animationDelay: `${i * 60}ms` }}
+                      className={`animate-fade-up rounded-lg border p-3 text-sm ${
+                        t.passed
+                          ? "border-green-200 bg-green-50"
+                          : "border-red-200 bg-red-50"
+                      }`}
+                    >
+                      <p className="flex items-baseline gap-2">
+                        <span
+                          className={`grid h-4 w-4 shrink-0 translate-y-0.5 place-items-center rounded-full text-[10px] font-bold text-white ${
+                            t.passed ? "bg-green-600" : "bg-red-600"
+                          }`}
+                        >
+                          {t.passed ? "✓" : "✗"}
+                        </span>
+                        <span className="overflow-x-auto whitespace-nowrap font-mono text-xs text-slate-600">
+                          {callLabel(problem, t.test)}
+                        </span>
+                      </p>
+                      {!t.passed && (
+                        <div className="mt-2 grid gap-2 font-mono text-xs sm:grid-cols-2">
+                          <div>
+                            <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                              Expected
+                            </p>
+                            <pre className="overflow-x-auto whitespace-pre-wrap">
+                              {formatValue(t.test.expected)}
+                            </pre>
+                          </div>
+                          <div>
+                            <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                              {t.error ? "Error" : "Received"}
+                            </p>
+                            <pre
+                              className={`overflow-x-auto whitespace-pre-wrap ${t.error ? "text-red-700" : ""}`}
+                            >
+                              {t.error ?? formatValue(t.actual)}
+                            </pre>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
         </div>
