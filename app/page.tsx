@@ -6,25 +6,25 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-100 text-slate-900">
-      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-6 py-16">
+      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-6 py-16 [&>*]:animate-fade-up">
         <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
           Junior JavaScript Assessment
         </p>
-        <h1 className="mt-2 text-4xl font-bold sm:text-5xl">
+        <h1 style={{ animationDelay: "80ms" }} className="mt-2 text-4xl font-bold sm:text-5xl">
           Technical interviews,
           <br />
           <span className="text-blue-600">without the setup.</span>
         </h1>
-        <p className="mt-4 max-w-xl text-lg text-slate-500">
+        <p style={{ animationDelay: "160ms" }} className="mt-4 max-w-xl text-lg text-slate-500">
           A self-contained coding exam for junior JavaScript candidates. Pick
           problems, send a link, and get a PDF of the results — everything
           runs in the browser.
         </p>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        <div style={{ animationDelay: "240ms" }} className="mt-10 grid gap-4 sm:grid-cols-2">
           <Link
             href="/exam"
-            className="group rounded-2xl border border-slate-200 bg-white p-6 transition-colors hover:border-blue-400"
+            className="group rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-100"
           >
             <span className="text-2xl">📝</span>
             <h2 className="mt-3 text-lg font-bold group-hover:text-blue-600">
@@ -37,7 +37,7 @@ export default function Home() {
           </Link>
           <Link
             href="/admin"
-            className="group rounded-2xl border border-slate-200 bg-white p-6 transition-colors hover:border-blue-400"
+            className="group rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-100"
           >
             <span className="text-2xl">🗂️</span>
             <h2 className="mt-3 text-lg font-bold group-hover:text-blue-600">
@@ -50,7 +50,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <dl className="mt-10 flex flex-wrap gap-8 border-t border-slate-200 pt-6">
+        <dl style={{ animationDelay: "320ms" }} className="mt-10 flex flex-wrap gap-8 border-t border-slate-200 pt-6">
           {[
             [problems.length, "problems"],
             [categories.length, "categories"],

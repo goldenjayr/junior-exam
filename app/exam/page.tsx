@@ -92,7 +92,7 @@ function Exam() {
             <button
               type="button"
               onClick={submitResults}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700"
+              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-green-700 active:scale-95"
             >
               Submit Results
             </button>
@@ -144,7 +144,7 @@ function Exam() {
                     key={p.id}
                     type="button"
                     onClick={() => setSelectedId(p.id)}
-                    className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-colors ${
+                    className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all active:scale-[0.98] ${
                       selected
                         ? "border-blue-200 bg-blue-50"
                         : "border-transparent hover:bg-slate-50"
@@ -173,7 +173,7 @@ function Exam() {
             </div>
           </aside>
 
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7">
+          <section key={problem.id} className="animate-fade-up rounded-2xl border border-slate-200 bg-white p-6 sm:p-7">
             <div className="border-b border-slate-200 pb-5">
               <span
                 className={`mb-2 inline-block rounded-full px-2.5 py-1 text-xs font-bold capitalize ${
@@ -209,7 +209,7 @@ function Exam() {
                         return next;
                       });
                     }}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold hover:bg-slate-50"
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95"
                   >
                     Reset
                   </button>
@@ -221,7 +221,7 @@ function Exam() {
                         [problem.id]: runProblem(problem, code),
                       }))
                     }
-                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95"
                   >
                     Run Tests
                   </button>
@@ -263,7 +263,7 @@ function Exam() {
                 <h3 className="text-sm font-bold">Test Results</h3>
                 {result && (
                   <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-bold ${statusBadge[result.status]}`}
+                    className={`animate-pop rounded-full px-2.5 py-1 text-xs font-bold ${statusBadge[result.status]}`}
                   >
                     {statusLabel[result.status]}
                   </span>
@@ -285,7 +285,8 @@ function Exam() {
               {result?.tests.map((t, i) => (
                 <div
                   key={i}
-                  className={`mt-3 rounded-lg border p-3 text-sm ${
+                  style={{ animationDelay: `${i * 60}ms` }}
+                  className={`animate-fade-up mt-3 rounded-lg border p-3 text-sm ${
                     t.passed
                       ? "border-green-200 bg-green-50"
                       : "border-red-200 bg-red-50"

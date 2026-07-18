@@ -122,7 +122,8 @@ export default function AdminPage() {
                     setSelected(new Set(preset.ids));
                     setCopied(false);
                   }}
-                  className={`rounded-2xl border bg-white p-4 text-left transition-colors ${
+                  style={{ animationDelay: `${presets.indexOf(preset) * 40}ms` }}
+                  className={`animate-fade-up rounded-2xl border bg-white p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] ${
                     active
                       ? "border-blue-400 ring-1 ring-blue-400"
                       : "border-slate-200 hover:border-slate-300"
@@ -176,14 +177,14 @@ export default function AdminPage() {
               onClick={() =>
                 setSelected(new Set(visible.map((p) => p.id)))
               }
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold transition-transform hover:bg-slate-50 active:scale-95"
             >
               Select all shown
             </button>
             <button
               type="button"
               onClick={() => setSelected(new Set())}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-semibold transition-transform hover:bg-slate-50 active:scale-95"
             >
               Clear
             </button>
@@ -200,7 +201,7 @@ export default function AdminPage() {
                   await navigator.clipboard.writeText(link);
                   setCopied(true);
                 }}
-                className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {copied ? "Copied!" : "Copy exam link"}
               </button>
@@ -225,7 +226,7 @@ export default function AdminPage() {
                   return (
                     <label
                       key={p.id}
-                      className={`flex cursor-pointer items-start gap-3 rounded-2xl border bg-white p-4 transition-colors ${
+                      className={`flex cursor-pointer items-start gap-3 rounded-2xl border bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
                         checked
                           ? "border-blue-400 ring-1 ring-blue-400"
                           : "border-slate-200 hover:border-slate-300"
