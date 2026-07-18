@@ -4,6 +4,61 @@ import { problems, categories, type Problem } from "@/lib/problems";
 
 const difficulties = ["easy", "medium", "hard"] as const;
 
+// ponytail: curated presets, hand-picked ids. Move into lib/problems.ts
+// if presets ever need to be shared or validated against the bank.
+const presets: { name: string; description: string; ids: number[] }[] = [
+  {
+    name: "Quick Screen",
+    description: "~15 min · 3 easy warm-ups to filter out non-coders",
+    ids: [4, 6, 8],
+  },
+  {
+    name: "Junior Standard",
+    description: "~45 min · balanced mix across all categories",
+    ids: [1, 2, 6, 9, 12, 21],
+  },
+  {
+    name: "Data Wrangling",
+    description: "~40 min · arrays & objects, closest to day-to-day CRUD work",
+    ids: [1, 2, 10, 13, 19, 22],
+  },
+  {
+    name: "Strings & Logic",
+    description: "~40 min · text handling plus algorithmic thinking",
+    ids: [7, 14, 16, 21, 24, 26],
+  },
+  {
+    name: "Speed Round",
+    description: "~25 min · 5 quick easy problems, breadth over depth",
+    ids: [3, 5, 14, 22, 27],
+  },
+  {
+    name: "Arrays Deep Dive",
+    description: "~45 min · progressive array work, easy to medium",
+    ids: [4, 8, 11, 12, 20],
+  },
+  {
+    name: "Objects & Data Shapes",
+    description: "~35 min · grouping, counting, and reshaping records",
+    ids: [2, 10, 17, 18, 19],
+  },
+  {
+    name: "Algorithm Focus",
+    description: "~50 min · the hardest set, for strong candidates only",
+    ids: [20, 23, 24, 25, 26],
+  },
+  {
+    name: "Warm-up + Challenge",
+    description: "~30 min · two easy openers, then one hard finisher",
+    ids: [6, 8, 23],
+  },
+  {
+    name: "Full Assessment",
+    description: "~90 min · easy to hard, for shortlisted candidates",
+    ids: [1, 6, 9, 12, 18, 20, 23, 24],
+  },
+];
+
 const difficultyBadge: Record<Problem["difficulty"], string> = {
   easy: "bg-blue-50 text-blue-600",
   medium: "bg-purple-50 text-purple-600",
@@ -49,6 +104,44 @@ export default function AdminPage() {
             Select problems, then copy an exam link to send to the applicant.
           </p>
         </header>
+
+        <section className="mb-6">
+          <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-500">
+            Recommended Exams
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {presets.map((preset) => {
+              const active =
+                selected.size === preset.ids.length &&
+                preset.ids.every((id) => selected.has(id));
+              return (
+                <button
+                  key={preset.name}
+                  type="button"
+                  onClick={() => {
+                    setSelected(new Set(preset.ids));
+                    setCopied(false);
+                  }}
+                  className={`rounded-2xl border bg-white p-4 text-left transition-colors ${
+                    active
+                      ? "border-blue-400 ring-1 ring-blue-400"
+                      : "border-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="font-semibold">{preset.name}</span>
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+                      {preset.ids.length} problems
+                    </span>
+                  </span>
+                  <span className="mt-1 block text-sm text-slate-500">
+                    {preset.description}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
         <div className="sticky top-4 z-10 mb-6 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-2">
