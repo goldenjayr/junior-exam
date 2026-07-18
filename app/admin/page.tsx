@@ -103,6 +103,12 @@ export default function AdminPage() {
   const presetDialog = useRef<HTMLDialogElement>(null);
   const previewDialog = useRef<HTMLDialogElement>(null);
   const [preview, setPreview] = useState<Problem | null>(null);
+  const setDialog = useRef<HTMLDialogElement>(null);
+  const [setPreview_, setSetPreview] = useState<{
+    name: string;
+    description?: string;
+    ids: number[];
+  } | null>(null);
 
   useEffect(() => {
     try {
@@ -411,30 +417,136 @@ export default function AdminPage() {
                 <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
                   Recommended
                 </h3>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {presets.map((preset) => (
-                    <button
+                    <div
                       key={preset.name}
-                      type="button"
-                      onClick={() => {
-                        loadSet(preset.ids);
-                        presetDialog.current?.close();
-                      }}
-                      className="rounded-xl border border-slate-200 bg-white p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md active:scale-[0.98]"
+                      className="rounded-xl border border-slate-200 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md"
                     >
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="font-semibold">{preset.name}</span>
-                        <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">
-                          {preset.ids.length}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          loadSet(preset.ids);
+                          presetDialog.current?.close();
+                        }}
+                        className="w-full p-4 text-left"
+                      >
+                        <span className="block font-semibold">
+                          {preset.name}
                         </span>
-                      </span>
-                      <span className="mt-1 block text-sm text-slate-500">
-                        {preset.description}
-                      </span>
-                    </button>
+                        <span className="mt-1 block text-sm text-slate-500">
+                          {preset.description}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSetPreview(preset);
+                          setDialog.current?.showModal();
+                        }}
+                        className="flex w-full items-center gap-1 border-t border-slate-100 px-4 py-2 text-xs font-semibold text-slate-500 hover:text-blue-600"
+                      >
+                        <span aria-hidden>▸</span> View {preset.ids.length}{" "}
+                        problems
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
+            </dialog>
+
+            <dialog
+              ref={setDialog}
+              closedby="any"
+              className="m-auto w-[min(34rem,calc(100vw-2rem))] rounded-2xl p-0 shadow-2xl backdrop:bg-slate-900/40 backdrop:backdrop-blur-sm open:animate-pop"
+            >
+              {setPreview_ && (
+                <div className="p-6 sm:p-8">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h2 className="text-xl font-bold">{setPreview_.name}</h2>
+                      {setPreview_.description && (
+                        <p className="mt-0.5 text-sm text-slate-500">
+                          {setPreview_.description}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Close"
+                      onClick={() => setDialog.current?.close()}
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                    {setPreview_.ids.map((id, i) => {
+                      const prob = problems.find((p) => p.id === id)!;
+                      return (
+                        <div
+                          key={id}
+                          style={{ animationDelay: `${i * 30}ms` }}
+                          className="animate-fade-up flex items-center gap-3 border-b border-slate-100 px-4 py-2.5 text-sm last:border-b-0"
+                        >
+                          <span className="w-4 shrink-0 text-xs text-slate-400">
+                            {i + 1}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate font-semibold">
+                              {prob.title}
+                            </span>
+                            <span className="block truncate text-xs text-slate-500">
+                              {prob.instructions}
+                            </span>
+                          </span>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold capitalize ${difficultyBadge[prob.difficulty]}`}
+                          >
+                            {prob.difficulty}
+                          </span>
+                          <span className="shrink-0 text-xs text-slate-400">
+                            ~{minutesFor[prob.difficulty]}m
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <p className="mt-3 text-xs text-slate-500">
+                    {setPreview_.ids.length} problems · ~
+                    {setPreview_.ids.reduce(
+                      (sum, id) =>
+                        sum +
+                        minutesFor[problems.find((p) => p.id === id)!.difficulty],
+                      0
+                    )}{" "}
+                    min total
+                  </p>
+
+                  <div className="mt-5 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setDialog.current?.close()}
+                      className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95"
+                    >
+                      Close
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        loadSet(setPreview_.ids);
+                        setDialog.current?.close();
+                        presetDialog.current?.close();
+                      }}
+                      className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95"
+                    >
+                      Use this exam
+                    </button>
+                  </div>
+                </div>
+              )}
             </dialog>
 
             <dialog
