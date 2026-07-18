@@ -3,6 +3,8 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { problems, parseProblemIds, type Problem } from "@/lib/problems";
 import { runProblemSandboxed, formatValue, type RunResult } from "@/lib/runner";
+import { runReactProblem } from "@/lib/react-runner";
+import type { TestCase } from "@/lib/problems";
 import CodeEditor from "@/components/CodeEditor";
 
 const statusLabel: Record<string, string> = {
@@ -17,6 +19,24 @@ const statusBadge: Record<string, string> = {
   error: "bg-red-100 text-red-700",
 };
 
+function runAny(problem: Problem, code: string): Promise<RunResult> {
+  return problem.kind === "react"
+    ? Promise.resolve(runReactProblem(problem, code))
+    : runProblemSandboxed(problem, code);
+}
+
+function callLabel(problem: Problem, t: TestCase): string {
+  if (problem.kind !== "react")
+    return `${problem.fnName}(${t.args.map((a) => JSON.stringify(a)).join(", ")})`;
+  const props = Object.entries((t.args[0] ?? {}) as Record<string, unknown>)
+    .map(([k, v]) => `${k}={${JSON.stringify(v)}}`)
+    .join(" ");
+  const clicks = t.clicks
+    ? ` then click <${t.clickOn}> ×${t.clicks}`
+    : "";
+  return `<${problem.fnName}${props ? " " + props : ""} />${clicks}`;
+}
+
 function Exam() {
   const searchParams = useSearchParams();
   const examProblems = useMemo<Problem[]>(() => {
@@ -27,20 +47,25 @@ function Exam() {
   }, [searchParams]);
 
   const [selectedId, setSelectedId] = useState(examProblems[0]?.id);
-  const [answers, setAnswers] = useState<Record<number, string>>(() =>
-    Object.fromEntries(examProblems.map((p) => [p.id, p.starterCode]))
-  );
+
+  // ponytail: localStorage so a refresh doesn't wipe the applicant's work.
+  // Read synchronously in the initializer — this component only runs in the
+  // browser (the Suspense fallback is what gets prerendered), and a
+  // post-mount restore effect would repaint the editor and flicker.
+  const storageKey = `exam-answers:${searchParams.get("p") ?? "all"}`;
+  const [answers, setAnswers] = useState<Record<number, string>>(() => {
+    let saved: Record<number, string> = {};
+    try {
+      saved = JSON.parse(localStorage.getItem(storageKey) ?? "{}");
+    } catch {}
+    return {
+      ...Object.fromEntries(examProblems.map((p) => [p.id, p.starterCode])),
+      ...saved,
+    };
+  });
   const [results, setResults] = useState<Record<number, RunResult>>({});
   const [applicantName, setApplicantName] = useState("");
 
-  // ponytail: localStorage so a refresh doesn't wipe the applicant's work.
-  const storageKey = `exam-answers:${searchParams.get("p") ?? "all"}`;
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey) ?? "{}");
-      setAnswers((a) => ({ ...a, ...saved }));
-    } catch {}
-  }, [storageKey]);
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(answers));
   }, [answers, storageKey]);
@@ -51,7 +76,7 @@ function Exam() {
     const entries = await Promise.all(
       examProblems.map(async (p) => [
         p.id,
-        await runProblemSandboxed(p, answers[p.id] ?? p.starterCode),
+        await runAny(p, answers[p.id] ?? p.starterCode),
       ])
     );
     setResults(Object.fromEntries(entries));
@@ -82,7 +107,7 @@ function Exam() {
 
   return (
     <main className="min-h-screen bg-slate-100 p-6 text-slate-900 sm:p-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="animate-fade-up mx-auto max-w-7xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4 print:hidden">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
@@ -316,7 +341,7 @@ function Exam() {
                   <button
                     type="button"
                     onClick={async () => {
-                      const result = await runProblemSandboxed(problem, code);
+                      const result = await runAny(problem, code);
                       setResults((r) => ({ ...r, [problem.id]: result }));
                     }}
                     className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95"
@@ -342,8 +367,7 @@ function Exam() {
                     className="rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs"
                   >
                     <p className="overflow-x-auto whitespace-nowrap text-slate-600">
-                      {problem.fnName}(
-                      {t.args.map((a) => JSON.stringify(a)).join(", ")})
+                      {callLabel(problem, t)}
                     </p>
                     <p className="mt-1 font-sans text-[11px] font-semibold text-slate-400">
                       Expected
@@ -393,8 +417,7 @@ function Exam() {
                   <p className="font-bold">
                     {t.passed ? "✓" : "✗"} Test {i + 1}
                     <span className="ml-2 font-mono font-normal text-slate-600">
-                      {problem.fnName}(
-                      {t.test.args.map((a) => JSON.stringify(a)).join(", ")})
+                      {callLabel(problem, t.test)}
                     </span>
                   </p>
                   {!t.passed && (
@@ -431,7 +454,13 @@ function Exam() {
 
 export default function ExamPage() {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <main className="grid min-h-screen place-items-center bg-slate-100 text-sm text-slate-400">
+          Loading exam…
+        </main>
+      }
+    >
       <Exam />
     </Suspense>
   );

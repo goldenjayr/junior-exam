@@ -35,14 +35,14 @@ const solutions: Record<number, string> = {
 };
 
 test("every problem has a solution that passes all its tests", () => {
-  for (const p of problems) {
+  for (const p of problems.filter((p) => p.kind !== "react")) {
     const result = runProblem(p, solutions[p.id]);
     assert.strictEqual(result.status, "passed", `${p.title}: ${JSON.stringify(result)}`);
   }
 });
 
 test("starter code fails (returns undefined)", () => {
-  for (const p of problems) {
+  for (const p of problems.filter((p) => p.kind !== "react")) {
     assert.notStrictEqual(runProblem(p, p.starterCode).status, "passed", p.title);
   }
 });

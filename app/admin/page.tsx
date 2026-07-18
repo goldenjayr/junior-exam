@@ -14,8 +14,8 @@ const presets: { name: string; description: string; ids: number[] }[] = [
   },
   {
     name: "Junior Standard",
-    description: "~45 min · balanced mix across all categories",
-    ids: [1, 2, 6, 9, 12, 21],
+    description: "~50 min · balanced mix across every category, React included",
+    ids: [1, 2, 6, 9, 12, 28],
   },
   {
     name: "Data Wrangling",
@@ -53,11 +53,29 @@ const presets: { name: string; description: string; ids: number[] }[] = [
     ids: [6, 8, 23],
   },
   {
+    name: "React Basics",
+    description: "~45 min · props, conditional rendering, lists, and state",
+    ids: [28, 29, 30, 31, 32, 33],
+  },
+  {
+    name: "Frontend Junior",
+    description: "~60 min · JS fundamentals plus React components and state",
+    ids: [4, 10, 16, 28, 30, 32],
+  },
+  {
     name: "Full Assessment",
-    description: "~90 min · easy to hard, for shortlisted candidates",
-    ids: [1, 6, 9, 12, 18, 20, 23, 24],
+    description: "~2 hrs · easy to hard across JS and React, for shortlisted candidates",
+    ids: [1, 6, 9, 12, 18, 20, 23, 28, 32],
   },
 ];
+
+// ponytail: rough time estimate derived from difficulty; add a per-problem
+// minutes field if these ever feel wrong.
+const minutesFor: Record<Problem["difficulty"], number> = {
+  easy: 5,
+  medium: 8,
+  hard: 12,
+};
 
 const difficultyBadge: Record<Problem["difficulty"], string> = {
   easy: "bg-blue-50 text-blue-600",
@@ -70,14 +88,21 @@ export default function AdminPage() {
   const [copied, setCopied] = useState(false);
   const [query, setQuery] = useState("");
   const [difficulty, setDifficulty] = useState<string>("all");
+  const [category, setCategory] = useState<string>("all");
 
   const visible = problems.filter(
     (p) =>
       (difficulty === "all" || p.difficulty === difficulty) &&
+      (category === "all" || p.category === category) &&
       (p.title + p.instructions).toLowerCase().includes(query.toLowerCase())
   );
 
-  const ids = problems.filter((p) => selected.has(p.id)).map((p) => p.id);
+  const selectedProblems = problems.filter((p) => selected.has(p.id));
+  const totalMinutes = selectedProblems.reduce(
+    (sum, p) => sum + minutesFor[p.difficulty],
+    0
+  );
+  const ids = selectedProblems.map((p) => p.id);
   const link = ids.length
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/exam?p=${ids.join(",")}`
     : "";
@@ -168,9 +193,33 @@ export default function AdminPage() {
               </button>
             ))}
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Category
+            </span>
+            {["all", ...categories].map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCategory(c)}
+                className={`rounded-full px-3 py-1.5 text-sm font-semibold capitalize ${
+                  category === c
+                    ? "bg-slate-900 text-white"
+                    : "border border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm font-semibold">
               {selected.size} selected
+              {selected.size > 0 && (
+                <span className="ml-1 font-normal text-slate-500">
+                  · ~{totalMinutes} min
+                </span>
+              )}
             </span>
             <button
               type="button"
@@ -194,6 +243,19 @@ export default function AdminPage() {
                   {link}
                 </code>
               )}
+              <a
+                href={link || undefined}
+                target="_blank"
+                rel="noreferrer"
+                aria-disabled={!link}
+                className={`rounded-lg border px-4 py-1.5 text-sm font-bold ${
+                  link
+                    ? "border-slate-300 transition-transform hover:bg-slate-50 active:scale-95"
+                    : "pointer-events-none border-slate-200 text-slate-300"
+                }`}
+              >
+                Preview
+              </a>
               <button
                 type="button"
                 disabled={!link}
@@ -207,6 +269,26 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
+          {selectedProblems.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 border-t border-slate-100 pt-3">
+              {selectedProblems.map((p) => (
+                <span
+                  key={p.id}
+                  className="animate-pop inline-flex items-center gap-1 rounded-full bg-blue-50 py-1 pl-3 pr-1.5 text-xs font-semibold text-blue-700"
+                >
+                  {p.title}
+                  <button
+                    type="button"
+                    onClick={() => toggle(p.id)}
+                    aria-label={`Remove ${p.title}`}
+                    className="grid h-4 w-4 place-items-center rounded-full hover:bg-blue-100"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {categories.map((category) => {

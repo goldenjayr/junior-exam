@@ -1,12 +1,17 @@
 export type TestCase = {
   args: unknown[];
   expected: unknown;
+  // React problems only: click this selector N times before asserting.
+  clickOn?: string;
+  clicks?: number;
 };
 
 export type Problem = {
   id: number;
   title: string;
-  category: "arrays" | "strings" | "objects" | "logic";
+  category: "arrays" | "strings" | "objects" | "logic" | "react";
+  // "react" problems are JSX components graded on rendered text content.
+  kind?: "react";
   difficulty: "easy" | "medium" | "hard";
   instructions: string;
   fnName: string;
@@ -19,6 +24,7 @@ export const categories: Problem["category"][] = [
   "strings",
   "objects",
   "logic",
+  "react",
 ];
 
 export const problems: Problem[] = [
@@ -588,6 +594,125 @@ export const problems: Problem[] = [
     tests: [
       { args: ["hello-world"], expected: "Hello World" },
       { args: ["a"], expected: "A" },
+    ],
+  },
+  {
+    id: 28,
+    title: "Greeting Component",
+    category: "react",
+    kind: "react",
+    difficulty: "easy",
+    instructions:
+      'Complete the Greeting component so it renders an <h1> saying "Hello, <name>!" using the name prop.',
+    fnName: "Greeting",
+    starterCode: `function Greeting({ name }) {
+  // Return your JSX here
+
+}`,
+    tests: [
+      { args: [{ name: "Maria" }], expected: "Hello, Maria!" },
+      { args: [{ name: "John" }], expected: "Hello, John!" },
+    ],
+  },
+  {
+    id: 29,
+    title: "Item Counter Label",
+    category: "react",
+    kind: "react",
+    difficulty: "easy",
+    instructions:
+      'Complete CartSummary so it renders "<n> items in cart" where n is the length of the items prop array.',
+    fnName: "CartSummary",
+    starterCode: `function CartSummary({ items }) {
+  // Return your JSX here
+
+}`,
+    tests: [
+      { args: [{ items: ["Pen", "Book", "Mug"] }], expected: "3 items in cart" },
+      { args: [{ items: [] }], expected: "0 items in cart" },
+    ],
+  },
+  {
+    id: 30,
+    title: "Conditional Status Badge",
+    category: "react",
+    kind: "react",
+    difficulty: "easy",
+    instructions:
+      'Complete StatusBadge so it renders "Online" when the active prop is true and "Offline" when it is false.',
+    fnName: "StatusBadge",
+    starterCode: `function StatusBadge({ active }) {
+  // Return your JSX here
+
+}`,
+    tests: [
+      { args: [{ active: true }], expected: "Online" },
+      { args: [{ active: false }], expected: "Offline" },
+    ],
+  },
+  {
+    id: 31,
+    title: "Render a User List",
+    category: "react",
+    kind: "react",
+    difficulty: "medium",
+    instructions:
+      "Complete UserList so it renders a <ul> with one <li> per user showing the user's name.",
+    fnName: "UserList",
+    starterCode: `function UserList({ users }) {
+  // Return your JSX here
+
+}`,
+    tests: [
+      {
+        args: [
+          {
+            users: [
+              { id: 1, name: "John" },
+              { id: 2, name: "Maria" },
+            ],
+          },
+        ],
+        expected: "John Maria",
+      },
+      { args: [{ users: [{ id: 1, name: "Solo" }] }], expected: "Solo" },
+    ],
+  },
+  {
+    id: 32,
+    title: "Click Counter",
+    category: "react",
+    kind: "react",
+    difficulty: "medium",
+    instructions:
+      'Complete Counter so it renders "Count: <n>" and a <button> labeled "+" that increments the count on every click. Start at 0. Use the useState hook (available as React.useState).',
+    fnName: "Counter",
+    starterCode: `function Counter() {
+  // Return your JSX here — e.g. <p>Count: 0</p> plus a <button>
+
+}`,
+    tests: [
+      { args: [{}], expected: "Count: 0 +" },
+      { args: [{}], clickOn: "button", clicks: 3, expected: "Count: 3 +" },
+    ],
+  },
+  {
+    id: 33,
+    title: "Show / Hide Toggle",
+    category: "react",
+    kind: "react",
+    difficulty: "hard",
+    instructions:
+      'Complete Toggle so it renders a <button> labeled "Toggle" and a message that switches between "Visible" and "Hidden" on each click. Start with "Visible". Use React.useState.',
+    fnName: "Toggle",
+    starterCode: `function Toggle() {
+  // Return your JSX here
+
+}`,
+    tests: [
+      { args: [{}], expected: "Toggle Visible" },
+      { args: [{}], clickOn: "button", clicks: 1, expected: "Toggle Hidden" },
+      { args: [{}], clickOn: "button", clicks: 2, expected: "Toggle Visible" },
     ],
   },
 ];
