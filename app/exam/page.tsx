@@ -73,13 +73,39 @@ function Exam() {
   // ponytail: PDF via the browser's print dialog (Save as PDF) on a
   // print-only report — no pdf library needed.
   async function submitResults() {
-    const entries = await Promise.all(
-      examProblems.map(async (p) => [
-        p.id,
-        await runAny(p, answers[p.id] ?? p.starterCode),
-      ])
+    const entries: [number, RunResult][] = await Promise.all(
+      examProblems.map(
+        async (p): Promise<[number, RunResult]> => [
+          p.id,
+          await runAny(p, answers[p.id] ?? p.starterCode),
+        ]
+      )
     );
     setResults(Object.fromEntries(entries));
+
+    // Email the report to the examiner; fire-and-forget so a mail hiccup
+    // never blocks the applicant's own PDF copy.
+    const graded = new Map(entries);
+    fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        examiner: searchParams.get("e") ?? undefined,
+        applicantName: applicantName.trim() || "Applicant",
+        results: examProblems.map((p) => {
+          const r = graded.get(p.id)!;
+          return {
+            title: p.title,
+            difficulty: p.difficulty,
+            status: r.status,
+            passed: r.tests.filter((t) => t.passed).length,
+            total: r.tests.length,
+            code: answers[p.id] ?? p.starterCode,
+            error: r.error,
+          };
+        }),
+      }),
+    }).catch(() => {});
     // Browsers use document.title as the default PDF filename.
     setTimeout(() => {
       const prev = document.title;

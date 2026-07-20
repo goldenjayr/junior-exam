@@ -92,6 +92,9 @@ const difficultyBadge: Record<Problem["difficulty"], string> = {
 
 type SavedExam = { name: string; ids: number[] };
 
+// ponytail: ids only — emails live server-side in app/api/submit/route.ts.
+const examinerIds = ["jayr", "jack", "iven", "andrei", "neil", "pragya"];
+
 export default function AdminPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [copied, setCopied] = useState(false);
@@ -99,6 +102,7 @@ export default function AdminPage() {
   const [difficulty, setDifficulty] = useState<string>("all");
   const [category, setCategory] = useState<string>("all");
   const [onlySelected, setOnlySelected] = useState(false);
+  const [examiner, setExaminer] = useState(examinerIds[0]);
   const [savedExams, setSavedExams] = useState<SavedExam[]>([]);
   const presetDialog = useRef<HTMLDialogElement>(null);
   const previewDialog = useRef<HTMLDialogElement>(null);
@@ -143,7 +147,7 @@ export default function AdminPage() {
   );
   const ids = selectedProblems.map((p) => p.id);
   const link = ids.length
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/exam?p=${ids.join(",")}`
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/exam?p=${ids.join(",")}&e=${examiner}`
     : "";
 
   const matchesSelection = (setIds: number[]) =>
@@ -701,6 +705,25 @@ export default function AdminPage() {
             )}
 
             <div className="flex flex-col gap-2 border-t border-slate-100 pt-4">
+              <label className="flex items-center gap-2 text-sm">
+                <span className="font-semibold text-slate-600">
+                  Send results to
+                </span>
+                <select
+                  value={examiner}
+                  onChange={(e) => {
+                    setExaminer(e.target.value);
+                    setCopied(false);
+                  }}
+                  className="flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 capitalize outline-none focus:border-blue-400"
+                >
+                  {examinerIds.map((id) => (
+                    <option key={id} value={id}>
+                      {id}
+                    </option>
+                  ))}
+                </select>
+              </label>
               {link && (
                 <code className="truncate rounded-lg bg-slate-100 px-3 py-2 text-[11px]">
                   {link}
