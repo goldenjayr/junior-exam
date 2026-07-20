@@ -65,6 +65,9 @@ function Exam() {
   });
   const [results, setResults] = useState<Record<number, RunResult>>({});
   const [applicantName, setApplicantName] = useState("");
+  const [submitState, setSubmitState] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(answers));
@@ -81,28 +84,34 @@ function Exam() {
     );
     setResults(Object.fromEntries(entries));
 
-    // Email the report to the examiner; fire-and-forget.
+    // Email the report to the examiner.
+    setSubmitState("sending");
     const graded = new Map(entries);
-    fetch("/api/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        examiner: searchParams.get("e") ?? undefined,
-        applicantName: applicantName.trim() || "Applicant",
-        results: examProblems.map((p) => {
-          const r = graded.get(p.id)!;
-          return {
-            title: p.title,
-            difficulty: p.difficulty,
-            status: r.status,
-            passed: r.tests.filter((t) => t.passed).length,
-            total: r.tests.length,
-            code: answers[p.id] ?? p.starterCode,
-            error: r.error,
-          };
+    try {
+      const res = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          examiner: searchParams.get("e") ?? undefined,
+          applicantName: applicantName.trim() || "Applicant",
+          results: examProblems.map((p) => {
+            const r = graded.get(p.id)!;
+            return {
+              title: p.title,
+              difficulty: p.difficulty,
+              status: r.status,
+              passed: r.tests.filter((t) => t.passed).length,
+              total: r.tests.length,
+              code: answers[p.id] ?? p.starterCode,
+              error: r.error,
+            };
+          }),
         }),
-      }),
-    }).catch(() => {});
+      });
+      setSubmitState(res.ok ? "sent" : "error");
+    } catch {
+      setSubmitState("error");
+    }
   }
 
   const problem = examProblems.find((p) => p.id === selectedId);
@@ -150,9 +159,22 @@ function Exam() {
             <button
               type="button"
               onClick={submitResults}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-green-700 active:scale-95"
+              disabled={submitState === "sending"}
+              className={`rounded-lg px-4 py-2 text-sm font-bold text-white transition-transform active:scale-95 disabled:cursor-not-allowed ${
+                submitState === "sent"
+                  ? "bg-green-700"
+                  : submitState === "error"
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-green-600 hover:bg-green-700"
+              }`}
             >
-              Submit Results
+              {submitState === "sending"
+                ? "Sending…"
+                : submitState === "sent"
+                ? "✓ Results sent"
+                : submitState === "error"
+                ? "Failed — retry"
+                : "Submit Results"}
             </button>
           </div>
         </header>
