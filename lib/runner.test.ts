@@ -80,3 +80,13 @@ test("parseProblemIds filters invalid ids", () => {
   assert.deepStrictEqual(parseProblemIds("1,2,999,abc,2"), [1, 2]);
   assert.deepStrictEqual(parseProblemIds(null), []);
 });
+
+test("captures console output per test", () => {
+  const minMax = problems.find((p) => p.fnName === "minMax")!;
+  const r = runProblem(
+    minMax,
+    'function minMax(ns){ console.log("got", ns.length); return { max: Math.max(...ns), min: Math.min(...ns) }; }'
+  );
+  assert.strictEqual(r.status, "passed");
+  assert.ok(r.tests[0].logs?.[0]?.startsWith("got "));
+});

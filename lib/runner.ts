@@ -5,6 +5,7 @@ export type TestResult = {
   passed: boolean;
   actual?: unknown;
   error?: string;
+  logs?: string[];
 };
 
 export type RunResult = {
@@ -61,11 +62,39 @@ export function runProblem(problem: Problem, code: string): RunResult {
     }
   }
 
+  // Capture the candidate's console.* so they can debug their solution.
+  // Injected as a `console` parameter because `new Function` bodies resolve
+  // free names against global scope, not this closure.
+  const logs: string[] = [];
+  const fmtArg = (a: unknown): string => {
+    if (typeof a === "string") return a;
+    if (a === undefined) return "undefined";
+    try {
+      return JSON.stringify(a) ?? String(a);
+    } catch {
+      return String(a);
+    }
+  };
+  const capture =
+    (level: string) =>
+    (...args: unknown[]) =>
+      logs.push(
+        (level === "log" ? "" : `[${level}] `) + args.map(fmtArg).join(" ")
+      );
+  const sandboxConsole = {
+    log: capture("log"),
+    error: capture("error"),
+    warn: capture("warn"),
+    info: capture("info"),
+    debug: capture("debug"),
+  };
+
   let fn: (...args: unknown[]) => unknown;
   try {
     fn = new Function(
+      "console",
       `"use strict";\n${code}\nif (typeof ${problem.fnName} !== "function") throw new Error("Function ${problem.fnName} was not defined.");\nreturn ${problem.fnName};`
-    )() as typeof fn;
+    )(sandboxConsole) as typeof fn;
   } catch (error) {
     return {
       status: "error",
@@ -75,18 +104,21 @@ export function runProblem(problem: Problem, code: string): RunResult {
   }
 
   const tests: TestResult[] = problem.tests.map((test) => {
+    logs.length = 0;
     try {
       const actual = fn(...structuredClone(test.args));
       return {
         test,
         passed: deepEqual(actual, test.expected),
         actual: sanitize(actual),
+        logs: [...logs],
       };
     } catch (error) {
       return {
         test,
         passed: false,
         error: error instanceof Error ? error.message : String(error),
+        logs: [...logs],
       };
     }
   });

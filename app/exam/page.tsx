@@ -70,8 +70,6 @@ function Exam() {
     localStorage.setItem(storageKey, JSON.stringify(answers));
   }, [answers, storageKey]);
 
-  // ponytail: PDF via the browser's print dialog (Save as PDF) on a
-  // print-only report — no pdf library needed.
   async function submitResults() {
     const entries: [number, RunResult][] = await Promise.all(
       examProblems.map(
@@ -83,8 +81,7 @@ function Exam() {
     );
     setResults(Object.fromEntries(entries));
 
-    // Email the report to the examiner; fire-and-forget so a mail hiccup
-    // never blocks the applicant's own PDF copy.
+    // Email the report to the examiner; fire-and-forget.
     const graded = new Map(entries);
     fetch("/api/submit", {
       method: "POST",
@@ -106,13 +103,6 @@ function Exam() {
         }),
       }),
     }).catch(() => {});
-    // Browsers use document.title as the default PDF filename.
-    setTimeout(() => {
-      const prev = document.title;
-      document.title = `${applicantName.trim() || "Applicant"} - JavaScript Assessment`;
-      window.print();
-      document.title = prev;
-    }, 50);
   }
 
   const problem = examProblems.find((p) => p.id === selectedId);
@@ -134,7 +124,7 @@ function Exam() {
   return (
     <main className="min-h-screen bg-slate-100 p-6 text-slate-900 sm:p-8">
       <div className="animate-fade-up mx-auto max-w-7xl">
-        <header className="mb-6 flex flex-wrap items-end justify-between gap-4 print:hidden">
+        <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
               Junior JavaScript Assessment
@@ -167,123 +157,7 @@ function Exam() {
           </div>
         </header>
 
-        <section className="hidden [print-color-adjust:exact] print:block">
-          <div className="flex items-end justify-between border-b-4 border-blue-600 pb-4">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-blue-600">
-                Junior JavaScript Assessment
-              </p>
-              <h1 className="mt-1 text-3xl font-bold">
-                {applicantName.trim() || "Applicant"}
-              </h1>
-              <p className="mt-1 text-sm text-slate-500">
-                Results Report · {new Date().toLocaleDateString()}
-              </p>
-            </div>
-            <div className="rounded-xl border-2 border-blue-600 px-5 py-3 text-center">
-              <p className="text-3xl font-bold text-blue-600">
-                {passedCount}/{examProblems.length}
-              </p>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Problems Solved
-              </p>
-            </div>
-          </div>
-
-          <table className="mt-5 w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b-2 border-slate-300 text-left text-[11px] uppercase tracking-wider text-slate-500">
-                <th className="py-2 pr-2 font-bold">#</th>
-                <th className="py-2 pr-2 font-bold">Problem</th>
-                <th className="py-2 pr-2 font-bold">Difficulty</th>
-                <th className="py-2 pr-2 font-bold">Tests</th>
-                <th className="py-2 font-bold">Result</th>
-              </tr>
-            </thead>
-            <tbody>
-              {examProblems.map((p, i) => {
-                const r = results[p.id];
-                const passed = r?.tests.filter((t) => t.passed).length ?? 0;
-                return (
-                  <tr key={p.id} className="border-b border-slate-200">
-                    <td className="py-2 pr-2 text-slate-400">{i + 1}</td>
-                    <td className="py-2 pr-2 font-semibold">{p.title}</td>
-                    <td className="py-2 pr-2 capitalize text-slate-500">
-                      {p.difficulty}
-                    </td>
-                    <td className="py-2 pr-2 text-slate-500">
-                      {r ? `${passed}/${r.tests.length}` : "—"}
-                    </td>
-                    <td className="py-2">
-                      <span
-                        className={`font-bold ${
-                          r?.status === "passed"
-                            ? "text-green-700"
-                            : r
-                            ? "text-red-700"
-                            : "text-slate-400"
-                        }`}
-                      >
-                        {r
-                          ? r.status === "passed"
-                            ? "✓ Passed"
-                            : r.status === "error"
-                            ? "✗ Error"
-                            : "✗ Failed"
-                          : "Not attempted"}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          <h2 className="mt-8 text-[11px] font-bold uppercase tracking-widest text-slate-500">
-            Submitted Solutions
-          </h2>
-          {examProblems.map((p, i) => {
-            const r = results[p.id];
-            return (
-              <div key={p.id} className="mt-4 break-inside-avoid">
-                <div className="flex items-center justify-between rounded-t-lg border border-slate-300 bg-slate-100 px-3 py-2">
-                  <p className="text-sm font-bold">
-                    {i + 1}. {p.title}
-                    <span className="ml-2 font-normal capitalize text-slate-500">
-                      {p.difficulty} · {p.category}
-                    </span>
-                  </p>
-                  <span
-                    className={`text-xs font-bold ${
-                      r?.status === "passed"
-                        ? "text-green-700"
-                        : r
-                        ? "text-red-700"
-                        : "text-slate-400"
-                    }`}
-                  >
-                    {r ? statusLabel[r.status] : "Not attempted"}
-                  </span>
-                </div>
-                <pre className="overflow-hidden whitespace-pre-wrap rounded-b-lg border border-t-0 border-slate-300 p-3 font-mono text-[11px] leading-relaxed">
-                  {answers[p.id] ?? p.starterCode}
-                </pre>
-                {r?.error && (
-                  <p className="mt-1 font-mono text-xs text-red-700">
-                    Runtime error: {r.error}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-
-          <p className="mt-8 border-t border-slate-200 pt-3 text-center text-[10px] text-slate-400">
-            Generated by Junior JavaScript Assessment · results are
-            self-reported from the applicant&apos;s browser
-          </p>
-        </section>
-
-        <div className="grid items-start gap-6 print:hidden lg:grid-cols-[280px_minmax(0,1fr)]">
+        <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="rounded-2xl border border-slate-200 bg-white p-4">
             <h2 className="mb-3 px-2 text-sm font-bold">Problems</h2>
             <div className="flex flex-col gap-1">
@@ -492,6 +366,16 @@ function Exam() {
                               {t.error ?? formatValue(t.actual)}
                             </pre>
                           </div>
+                        </div>
+                      )}
+                      {t.logs && t.logs.length > 0 && (
+                        <div className="mt-2">
+                          <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            Console
+                          </p>
+                          <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-900 p-2 font-mono text-[11px] leading-relaxed text-slate-100">
+                            {t.logs.join("\n")}
+                          </pre>
                         </div>
                       )}
                     </div>
