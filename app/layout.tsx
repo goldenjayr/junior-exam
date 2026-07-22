@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Junior JavaScript Assessment",
+  title: "Junior Technical Assessment",
   description:
-    "Browser-based coding exam for junior JavaScript candidates — pick problems, share a link, get PDF results.",
+    "Browser-based coding exams and knowledge quizzes for junior candidates — pick items, share a link, get email results.",
 };
 
 export default function RootLayout({

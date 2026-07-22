@@ -6,6 +6,11 @@ import { runProblemSandboxed, formatValue, type RunResult } from "@/lib/runner";
 import { runReactProblem } from "@/lib/react-runner";
 import type { TestCase } from "@/lib/problems";
 import CodeEditor from "@/components/CodeEditor";
+import TimeAttackBar from "@/components/TimeAttackBar";
+import FreezeOverlay from "@/components/FreezeOverlay";
+import { parseTimeLimit } from "@/lib/time-attack";
+import { useTimeAttack } from "@/lib/use-time-attack";
+import { parseShuffle, sessionItemOrder } from "@/lib/shuffle";
 
 const statusLabel: Record<string, string> = {
   passed: "Passed",
@@ -39,12 +44,23 @@ function callLabel(problem: Problem, t: TestCase): string {
 
 function Exam() {
   const searchParams = useSearchParams();
+  const shuffle = parseShuffle(searchParams.get("s"));
+  const limitSeconds = parseTimeLimit(searchParams.get("t"));
+  const pParam = searchParams.get("p") ?? "all";
+  const orderSessionKey = `exam:${pParam}:s=${shuffle ? 1 : 0}`;
+
   const examProblems = useMemo<Problem[]>(() => {
     const ids = parseProblemIds(searchParams.get("p"));
-    return ids.length
-      ? problems.filter((p) => ids.includes(p.id))
-      : problems;
-  }, [searchParams]);
+    const byId = new Map(problems.map((p) => [p.id, p]));
+    const baseIds = ids.length ? ids : problems.map((p) => p.id);
+    const orderedIds =
+      typeof window === "undefined"
+        ? baseIds
+        : sessionItemOrder(sessionStorage, orderSessionKey, baseIds, shuffle);
+    return orderedIds
+      .map((id) => byId.get(id))
+      .filter((p): p is Problem => Boolean(p));
+  }, [searchParams, shuffle, orderSessionKey]);
 
   const [selectedId, setSelectedId] = useState(examProblems[0]?.id);
 
@@ -52,7 +68,7 @@ function Exam() {
   // Read synchronously in the initializer — this component only runs in the
   // browser (the Suspense fallback is what gets prerendered), and a
   // post-mount restore effect would repaint the editor and flicker.
-  const storageKey = `exam-answers:${searchParams.get("p") ?? "all"}`;
+  const storageKey = `exam-answers:${pParam}`;
   const [answers, setAnswers] = useState<Record<number, string>>(() => {
     let saved: Record<number, string> = {};
     try {
@@ -68,6 +84,11 @@ function Exam() {
   const [submitState, setSubmitState] = useState<
     "idle" | "sending" | "sent" | "error"
   >("idle");
+  const timerSessionId = `exam:${pParam}:${searchParams.get("t") ?? ""}`;
+  const { remaining, frozen, elapsed } = useTimeAttack(
+    limitSeconds,
+    timerSessionId
+  );
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(answers));
@@ -87,13 +108,18 @@ function Exam() {
     // Email the report to the examiner.
     setSubmitState("sending");
     const graded = new Map(entries);
+    const timeUsed = elapsed ?? undefined;
     try {
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          kind: "exam",
           examiner: searchParams.get("e") ?? undefined,
           applicantName: applicantName.trim() || "Applicant",
+          timedOut: frozen,
+          timeLimitSeconds: limitSeconds ?? undefined,
+          timeUsedSeconds: timeUsed,
           results: examProblems.map((p) => {
             const r = graded.get(p.id)!;
             return {
@@ -145,6 +171,9 @@ function Exam() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            {limitSeconds != null && remaining != null && (
+              <TimeAttackBar remaining={remaining} limitSeconds={limitSeconds} />
+            )}
             <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold shadow-sm">
               {passedCount} / {examProblems.length} solved
             </div>
@@ -190,8 +219,9 @@ function Exam() {
                   <button
                     key={p.id}
                     type="button"
+                    disabled={frozen}
                     onClick={() => setSelectedId(p.id)}
-                    className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all active:scale-[0.98] ${
+                    className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${
                       selected
                         ? "border-blue-200 bg-blue-50"
                         : "border-transparent hover:bg-slate-50"
@@ -245,6 +275,7 @@ function Exam() {
                 <div className="flex gap-2">
                   <button
                     type="button"
+                    disabled={frozen}
                     onClick={() => {
                       setAnswers((a) => ({
                         ...a,
@@ -256,17 +287,18 @@ function Exam() {
                         return next;
                       });
                     }}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95"
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Reset
                   </button>
                   <button
                     type="button"
+                    disabled={frozen}
                     onClick={async () => {
                       const result = await runAny(problem, code);
                       setResults((r) => ({ ...r, [problem.id]: result }));
                     }}
-                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95"
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Run Tests
                   </button>
@@ -274,6 +306,7 @@ function Exam() {
               </div>
               <CodeEditor
                 value={code}
+                readOnly={frozen}
                 onChange={(value) =>
                   setAnswers((a) => ({ ...a, [problem.id]: value }))
                 }
@@ -408,6 +441,41 @@ function Exam() {
           </section>
         </div>
       </div>
+
+      {frozen && (
+        <FreezeOverlay>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center">
+            <input
+              type="text"
+              value={applicantName}
+              onChange={(e) => setApplicantName(e.target.value)}
+              placeholder="Your name"
+              aria-label="Your name"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+            />
+            <button
+              type="button"
+              onClick={submitResults}
+              disabled={submitState === "sending"}
+              className={`rounded-lg px-4 py-2 text-sm font-bold text-white ${
+                submitState === "sent"
+                  ? "bg-green-700"
+                  : submitState === "error"
+                    ? "bg-red-600"
+                    : "bg-green-600 hover:bg-green-700"
+              }`}
+            >
+              {submitState === "sending"
+                ? "Sending…"
+                : submitState === "sent"
+                  ? "✓ Results sent"
+                  : submitState === "error"
+                    ? "Failed — retry"
+                    : "Submit Results"}
+            </button>
+          </div>
+        </FreezeOverlay>
+      )}
     </main>
   );
 }

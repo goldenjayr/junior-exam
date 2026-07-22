@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   problems,
   categories,
@@ -7,6 +7,7 @@ import {
   type TestCase,
 } from "@/lib/problems";
 import { formatValue } from "@/lib/runner";
+import { clampMinutes, minutesToSeconds } from "@/lib/time-attack";
 
 const difficulties = ["easy", "medium", "hard"] as const;
 
@@ -94,6 +95,7 @@ type SavedExam = { name: string; ids: number[] };
 
 // ponytail: ids only — emails live server-side in app/api/submit/route.ts.
 const examinerIds = ["jayr", "jack", "iven", "andrei", "neil", "pragya"];
+const presetMinutes = [10, 15, 30, 45, 60] as const;
 
 export default function AdminPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -103,7 +105,23 @@ export default function AdminPage() {
   const [category, setCategory] = useState<string>("all");
   const [onlySelected, setOnlySelected] = useState(false);
   const [examiner, setExaminer] = useState(examinerIds[0]);
-  const [savedExams, setSavedExams] = useState<SavedExam[]>([]);
+  const [timeMode, setTimeMode] = useState<"off" | "preset" | "custom">("off");
+  const [presetMin, setPresetMin] = useState<(typeof presetMinutes)[number]>(30);
+  const [customMin, setCustomMin] = useState(45);
+  const [shuffle, setShuffle] = useState(false);
+  const [savedExams, setSavedExams] = useState<SavedExam[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = JSON.parse(localStorage.getItem("saved-exams") ?? "[]");
+      const valid = new Set(problems.map((p) => p.id));
+      return stored.map((s: SavedExam) => ({
+        ...s,
+        ids: s.ids.filter((id: number) => valid.has(id)),
+      }));
+    } catch {
+      return [];
+    }
+  });
   const presetDialog = useRef<HTMLDialogElement>(null);
   const previewDialog = useRef<HTMLDialogElement>(null);
   const [preview, setPreview] = useState<Problem | null>(null);
@@ -113,19 +131,6 @@ export default function AdminPage() {
     description?: string;
     ids: number[];
   } | null>(null);
-
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem("saved-exams") ?? "[]");
-      const valid = new Set(problems.map((p) => p.id));
-      setSavedExams(
-        stored.map((s: SavedExam) => ({
-          ...s,
-          ids: s.ids.filter((id: number) => valid.has(id)),
-        }))
-      );
-    } catch {}
-  }, []);
 
   function persistExams(next: SavedExam[]) {
     setSavedExams(next);
@@ -146,8 +151,14 @@ export default function AdminPage() {
     0
   );
   const ids = selectedProblems.map((p) => p.id);
+  const timeSeconds =
+    timeMode === "off"
+      ? null
+      : minutesToSeconds(timeMode === "preset" ? presetMin : customMin);
   const link = ids.length
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/exam?p=${ids.join(",")}&e=${examiner}`
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/exam?p=${ids.join(",")}&e=${examiner}${
+        timeSeconds ? `&t=${timeSeconds}` : ""
+      }${shuffle ? "&s=1" : ""}`
     : "";
 
   const matchesSelection = (setIds: number[]) =>
@@ -724,6 +735,89 @@ export default function AdminPage() {
                   ))}
                 </select>
               </label>
+
+              <div>
+                <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Time Attack
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTimeMode("off");
+                      setCopied(false);
+                    }}
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      timeMode === "off"
+                        ? "bg-slate-900 text-white"
+                        : "border border-slate-300"
+                    }`}
+                  >
+                    Off
+                  </button>
+                  {presetMinutes.map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => {
+                        setTimeMode("preset");
+                        setPresetMin(m);
+                        setCopied(false);
+                      }}
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        timeMode === "preset" && presetMin === m
+                          ? "bg-blue-600 text-white"
+                          : "border border-slate-300"
+                      }`}
+                    >
+                      {m}m
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTimeMode("custom");
+                      setCopied(false);
+                    }}
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      timeMode === "custom"
+                        ? "bg-blue-600 text-white"
+                        : "border border-slate-300"
+                    }`}
+                  >
+                    Custom
+                  </button>
+                </div>
+                {timeMode === "custom" && (
+                  <input
+                    type="number"
+                    min={1}
+                    max={180}
+                    value={customMin}
+                    onChange={(e) => {
+                      setCustomMin(clampMinutes(Number(e.target.value)));
+                      setCopied(false);
+                    }}
+                    className="mt-2 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+                  />
+                )}
+              </div>
+
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={shuffle}
+                  onChange={(e) => {
+                    setShuffle(e.target.checked);
+                    setCopied(false);
+                  }}
+                  className="h-4 w-4 accent-blue-600"
+                />
+                <span className="font-semibold text-slate-600">
+                  Shuffle problem order
+                </span>
+              </label>
+
               {link && (
                 <code className="truncate rounded-lg bg-slate-100 px-3 py-2 text-[11px]">
                   {link}
