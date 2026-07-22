@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test lib/runner.test.ts"
+    "test": "node --test lib/runner.test.ts lib/quiz/grade.test.ts lib/time-attack.test.ts"
   },
   "dependencies": {
     "next": "16.2.10",

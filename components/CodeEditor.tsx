@@ -6,15 +6,17 @@ import { useRef } from "react";
 export default function CodeEditor({
   value,
   onChange,
+  readOnly = false,
 }: {
   value: string;
   onChange: (value: string) => void;
+  readOnly?: boolean;
 }) {
   const gutterRef = useRef<HTMLDivElement>(null);
   const lines = value.split("\n").length;
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key !== "Tab") return;
+    if (readOnly || e.key !== "Tab") return;
     e.preventDefault();
     const el = e.currentTarget;
     const { selectionStart, selectionEnd } = el;
@@ -45,11 +47,14 @@ export default function CodeEditor({
           if (gutterRef.current)
             gutterRef.current.scrollTop = e.currentTarget.scrollTop;
         }}
+        readOnly={readOnly}
         spellCheck={false}
         autoCapitalize="off"
         autoCorrect="off"
         aria-label="Code editor"
-        className="min-h-[380px] w-full resize-y bg-transparent p-4 pl-3 text-slate-100 outline-none"
+        className={`min-h-[380px] w-full resize-y bg-transparent p-4 pl-3 text-slate-100 outline-none ${
+          readOnly ? "cursor-not-allowed opacity-70" : ""
+        }`}
       />
     </div>
   );
