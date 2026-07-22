@@ -108,6 +108,22 @@ export default function QuizAdminPage() {
     setCopied(false);
   }
 
+  const allVisibleSelected =
+    visible.length > 0 && visible.every((q) => selected.has(q.id));
+
+  function toggleSelectVisible() {
+    setSelected((s) => {
+      const next = new Set(s);
+      if (allVisibleSelected) {
+        for (const q of visible) next.delete(q.id);
+      } else {
+        for (const q of visible) next.add(q.id);
+      }
+      return next;
+    });
+    setCopied(false);
+  }
+
   return (
     <main className="min-h-screen bg-slate-100 p-6 text-slate-900 sm:p-8">
       <div className="mx-auto max-w-7xl">
@@ -194,6 +210,37 @@ export default function QuizAdminPage() {
             </div>
 
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              {visible.length > 0 && (
+                <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/80 px-4 py-2.5">
+                  <input
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    ref={(el) => {
+                      if (el) {
+                        el.indeterminate =
+                          !allVisibleSelected &&
+                          visible.some((q) => selected.has(q.id));
+                      }
+                    }}
+                    onChange={toggleSelectVisible}
+                    className="h-4 w-4 shrink-0 accent-blue-600"
+                    aria-label={
+                      allVisibleSelected
+                        ? "Deselect all visible questions"
+                        : "Select all visible questions"
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleSelectVisible}
+                    className="text-xs font-semibold text-slate-600 hover:text-blue-600"
+                  >
+                    {allVisibleSelected
+                      ? `Deselect all (${visible.length})`
+                      : `Select all (${visible.length})`}
+                  </button>
+                </div>
+              )}
               {visible.map((q) => {
                 const checked = selected.has(q.id);
                 return (

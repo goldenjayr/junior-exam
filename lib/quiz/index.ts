@@ -1,3 +1,4 @@
+import { cssQuestions } from "./bank/css.ts";
 import { htmlQuestions } from "./bank/html.ts";
 import { javascriptQuestions } from "./bank/javascript.ts";
 import { nodejsQuestions } from "./bank/nodejs.ts";
@@ -12,6 +13,7 @@ export const quizTopics = [
   "tailwind",
   "react",
   "html",
+  "css",
   "nodejs",
 ] as const satisfies readonly QuizTopic[];
 
@@ -21,6 +23,7 @@ export const quizQuestions: QuizQuestion[] = [
   ...tailwindQuestions,
   ...reactQuestions,
   ...htmlQuestions,
+  ...cssQuestions,
   ...nodejsQuestions,
 ];
 
