@@ -4,7 +4,8 @@ export type QuizTopic =
   | "tailwind"
   | "react"
   | "html"
-  | "nodejs";
+  | "nodejs"
+  | "css";
 
 export type QuizDifficulty = "easy" | "medium" | "hard";
 

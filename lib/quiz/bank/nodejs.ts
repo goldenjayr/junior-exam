@@ -9,7 +9,7 @@ export const nodejsQuestions: QuizQuestion[] = [
     prompt: "What is Node.js primarily?",
     options: [
       { id: "a", label: "A browser-only JavaScript framework" },
-      { id: "b", label: "A JavaScript runtime built on V8 for server/side tooling" },
+      { id: "b", label: "A JavaScript runtime built on V8 for server-side tooling" },
       { id: "c", label: "A SQL database" },
       { id: "d", label: "A CSS preprocessor" },
     ],

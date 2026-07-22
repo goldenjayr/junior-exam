@@ -299,7 +299,7 @@ export const htmlQuestions: QuizQuestion[] = [
     type: "hotspot",
     topic: "html",
     difficulty: "hard",
-    prompt: "Click the line that uses the wrong element for page navigation links.",
+    prompt: "Click the line that should use a semantic landmark instead of a generic container for primary navigation.",
     code: `<div id="nav">
   <a href="/">Home</a>
   <a href="/about">About</a>
@@ -312,7 +312,7 @@ export const htmlQuestions: QuizQuestion[] = [
       { id: "r4", label: "Line 5: main", startLine: 5, endLine: 5 },
     ],
     correctRegionId: "r1",
-    explanation: "Prefer `<nav>` for major navigation landmarks instead of a generic div.",
+    explanation: "Prefer `<nav>` for major navigation landmarks instead of a generic `div`.",
   },
   {
     id: 143,
@@ -321,7 +321,7 @@ export const htmlQuestions: QuizQuestion[] = [
     difficulty: "easy",
     prompt: "What visible text does this produce? (type the text only)",
     code: `<p>Hello <strong>world</strong></p>`,
-    accept: ["Hello world", "Hello world"],
+    accept: ["Hello world"],
     explanation: "Strong emphasizes but the text content is still \"Hello world\".",
   },
   {

@@ -182,14 +182,16 @@ export const tailwindQuestions: QuizQuestion[] = [
     type: "order",
     topic: "tailwind",
     difficulty: "medium",
-    prompt: "Order these class groups as you might build a responsive card (conceptual cascade from layout → spacing → type):",
+    prompt:
+      "A common authoring habit is layout → spacing → typography. Order these class groups that way (note: class order in HTML does not change utility CSS priority):",
     items: [
       { id: "layout", label: "flex flex-col" },
       { id: "space", label: "p-4 gap-2" },
       { id: "type", label: "text-sm text-slate-700" },
     ],
     correctOrder: ["layout", "space", "type"],
-    explanation: "Common habit: structure layout, then spacing, then visual/type details (order of classes does not affect CSS specificity among utilities).",
+    explanation:
+      "This is a readability convention only. Among Tailwind utilities, source order in the generated CSS (and conflicts) matter more than the order of classes in the `class` attribute.",
   },
   {
     id: 76,

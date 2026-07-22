@@ -379,4 +379,87 @@ export const reactQuestions: QuizQuestion[] = [
     correctId: "b",
     explanation: "Context provides a value to a subtree without passing props through every level.",
   },
+  {
+    id: 116,
+    type: "single",
+    topic: "react",
+    difficulty: "easy",
+    prompt: "What is the correct way to pass a string prop in JSX?",
+    options: [
+      { id: "a", label: '<User name="Ada" />' },
+      { id: "b", label: "<User name=Ada />" },
+      { id: "c", label: '<User name={"Ada"} name2=Ada />' },
+      { id: "d", label: "<User name: Ada />" },
+    ],
+    correctId: "a",
+    explanation: "String props can use quotes; expressions use curly braces: `name={value}`.",
+  },
+  {
+    id: 117,
+    type: "single",
+    topic: "react",
+    difficulty: "medium",
+    prompt: "When should you typically add a value to a `useEffect` dependency array?",
+    options: [
+      { id: "a", label: "When the effect reads that value from props/state/context" },
+      { id: "b", label: "Never — empty arrays are always best" },
+      { id: "c", label: "Only for CSS class names" },
+      { id: "d", label: "Only when using class components" },
+    ],
+    correctId: "a",
+    explanation:
+      "Dependencies should include reactive values the effect uses so it re-runs when they change (eslint-plugin-react-hooks helps).",
+  },
+  {
+    id: 118,
+    type: "multi",
+    topic: "react",
+    difficulty: "medium",
+    prompt: "Which are good reasons to extract a custom hook? (select all)",
+    options: [
+      { id: "a", label: "Reuse stateful logic across components" },
+      { id: "b", label: "Share non-visual logic (e.g. form/subscription helpers)" },
+      { id: "c", label: "Replace the need for keys on lists" },
+      { id: "d", label: "Keep components thinner by hiding effect/state details" },
+    ],
+    correctIds: ["a", "b", "d"],
+    explanation: "Custom hooks share logic, not markup identity. Keys are still required for lists.",
+  },
+  {
+    id: 119,
+    type: "boolean",
+    topic: "react",
+    difficulty: "easy",
+    prompt: "In React, props should be treated as read-only by the child component.",
+    correct: true,
+    explanation: "Children receive props from parents; mutate local state or lift state instead of mutating props.",
+  },
+  {
+    id: 120,
+    type: "snippet",
+    topic: "react",
+    difficulty: "medium",
+    prompt: "Which snippet correctly derives UI from state without storing redundant state?",
+    snippets: [
+      {
+        id: "a",
+        code: `const [items, setItems] = useState([]);
+const count = items.length; // derived during render`,
+      },
+      {
+        id: "b",
+        code: `const [items, setItems] = useState([]);
+const [count, setCount] = useState(0);
+// manually keep count in sync on every update`,
+      },
+      {
+        id: "c",
+        code: `let count = 0;
+function add() { count++; }`,
+      },
+    ],
+    correctId: "a",
+    explanation:
+      "Prefer calculating derived values during render. Duplicate state often drifts out of sync.",
+  },
 ];
