@@ -45,6 +45,7 @@ export default function QuizAdminPage() {
   const [timeMode, setTimeMode] = useState<"off" | "preset" | "custom">("off");
   const [presetMin, setPresetMin] = useState<(typeof presetMinutes)[number]>(15);
   const [customMin, setCustomMin] = useState(20);
+  const [shuffle, setShuffle] = useState(false);
   const [savedQuizzes, setSavedQuizzes] = useState<SavedQuiz[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -89,7 +90,7 @@ export default function QuizAdminPage() {
   const link = ids.length
     ? `${typeof window !== "undefined" ? window.location.origin : ""}/quiz?q=${ids.join(",")}&e=${examiner}&mode=${mode}${
         timeSeconds ? `&t=${timeSeconds}` : ""
-      }`
+      }${shuffle ? "&s=1" : ""}`
     : "";
 
   function toggle(id: number) {
@@ -492,6 +493,21 @@ export default function QuizAdminPage() {
                   />
                 )}
               </div>
+
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={shuffle}
+                  onChange={(e) => {
+                    setShuffle(e.target.checked);
+                    setCopied(false);
+                  }}
+                  className="h-4 w-4 accent-blue-600"
+                />
+                <span className="font-semibold text-slate-600">
+                  Shuffle question order
+                </span>
+              </label>
 
               {link && (
                 <code className="truncate rounded-lg bg-slate-100 px-3 py-2 text-[11px]">

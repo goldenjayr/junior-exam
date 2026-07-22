@@ -10,6 +10,7 @@ import TimeAttackBar from "@/components/TimeAttackBar";
 import FreezeOverlay from "@/components/FreezeOverlay";
 import { parseTimeLimit } from "@/lib/time-attack";
 import { useTimeAttack } from "@/lib/use-time-attack";
+import { parseShuffle, sessionItemOrder } from "@/lib/shuffle";
 
 const statusLabel: Record<string, string> = {
   passed: "Passed",
@@ -43,12 +44,23 @@ function callLabel(problem: Problem, t: TestCase): string {
 
 function Exam() {
   const searchParams = useSearchParams();
+  const shuffle = parseShuffle(searchParams.get("s"));
+  const limitSeconds = parseTimeLimit(searchParams.get("t"));
+  const pParam = searchParams.get("p") ?? "all";
+  const orderSessionKey = `exam:${pParam}:s=${shuffle ? 1 : 0}`;
+
   const examProblems = useMemo<Problem[]>(() => {
     const ids = parseProblemIds(searchParams.get("p"));
-    return ids.length
-      ? problems.filter((p) => ids.includes(p.id))
-      : problems;
-  }, [searchParams]);
+    const byId = new Map(problems.map((p) => [p.id, p]));
+    const baseIds = ids.length ? ids : problems.map((p) => p.id);
+    const orderedIds =
+      typeof window === "undefined"
+        ? baseIds
+        : sessionItemOrder(sessionStorage, orderSessionKey, baseIds, shuffle);
+    return orderedIds
+      .map((id) => byId.get(id))
+      .filter((p): p is Problem => Boolean(p));
+  }, [searchParams, shuffle, orderSessionKey]);
 
   const [selectedId, setSelectedId] = useState(examProblems[0]?.id);
 
@@ -56,7 +68,7 @@ function Exam() {
   // Read synchronously in the initializer — this component only runs in the
   // browser (the Suspense fallback is what gets prerendered), and a
   // post-mount restore effect would repaint the editor and flicker.
-  const storageKey = `exam-answers:${searchParams.get("p") ?? "all"}`;
+  const storageKey = `exam-answers:${pParam}`;
   const [answers, setAnswers] = useState<Record<number, string>>(() => {
     let saved: Record<number, string> = {};
     try {
@@ -72,8 +84,7 @@ function Exam() {
   const [submitState, setSubmitState] = useState<
     "idle" | "sending" | "sent" | "error"
   >("idle");
-  const limitSeconds = parseTimeLimit(searchParams.get("t"));
-  const timerSessionId = `exam:${searchParams.get("p") ?? "all"}:${searchParams.get("t") ?? ""}`;
+  const timerSessionId = `exam:${pParam}:${searchParams.get("t") ?? ""}`;
   const { remaining, frozen, elapsed } = useTimeAttack(
     limitSeconds,
     timerSessionId

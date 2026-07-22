@@ -14,6 +14,7 @@ import TimeAttackBar from "@/components/TimeAttackBar";
 import FreezeOverlay from "@/components/FreezeOverlay";
 import { parseTimeLimit } from "@/lib/time-attack";
 import { useTimeAttack } from "@/lib/use-time-attack";
+import { parseShuffle, sessionItemOrder } from "@/lib/shuffle";
 
 function parseMode(raw: string | null): QuizMode {
   return raw === "practice" ? "practice" : "assessment";
@@ -47,15 +48,25 @@ function QuizPlayer() {
   const searchParams = useSearchParams();
   const mode = parseMode(searchParams.get("mode"));
   const limitSeconds = parseTimeLimit(searchParams.get("t"));
+  const shuffle = parseShuffle(searchParams.get("s"));
+  const qParam = searchParams.get("q") ?? "";
+  const orderSessionKey = `quiz:${qParam}:s=${shuffle ? 1 : 0}`;
+
   const sessionQuestions = useMemo(() => {
     const ids = parseQuizIds(searchParams.get("q"));
     if (!ids.length) return [];
     const byId = new Map(quizQuestions.map((q) => [q.id, q]));
-    return ids.map((id) => byId.get(id)!).filter(Boolean);
-  }, [searchParams]);
+    const orderedIds =
+      typeof window === "undefined"
+        ? ids
+        : sessionItemOrder(sessionStorage, orderSessionKey, ids, shuffle);
+    return orderedIds
+      .map((id) => byId.get(id))
+      .filter((q): q is NonNullable<typeof q> => Boolean(q));
+  }, [searchParams, shuffle, orderSessionKey]);
 
-  const storageKey = `quiz-answers:${searchParams.get("q") ?? ""}:${mode}`;
-  const timerSessionId = `quiz:${searchParams.get("q") ?? ""}:${searchParams.get("t") ?? ""}`;
+  const storageKey = `quiz-answers:${qParam}:${mode}`;
+  const timerSessionId = `quiz:${qParam}:${searchParams.get("t") ?? ""}`;
 
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, AnswerEntry>>(() => {
