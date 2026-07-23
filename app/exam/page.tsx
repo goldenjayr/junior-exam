@@ -32,9 +32,9 @@ function runAny(problem: Problem, code: string): Promise<RunResult> {
 
 function callLabel(problem: Problem, t: TestCase): string {
   if (problem.kind !== "react")
-    return `${problem.fnName}(${t.args.map((a) => JSON.stringify(a)).join(", ")})`;
+    return `${problem.fnName}(${t.args.map((a) => formatValue(a)).join(", ")})`;
   const props = Object.entries((t.args[0] ?? {}) as Record<string, unknown>)
-    .map(([k, v]) => `${k}={${JSON.stringify(v)}}`)
+    .map(([k, v]) => `${k}={${formatValue(v)}}`)
     .join(" ");
   const clicks = t.clicks
     ? ` then click <${t.clickOn}> ×${t.clicks}`
@@ -325,22 +325,29 @@ function Exam() {
                   {problem.tests.map((t, i) => (
                     <div
                       key={i}
-                      className="rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs"
+                      className="rounded-lg border border-slate-200 bg-white p-3"
                     >
-                      <p className="flex items-baseline gap-2">
-                        <span className="shrink-0 font-sans text-[11px] font-bold text-slate-400">
-                          {i + 1}
-                        </span>
-                        <span className="overflow-x-auto whitespace-nowrap text-slate-600">
-                          {callLabel(problem, t)}
-                        </span>
+                      <p className="font-sans text-[11px] font-semibold text-slate-400">
+                        Case {i + 1}
                       </p>
-                      <p className="mt-2 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                        Expected
-                      </p>
-                      <pre className="mt-0.5 overflow-x-auto whitespace-pre-wrap text-slate-800">
-                        {formatValue(t.expected)}
-                      </pre>
+                      <div className="mt-2 flex flex-col gap-2">
+                        <div>
+                          <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                            Input
+                          </p>
+                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-50 p-2 font-mono text-xs text-slate-700">
+                            {callLabel(problem, t)}
+                          </pre>
+                        </div>
+                        <div>
+                          <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                            Expected
+                          </p>
+                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-50 p-2 font-mono text-xs text-slate-800">
+                            {formatValue(t.expected)}
+                          </pre>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -389,7 +396,7 @@ function Exam() {
                           : "border-red-200 bg-red-50"
                       }`}
                     >
-                      <p className="flex items-baseline gap-2">
+                      <div className="flex items-baseline gap-2">
                         <span
                           className={`grid h-4 w-4 shrink-0 translate-y-0.5 place-items-center rounded-full text-[10px] font-bold text-white ${
                             t.passed ? "bg-green-600" : "bg-red-600"
@@ -397,10 +404,10 @@ function Exam() {
                         >
                           {t.passed ? "✓" : "✗"}
                         </span>
-                        <span className="overflow-x-auto whitespace-nowrap font-mono text-xs text-slate-600">
+                        <pre className="min-w-0 flex-1 whitespace-pre-wrap font-mono text-xs text-slate-600">
                           {callLabel(problem, t.test)}
-                        </span>
-                      </p>
+                        </pre>
+                      </div>
                       {!t.passed && (
                         <div className="mt-2 grid gap-2 font-mono text-xs sm:grid-cols-2">
                           <div>
