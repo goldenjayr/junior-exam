@@ -91,9 +91,15 @@ const presets: { name: string; description: string; ids: number[] }[] = [
     ids: [34, 36, 39, 40, 41, 43],
   },
   {
+    name: "Python Basics",
+    description: "~40 min · list/dict/string challenges on Pyodide",
+    ids: [46, 47, 48, 49, 50, 51],
+  },
+  {
     name: "Junior Full Stack",
-    description: "~60 min · JS/React junior mix plus one SQL and one Prisma item",
-    ids: [1, 2, 6, 9, 12, 28, 34, 43],
+    description:
+      "~60 min · JS/React junior mix plus SQL, Prisma, and one Python item",
+    ids: [1, 2, 6, 9, 12, 28, 34, 43, 46],
   },
 ];
 
