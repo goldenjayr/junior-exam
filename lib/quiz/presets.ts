@@ -72,7 +72,7 @@ export const quizPresets: QuizPreset[] = [
   {
     name: "Full Stack Blitz",
     description:
-      "Mixed junior topics across JS, TS, React, HTML, CSS, Tailwind, and Node.",
+      "Mixed junior topics across JS, TS, React, HTML, CSS, Tailwind, Node, PostgreSQL, and Prisma.",
     ids: [
       1, 4, 9, 17, 23, // js
       31, 32, 39, 47, // ts
@@ -116,6 +116,6 @@ export const quizPresets: QuizPreset[] = [
       // prisma 241-252
       241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252,
     ],
-    suggestedMinutes: 70,
+    suggestedMinutes: 90,
   },
 ];
