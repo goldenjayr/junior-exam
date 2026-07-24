@@ -49,6 +49,27 @@ export const quizPresets: QuizPreset[] = [
     suggestedMinutes: 15,
   },
   {
+    name: "PostgreSQL Essentials",
+    description:
+      "SELECT/JOIN/aggregates, keys, and junior Postgres pitfalls.",
+    ids: [211, 212, 213, 214, 216, 219, 221, 222, 224, 226, 228, 230, 233],
+    suggestedMinutes: 15,
+  },
+  {
+    name: "Prisma Essentials",
+    description:
+      "Schema modeling, relations, and Client CRUD/query args.",
+    ids: [241, 242, 243, 244, 246, 249, 251, 252, 254, 256, 258, 260, 263],
+    suggestedMinutes: 15,
+  },
+  {
+    name: "Data Layer Blitz",
+    description:
+      "Mixed Postgres + Prisma for a short data-layer screen.",
+    ids: [211, 214, 219, 224, 230, 241, 244, 249, 254, 260],
+    suggestedMinutes: 20,
+  },
+  {
     name: "Full Stack Blitz",
     description:
       "Mixed junior topics across JS, TS, React, HTML, CSS, Tailwind, and Node.",
@@ -60,6 +81,7 @@ export const quizPresets: QuizPreset[] = [
       121, 123, 132, // html
       181, 184, 192, // css
       151, 154, 167, // node
+      211, 214, 241, 244, // postgres, prisma
     ],
     suggestedMinutes: 25,
   },
@@ -67,7 +89,7 @@ export const quizPresets: QuizPreset[] = [
     name: "Time Attack 10",
     description:
       "Ten varied easy/medium items meant to pair with a tight countdown.",
-    ids: [1, 32, 62, 92, 122, 152, 6, 96, 181, 156],
+    ids: [1, 32, 62, 92, 122, 152, 211, 96, 181, 241],
     suggestedMinutes: 10,
   },
   {
@@ -89,6 +111,10 @@ export const quizPresets: QuizPreset[] = [
       181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192,
       // nodejs 151-162
       151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162,
+      // postgresql 211-222
+      211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222,
+      // prisma 241-252
+      241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252,
     ],
     suggestedMinutes: 70,
   },
