@@ -67,7 +67,11 @@ test("parses enums and one-to-many relation fields", () => {
           name: "Post",
           fields: [
             { name: "authorId", type: "Int", attributes: [] },
-            { name: "author", type: "User", attributes: ["relation"] },
+            {
+              name: "author",
+              type: "User",
+              attributes: ["relation(fields:[authorId],references:[id])"],
+            },
           ],
         },
       ],
@@ -107,6 +111,39 @@ test("rejects unknown field attributes", () => {
       `),
     /Unsupported Prisma field attribute: @map/
   );
+});
+
+test("preserves normalized relation arguments", () => {
+  const ast = parsePrismaSchema(`
+    model Post {
+      authorId Int
+      author User @relation(fields: [authorId], references: [id])
+    }
+  `);
+
+  assert.deepEqual(ast.models[0].fields[1].attributes, [
+    "relation(fields:[authorId],references:[id])",
+  ]);
+});
+
+test("parses quoted default strings containing delimiters and comment markers", () => {
+  const ast = parsePrismaSchema(`
+    model Link {
+      closing String @default(")")
+      url String @default("https://example.com")
+      json String @default("{ }")
+    }
+  `);
+
+  assert.deepEqual(ast.models[0].fields, [
+    { name: "closing", type: "String", attributes: ['default(")")'] },
+    {
+      name: "url",
+      type: "String",
+      attributes: ['default("https://example.com")'],
+    },
+    { name: "json", type: "String", attributes: ['default("{ }")'] },
+  ]);
 });
 
 const userEmail: Problem = {
@@ -159,6 +196,31 @@ test("schema runner fails a missing unique attribute", () => {
   );
 
   assert.equal(result.status, "failed");
+});
+
+test("problem 41 rejects bare or incorrect relation arguments", () => {
+  const problem = problems.find((candidate) => candidate.id === 41);
+  assert.ok(problem);
+
+  for (const relation of [
+    "@relation",
+    "@relation(fields: [id], references: [authorId])",
+  ]) {
+    const result = runPrismaSchemaProblem(
+      problem,
+      `model User {
+        id Int @id
+        posts Post[]
+      }
+
+      model Post {
+        id Int @id
+        authorId Int
+        author User ${relation}
+      }`
+    );
+    assert.equal(result.status, "failed", relation);
+  }
 });
 
 const solutions: Record<number, string> = {

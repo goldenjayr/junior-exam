@@ -19,13 +19,78 @@ export type PrismaSchemaAst = {
   models: PrismaModelAst[];
 };
 
-function findBlockEnd(source: string, openBrace: number): number {
+function findClosingDelimiter(
+  source: string,
+  start: number,
+  open: string,
+  close: string
+): number {
   let depth = 0;
-  for (let index = openBrace; index < source.length; index++) {
-    if (source[index] === "{") depth++;
-    if (source[index] === "}" && --depth === 0) return index;
+  let quote = "";
+  for (let index = start; index < source.length; index++) {
+    const character = source[index];
+    if (quote) {
+      if (character === "\\" && index + 1 < source.length) {
+        index++;
+      } else if (character === quote) {
+        quote = "";
+      }
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+    } else if (character === open) {
+      depth++;
+    } else if (character === close && --depth === 0) {
+      return index;
+    }
   }
-  throw new Error("Invalid Prisma schema: unclosed block");
+  throw new Error("Invalid Prisma schema: unclosed delimiter");
+}
+
+function findBlockEnd(source: string, openBrace: number): number {
+  return findClosingDelimiter(source, openBrace, "{", "}");
+}
+
+function stripLineComment(line: string): string {
+  let quote = "";
+  for (let index = 0; index < line.length; index++) {
+    const character = line[index];
+    if (quote) {
+      if (character === "\\" && index + 1 < line.length) {
+        index++;
+      } else if (character === quote) {
+        quote = "";
+      }
+    } else if (character === '"' || character === "'") {
+      quote = character;
+    } else if (character === "/" && line[index + 1] === "/") {
+      return line.slice(0, index);
+    }
+  }
+  return line;
+}
+
+function normalizeAttributeArgs(args: string): string {
+  let normalized = "";
+  let quote = "";
+  for (let index = 0; index < args.length; index++) {
+    const character = args[index];
+    if (quote) {
+      normalized += character;
+      if (character === "\\" && index + 1 < args.length) {
+        normalized += args[++index];
+      } else if (character === quote) {
+        quote = "";
+      }
+    } else if (character === '"' || character === "'") {
+      quote = character;
+      normalized += character;
+    } else if (!/\s/.test(character)) {
+      normalized += character;
+    }
+  }
+  return normalized;
 }
 
 function parseAttribute(source: string, start: number): [string, number] {
@@ -36,7 +101,7 @@ function parseAttribute(source: string, start: number): [string, number] {
   let index = start + match[0].length;
   let args = "";
   if (source[index] === "(") {
-    const end = findBlockEnd(source.replaceAll("(", "{").replaceAll(")", "}"), index);
+    const end = findClosingDelimiter(source, index, "(", ")");
     args = source.slice(index + 1, end);
     index = end + 1;
   }
@@ -47,9 +112,13 @@ function parseAttribute(source: string, start: number): [string, number] {
   }
   if (name === "default") {
     if (!args) throw new Error("Invalid Prisma field attribute: @default");
-    return [`default(${args})`, index];
+    return [`default(${normalizeAttributeArgs(args)})`, index];
   }
-  if (name === "relation") return ["relation", index];
+  if (name === "relation")
+    return [
+      args ? `relation(${normalizeAttributeArgs(args)})` : "relation",
+      index,
+    ];
   throw new Error(`Unsupported Prisma field attribute: @${name}`);
 }
 
@@ -76,7 +145,7 @@ function parseField(line: string): PrismaFieldAst {
 function parseModel(name: string, body: string): PrismaModelAst {
   const fields = body
     .split("\n")
-    .map((line) => line.replace(/\/\/.*$/, "").trim())
+    .map((line) => stripLineComment(line).trim())
     .filter(Boolean)
     .map(parseField);
   return { name, fields };
@@ -85,7 +154,7 @@ function parseModel(name: string, body: string): PrismaModelAst {
 function parseEnum(name: string, body: string): PrismaEnumAst {
   const values = body
     .split("\n")
-    .map((line) => line.replace(/\/\/.*$/, "").trim())
+    .map((line) => stripLineComment(line).trim())
     .filter(Boolean);
   if (values.some((value) => !/^[A-Za-z_]\w*$/.test(value)))
     throw new Error(`Invalid Prisma enum value in ${name}`);

@@ -1027,7 +1027,11 @@ model Post {
               name: "Post",
               fields: [
                 { name: "authorId", type: "Int", attributes: [] },
-                { name: "author", type: "User", attributes: ["relation"] },
+                {
+                  name: "author",
+                  type: "User",
+                  attributes: ["relation(fields:[authorId],references:[id])"],
+                },
               ],
             },
           ],
