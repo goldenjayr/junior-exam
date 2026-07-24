@@ -183,7 +183,7 @@ export const pythonQuestions: QuizQuestion[] = [
   },
   {
     id: 296, type: "snippet", topic: "python", difficulty: "medium",
-    prompt: "Which snippet returns a dictionary counting each word in `words`?",
+    prompt: "Which snippet builds a dictionary counting each word in `words`?",
     snippets: [
       { id: "a", code: `counts = {}\nfor word in words:\n    counts[word] = counts.get(word, 0) + 1` },
       { id: "b", code: `counts = []\nfor word in words:\n    counts[word] += 1` },
