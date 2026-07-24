@@ -8,7 +8,7 @@ import { runReactProblem } from "./react-runner.ts";
 import { runSqlProblem } from "./sql-runner.ts";
 import { runPrismaSchemaProblem } from "./prisma-schema-runner.ts";
 
-export type EditorLanguage = "javascript" | "sql" | "prisma";
+export type EditorLanguage = "javascript" | "sql" | "prisma" | "python";
 
 export function editorLanguageFor(problem: Problem): EditorLanguage {
   if (problem.kind === "sql") return "sql";

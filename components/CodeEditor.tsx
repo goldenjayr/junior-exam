@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { sql, PostgreSQL } from "@codemirror/lang-sql";
+import { python } from "@codemirror/lang-python";
 import type { EditorLanguage } from "@/lib/exam-dispatch";
 
 export default function CodeEditor({
@@ -20,6 +21,7 @@ export default function CodeEditor({
   const extensions = useMemo(() => {
     if (language === "sql") return [sql({ dialect: PostgreSQL })];
     if (language === "prisma") return []; // plain text v1
+    if (language === "python") return [python()];
     return [javascript({ jsx: true })];
   }, [language]);
 
