@@ -96,3 +96,45 @@ test("starter code does not pass SQL problems 34-39", async () => {
     assert.notEqual(result.status, "passed", problem.title);
   }
 });
+
+test("problem 35 cannot be solved by hard-coding Maria's customer id", async () => {
+  const problem = problems.find((candidate) => candidate.id === 35);
+  assert.ok(problem);
+
+  const result = await runSqlProblem(
+    problem,
+    "SELECT id, total FROM orders WHERE customer_id = 2 ORDER BY id;"
+  );
+
+  assert.notEqual(result.status, "passed");
+});
+
+test("verifySql rejects a literal SELECT that fakes INSERT RETURNING", async () => {
+  const insertProduct: Problem = {
+    id: 9002,
+    title: "Insert Product (fixture)",
+    category: "postgresql",
+    kind: "sql",
+    difficulty: "easy",
+    instructions: "Insert and return a product",
+    fnName: "query",
+    starterCode: "-- write SQL",
+    tests: [
+      {
+        args: [],
+        setupSql:
+          "CREATE TABLE products (id INT PRIMARY KEY, name TEXT, price NUMERIC);",
+        expected: [{ id: 1, name: "Mug", price: "9.5" }],
+        verifySql: "SELECT id, name, price FROM products ORDER BY id;",
+        verifyExpected: [{ id: 1, name: "Mug", price: "9.5" }],
+      },
+    ],
+  };
+
+  const result = await runSqlProblem(
+    insertProduct,
+    "SELECT 1 AS id, 'Mug' AS name, 9.5::numeric AS price;"
+  );
+
+  assert.equal(result.status, "failed");
+});

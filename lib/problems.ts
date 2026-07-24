@@ -5,6 +5,10 @@ export type TestCase = {
   clicks?: number;
   /** SQL problems: seed schema + data before candidate query. */
   setupSql?: string;
+  /** SQL problems: query persisted state after the candidate query. */
+  verifySql?: string;
+  /** SQL problems: expected rows returned by verifySql. */
+  verifyExpected?: unknown;
 };
 
 export type Problem = {
@@ -798,6 +802,26 @@ export const problems: Problem[] = [
           { id: 12, total: 120 },
         ],
       },
+      {
+        args: [],
+        setupSql: `
+          CREATE TABLE customers (id INT PRIMARY KEY, name TEXT);
+          CREATE TABLE orders (
+            id INT PRIMARY KEY,
+            customer_id INT REFERENCES customers(id),
+            total INT
+          );
+          INSERT INTO customers VALUES (2, 'John'), (7, 'Maria'), (9, 'Peter');
+          INSERT INTO orders VALUES
+            (20, 7, 55),
+            (21, 2, 90),
+            (22, 7, 140);
+        `,
+        expected: [
+          { id: 20, total: 55 },
+          { id: 22, total: 140 },
+        ],
+      },
     ],
   },
   {
@@ -903,6 +927,8 @@ export const problems: Problem[] = [
           );
         `,
         expected: [{ id: 1, name: "Mug", price: "9.5" }],
+        verifySql: "SELECT id, name, price FROM products ORDER BY id;",
+        verifyExpected: [{ id: 1, name: "Mug", price: "9.5" }],
       },
     ],
   },

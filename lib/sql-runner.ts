@@ -49,12 +49,28 @@ export async function runSqlProblem(
       const actual = normalizeRows(
         (result.rows ?? []) as Record<string, unknown>[]
       );
-      const passed = deepEqual(actual, testCase.expected);
+      const resultPassed = deepEqual(actual, testCase.expected);
+      let verificationPassed = true;
+      if (testCase.verifySql) {
+        const verification = await db.query(testCase.verifySql);
+        const verificationActual = normalizeRows(
+          (verification.rows ?? []) as Record<string, unknown>[]
+        );
+        verificationPassed = deepEqual(
+          verificationActual,
+          testCase.verifyExpected
+        );
+      }
+      const passed = resultPassed && verificationPassed;
       tests.push({
         test: testCase,
         passed,
         actual,
-        error: passed ? undefined : "Result rows did not match expected",
+        error: passed
+          ? undefined
+          : resultPassed
+            ? "Verification rows did not match expected"
+            : "Result rows did not match expected",
       });
     } catch (error) {
       tests.push({
