@@ -5,7 +5,9 @@ export type QuizTopic =
   | "react"
   | "html"
   | "nodejs"
-  | "css";
+  | "css"
+  | "postgresql"
+  | "prisma";
 
 export type QuizDifficulty = "easy" | "medium" | "hard";
 

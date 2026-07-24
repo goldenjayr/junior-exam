@@ -2,6 +2,7 @@ import { cssQuestions } from "./bank/css.ts";
 import { htmlQuestions } from "./bank/html.ts";
 import { javascriptQuestions } from "./bank/javascript.ts";
 import { nodejsQuestions } from "./bank/nodejs.ts";
+import { postgresqlQuestions } from "./bank/postgresql.ts";
 import { reactQuestions } from "./bank/react.ts";
 import { tailwindQuestions } from "./bank/tailwind.ts";
 import { typescriptQuestions } from "./bank/typescript.ts";
@@ -15,6 +16,7 @@ export const quizTopics = [
   "html",
   "css",
   "nodejs",
+  "postgresql",
 ] as const satisfies readonly QuizTopic[];
 
 export const quizQuestions: QuizQuestion[] = [
@@ -25,6 +27,7 @@ export const quizQuestions: QuizQuestion[] = [
   ...htmlQuestions,
   ...cssQuestions,
   ...nodejsQuestions,
+  ...postgresqlQuestions,
 ];
 
 const byId = new Map(quizQuestions.map((q) => [q.id, q]));

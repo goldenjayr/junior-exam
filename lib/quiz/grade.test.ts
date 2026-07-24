@@ -2,6 +2,7 @@
 import assert from "node:assert";
 import test from "node:test";
 import { gradeAnswer, normalizeText } from "./grade.ts";
+import { quizQuestions, quizTopics } from "./index.ts";
 import type { QuizQuestion } from "./types.ts";
 
 const single: QuizQuestion = {
@@ -214,4 +215,13 @@ test("grades output", () => {
     gradeAnswer(output, { type: "output", text: "12" }),
     false
   );
+});
+
+test("registers the complete PostgreSQL question bank", () => {
+  const questions = quizQuestions.filter((question) => question.topic === "postgresql");
+
+  assert.ok(quizTopics.includes("postgresql"));
+  assert.strictEqual(questions.length, 25);
+  assert.strictEqual(questions[0]?.id, 211);
+  assert.strictEqual(questions.at(-1)?.id, 235);
 });
