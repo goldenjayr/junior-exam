@@ -290,6 +290,18 @@ function Exam() {
                       try {
                         const result = await runAny(problem, code);
                         setResults((r) => ({ ...r, [problem.id]: result }));
+                      } catch (error) {
+                        setResults((r) => ({
+                          ...r,
+                          [problem.id]: {
+                            status: "error",
+                            tests: [],
+                            error:
+                              error instanceof Error
+                                ? error.message
+                                : String(error),
+                          },
+                        }));
                       } finally {
                         setRunning(false);
                       }

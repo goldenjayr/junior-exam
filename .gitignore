@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 .superpowers/
 .worktrees/
+
+# PGlite browser assets (copied from node_modules on install/build)
+/public/pglite/
