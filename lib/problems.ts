@@ -967,6 +967,105 @@ export const problems: Problem[] = [
       },
     ],
   },
+  {
+    id: 40,
+    title: "Unique User Email",
+    category: "prisma",
+    kind: "prisma-schema",
+    difficulty: "easy",
+    instructions:
+      "Write a Prisma schema with a User model. It must have an Int id marked @id and a String email marked @unique.",
+    fnName: "schema",
+    starterCode: `model User {
+  // Add id and email fields
+}`,
+    tests: [
+      {
+        args: [],
+        expected: {
+          enums: [],
+          models: [
+            {
+              name: "User",
+              fields: [
+                { name: "id", type: "Int", attributes: ["id"] },
+                { name: "email", type: "String", attributes: ["unique"] },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: 41,
+    title: "User–Post 1-n",
+    category: "prisma",
+    kind: "prisma-schema",
+    difficulty: "medium",
+    instructions:
+      "Write User and Post models for a one-to-many relationship. User needs posts Post[]. Post needs authorId Int and author User with @relation(fields: [authorId], references: [id]).",
+    fnName: "schema",
+    starterCode: `model User {
+  // Add id and posts fields
+}
+
+model Post {
+  // Add id, authorId, and author fields
+}`,
+    tests: [
+      {
+        args: [],
+        expected: {
+          enums: [],
+          models: [
+            {
+              name: "User",
+              fields: [{ name: "posts", type: "Post[]", attributes: [] }],
+            },
+            {
+              name: "Post",
+              fields: [
+                { name: "authorId", type: "Int", attributes: [] },
+                { name: "author", type: "User", attributes: ["relation"] },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: 42,
+    title: "Role Enum",
+    category: "prisma",
+    kind: "prisma-schema",
+    difficulty: "medium",
+    instructions:
+      "Write a Role enum with USER and ADMIN values, then add a User model with a role field of type Role.",
+    fnName: "schema",
+    starterCode: `enum Role {
+  // Add USER and ADMIN
+}
+
+model User {
+  // Add id and role fields
+}`,
+    tests: [
+      {
+        args: [],
+        expected: {
+          enums: [{ name: "Role", values: ["USER", "ADMIN"] }],
+          models: [
+            {
+              name: "User",
+              fields: [{ name: "role", type: "Role", attributes: [] }],
+            },
+          ],
+        },
+      },
+    ],
+  },
 ];
 
 export function parseProblemIds(param: string | null): number[] {
