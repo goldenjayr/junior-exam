@@ -4,6 +4,7 @@ import { javascriptQuestions } from "./bank/javascript.ts";
 import { nodejsQuestions } from "./bank/nodejs.ts";
 import { postgresqlQuestions } from "./bank/postgresql.ts";
 import { prismaQuestions } from "./bank/prisma.ts";
+import { pythonQuestions } from "./bank/python.ts";
 import { reactQuestions } from "./bank/react.ts";
 import { tailwindQuestions } from "./bank/tailwind.ts";
 import { typescriptQuestions } from "./bank/typescript.ts";
@@ -19,6 +20,7 @@ export const quizTopics = [
   "nodejs",
   "postgresql",
   "prisma",
+  "python",
 ] as const satisfies readonly QuizTopic[];
 
 export const quizQuestions: QuizQuestion[] = [
@@ -31,6 +33,7 @@ export const quizQuestions: QuizQuestion[] = [
   ...nodejsQuestions,
   ...postgresqlQuestions,
   ...prismaQuestions,
+  ...pythonQuestions,
 ];
 
 const byId = new Map(quizQuestions.map((q) => [q.id, q]));

@@ -7,7 +7,8 @@ export type QuizTopic =
   | "nodejs"
   | "css"
   | "postgresql"
-  | "prisma";
+  | "prisma"
+  | "python";
 
 export type QuizDifficulty = "easy" | "medium" | "hard";
 
