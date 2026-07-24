@@ -7,12 +7,14 @@ import {
 import { runReactProblem } from "./react-runner.ts";
 import { runSqlProblem } from "./sql-runner.ts";
 import { runPrismaSchemaProblem } from "./prisma-schema-runner.ts";
+import { runPythonProblem } from "./python-runner.ts";
 
 export type EditorLanguage = "javascript" | "sql" | "prisma" | "python";
 
 export function editorLanguageFor(problem: Problem): EditorLanguage {
   if (problem.kind === "sql") return "sql";
   if (problem.kind === "prisma-schema") return "prisma";
+  if (problem.kind === "python") return "python";
   return "javascript";
 }
 
@@ -43,6 +45,8 @@ export function runAny(problem: Problem, code: string): Promise<RunResult> {
       return runSqlProblem(problem, code);
     case "prisma-schema":
       return Promise.resolve(runPrismaSchemaProblem(problem, code));
+    case "python":
+      return runPythonProblem(problem, code);
     default:
       return runProblemSandboxed(problem, code);
   }

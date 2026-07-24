@@ -264,6 +264,11 @@ function Exam() {
                       Starting Postgres…
                     </span>
                   )}
+                  {running && problem.kind === "python" && (
+                    <span className="self-center text-xs text-slate-500">
+                      Starting Python…
+                    </span>
+                  )}
                   <button
                     type="button"
                     disabled={frozen}

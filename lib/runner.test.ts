@@ -111,6 +111,15 @@ test("shared exam dispatch selects languages, labels, and runners", async () => 
   assert.strictEqual(editorLanguageFor(jsProblem), "javascript");
   assert.strictEqual(editorLanguageFor(sqlProblem), "sql");
   assert.strictEqual(editorLanguageFor(schemaProblem), "prisma");
+  assert.strictEqual(
+    editorLanguageFor({
+      ...problems[0],
+      kind: "python",
+      category: "python",
+      fnName: "get_active_users",
+    }),
+    "python"
+  );
   assert.strictEqual(callLabel(sqlProblem, sqlProblem.tests[0]), "SQL query → rows");
   assert.strictEqual(
     callLabel(schemaProblem, schemaProblem.tests[0]),

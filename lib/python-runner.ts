@@ -8,6 +8,19 @@ const JSON_RETURN_ERROR =
 
 let pyodidePromise: Promise<PyodideInterface> | undefined;
 let gradeQueue: Promise<void> = Promise.resolve();
+let worker: Worker | null = null;
+let browserGradeQueue: Promise<void> = Promise.resolve();
+
+function getWorker(): Worker {
+  if (worker) return worker;
+  worker = new Worker("/python-worker.js", { type: "module" });
+  return worker;
+}
+
+function resetWorker(): void {
+  worker?.terminate();
+  worker = null;
+}
 
 function deepEqual(a: unknown, b: unknown): boolean {
   if (Object.is(a, b)) return true;
@@ -175,16 +188,46 @@ export async function gradeWithPyodide(
 export async function runPythonProblem(
   problem: Problem,
   code: string,
-  timeoutMs = 3000
+  timeoutMs?: number
 ): Promise<RunResult> {
-  void timeoutMs;
-
   if (typeof window !== "undefined") {
-    return {
-      status: "error",
-      tests: [],
-      error: "Python browser execution requires the worker runner.",
-    };
+    const browserTimeoutMs = timeoutMs ?? 8000;
+    const run = browserGradeQueue.then(
+      () =>
+        new Promise<RunResult>((resolve) => {
+          const activeWorker = getWorker();
+          const timeout = window.setTimeout(() => {
+            resetWorker();
+            resolve({
+              status: "error",
+              tests: [],
+              error: `Your code took longer than ${
+                browserTimeoutMs / 1000
+              } seconds to run — check for infinite loops.`,
+            });
+          }, browserTimeoutMs);
+
+          activeWorker.onmessage = (event: MessageEvent<RunResult>) => {
+            window.clearTimeout(timeout);
+            resolve(event.data);
+          };
+          activeWorker.onerror = (event: ErrorEvent) => {
+            window.clearTimeout(timeout);
+            resetWorker();
+            resolve({
+              status: "error",
+              tests: [],
+              error: event.message,
+            });
+          };
+          activeWorker.postMessage({ problem, code });
+        })
+    );
+    browserGradeQueue = run.then(
+      () => undefined,
+      () => undefined
+    );
+    return run;
   }
 
   const run = gradeQueue.then(async () => {
