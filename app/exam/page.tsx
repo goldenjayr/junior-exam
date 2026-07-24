@@ -2,9 +2,12 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { problems, parseProblemIds, type Problem } from "@/lib/problems";
-import { runProblemSandboxed, formatValue, type RunResult } from "@/lib/runner";
-import { runReactProblem } from "@/lib/react-runner";
-import type { TestCase } from "@/lib/problems";
+import { formatValue, type RunResult } from "@/lib/runner";
+import {
+  callLabel,
+  editorLanguageFor,
+  runAny,
+} from "@/lib/exam-dispatch";
 import CodeEditor from "@/components/CodeEditor";
 import TimeAttackBar from "@/components/TimeAttackBar";
 import FreezeOverlay from "@/components/FreezeOverlay";
@@ -23,24 +26,6 @@ const statusBadge: Record<string, string> = {
   failed: "bg-amber-100 text-amber-700",
   error: "bg-red-100 text-red-700",
 };
-
-function runAny(problem: Problem, code: string): Promise<RunResult> {
-  return problem.kind === "react"
-    ? Promise.resolve(runReactProblem(problem, code))
-    : runProblemSandboxed(problem, code);
-}
-
-function callLabel(problem: Problem, t: TestCase): string {
-  if (problem.kind !== "react")
-    return `${problem.fnName}(${t.args.map((a) => JSON.stringify(a)).join(", ")})`;
-  const props = Object.entries((t.args[0] ?? {}) as Record<string, unknown>)
-    .map(([k, v]) => `${k}={${JSON.stringify(v)}}`)
-    .join(" ");
-  const clicks = t.clicks
-    ? ` then click <${t.clickOn}> ×${t.clicks}`
-    : "";
-  return `<${problem.fnName}${props ? " " + props : ""} />${clicks}`;
-}
 
 function Exam() {
   const searchParams = useSearchParams();
@@ -80,6 +65,7 @@ function Exam() {
     };
   });
   const [results, setResults] = useState<Record<number, RunResult>>({});
+  const [running, setRunning] = useState(false);
   const [applicantName, setApplicantName] = useState("");
   const [submitState, setSubmitState] = useState<
     "idle" | "sending" | "sent" | "error"
@@ -273,6 +259,11 @@ function Exam() {
               <div className="mb-2 flex items-center justify-between gap-4">
                 <h3 className="text-sm font-bold">Your Code</h3>
                 <div className="flex gap-2">
+                  {running && problem.kind === "sql" && (
+                    <span className="self-center text-xs text-slate-500">
+                      Starting Postgres…
+                    </span>
+                  )}
                   <button
                     type="button"
                     disabled={frozen}
@@ -293,10 +284,15 @@ function Exam() {
                   </button>
                   <button
                     type="button"
-                    disabled={frozen}
+                    disabled={frozen || running}
                     onClick={async () => {
-                      const result = await runAny(problem, code);
-                      setResults((r) => ({ ...r, [problem.id]: result }));
+                      setRunning(true);
+                      try {
+                        const result = await runAny(problem, code);
+                        setResults((r) => ({ ...r, [problem.id]: result }));
+                      } finally {
+                        setRunning(false);
+                      }
                     }}
                     className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -307,6 +303,7 @@ function Exam() {
               <CodeEditor
                 value={code}
                 readOnly={frozen}
+                language={editorLanguageFor(problem)}
                 onChange={(value) =>
                   setAnswers((a) => ({ ...a, [problem.id]: value }))
                 }
@@ -325,22 +322,29 @@ function Exam() {
                   {problem.tests.map((t, i) => (
                     <div
                       key={i}
-                      className="rounded-lg border border-slate-200 bg-white p-3 font-mono text-xs"
+                      className="rounded-lg border border-slate-200 bg-white p-3"
                     >
-                      <p className="flex items-baseline gap-2">
-                        <span className="shrink-0 font-sans text-[11px] font-bold text-slate-400">
-                          {i + 1}
-                        </span>
-                        <span className="overflow-x-auto whitespace-nowrap text-slate-600">
-                          {callLabel(problem, t)}
-                        </span>
+                      <p className="font-sans text-[11px] font-semibold text-slate-400">
+                        Case {i + 1}
                       </p>
-                      <p className="mt-2 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                        Expected
-                      </p>
-                      <pre className="mt-0.5 overflow-x-auto whitespace-pre-wrap text-slate-800">
-                        {formatValue(t.expected)}
-                      </pre>
+                      <div className="mt-2 flex flex-col gap-2">
+                        <div>
+                          <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                            Input
+                          </p>
+                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-50 p-2 font-mono text-xs text-slate-700">
+                            {callLabel(problem, t)}
+                          </pre>
+                        </div>
+                        <div>
+                          <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                            Expected
+                          </p>
+                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-50 p-2 font-mono text-xs text-slate-800">
+                            {formatValue(t.expected)}
+                          </pre>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -389,7 +393,7 @@ function Exam() {
                           : "border-red-200 bg-red-50"
                       }`}
                     >
-                      <p className="flex items-baseline gap-2">
+                      <div className="flex items-baseline gap-2">
                         <span
                           className={`grid h-4 w-4 shrink-0 translate-y-0.5 place-items-center rounded-full text-[10px] font-bold text-white ${
                             t.passed ? "bg-green-600" : "bg-red-600"
@@ -397,10 +401,10 @@ function Exam() {
                         >
                           {t.passed ? "✓" : "✗"}
                         </span>
-                        <span className="overflow-x-auto whitespace-nowrap font-mono text-xs text-slate-600">
+                        <pre className="min-w-0 flex-1 whitespace-pre-wrap font-mono text-xs text-slate-600">
                           {callLabel(problem, t.test)}
-                        </span>
-                      </p>
+                        </pre>
+                      </div>
                       {!t.passed && (
                         <div className="mt-2 grid gap-2 font-mono text-xs sm:grid-cols-2">
                           <div>

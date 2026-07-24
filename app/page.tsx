@@ -67,7 +67,7 @@ export default function Home() {
             </h2>
             <p className="mt-1 text-sm text-slate-500">
               One question at a time — multiple answer styles across JS, React,
-              Tailwind, and more.
+              Postgres, Prisma, and more.
             </p>
           </Link>
           <Link

@@ -4,8 +4,8 @@ import {
   problems,
   categories,
   type Problem,
-  type TestCase,
 } from "@/lib/problems";
+import { callLabel } from "@/lib/exam-dispatch";
 import { formatValue } from "@/lib/runner";
 import { clampMinutes, minutesToSeconds } from "@/lib/time-attack";
 
@@ -74,6 +74,26 @@ const presets: { name: string; description: string; ids: number[] }[] = [
     description:
       "~2 hrs · easy to hard across JS and React, for shortlisted candidates",
     ids: [1, 6, 9, 12, 18, 20, 23, 28, 32],
+  },
+  {
+    name: "Postgres Basics",
+    description: "~35 min · SQL filters, joins, aggregates on PGlite",
+    ids: [34, 35, 36, 37],
+  },
+  {
+    name: "Prisma Modeling",
+    description: "~35 min · schema relations plus client query args",
+    ids: [40, 41, 43, 44],
+  },
+  {
+    name: "Data Layer Screen",
+    description: "~50 min · SQL + Prisma schema + client args",
+    ids: [34, 36, 39, 40, 41, 43],
+  },
+  {
+    name: "Junior Full Stack",
+    description: "~60 min · JS/React junior mix plus one SQL and one Prisma item",
+    ids: [1, 2, 6, 9, 12, 28, 34, 43],
   },
 ];
 
@@ -171,16 +191,6 @@ export default function AdminPage() {
   function loadSet(setIds: number[]) {
     setSelected(new Set(setIds));
     setCopied(false);
-  }
-
-  function callLabel(problem: Problem, t: TestCase): string {
-    if (problem.kind !== "react")
-      return `${problem.fnName}(${t.args.map((a) => JSON.stringify(a)).join(", ")})`;
-    const props = Object.entries((t.args[0] ?? {}) as Record<string, unknown>)
-      .map(([k, v]) => `${k}={${JSON.stringify(v)}}`)
-      .join(" ");
-    const clicks = t.clicks ? ` then click <${t.clickOn}> ×${t.clicks}` : "";
-    return `<${problem.fnName}${props ? " " + props : ""} />${clicks}`;
   }
 
   function toggle(id: number) {

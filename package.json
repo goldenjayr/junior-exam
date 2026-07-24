@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test lib/runner.test.ts lib/quiz/grade.test.ts lib/time-attack.test.ts lib/shuffle.test.ts"
+    "test": "node --test lib/runner.test.ts lib/quiz/grade.test.ts lib/time-attack.test.ts lib/shuffle.test.ts lib/sql-runner.test.ts lib/prisma-schema.test.ts"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-sql": "^6.10.0",
+    "@electric-sql/pglite": "^0.5.4",
     "@uiw/react-codemirror": "^4.25.11",
     "next": "16.2.10",
     "nodemailer": "^9.0.3",
