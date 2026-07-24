@@ -1070,6 +1070,74 @@ model User {
       },
     ],
   },
+  {
+    id: 43,
+    title: "Active Users Args",
+    category: "prisma",
+    kind: "prisma-client",
+    difficulty: "easy",
+    instructions:
+      "Return the arguments object for prisma.user.findMany(...) that selects active users.",
+    fnName: "findActiveUsersArgs",
+    starterCode: `function findActiveUsersArgs() {
+  // Return args for prisma.user.findMany(...)
+
+}`,
+    tests: [
+      {
+        args: [],
+        expected: { where: { active: true } },
+      },
+    ],
+  },
+  {
+    id: 44,
+    title: "Posts With Author",
+    category: "prisma",
+    kind: "prisma-client",
+    difficulty: "medium",
+    instructions:
+      "Return the arguments object for prisma.post.findMany(...) that selects published posts and includes each post's author.",
+    fnName: "findPublishedPostsArgs",
+    starterCode: `function findPublishedPostsArgs() {
+  // Return args for prisma.post.findMany(...)
+
+}`,
+    tests: [
+      {
+        args: [],
+        expected: {
+          where: { published: true },
+          include: { author: true },
+        },
+      },
+    ],
+  },
+  {
+    id: 45,
+    title: "Create Post Connect",
+    category: "prisma",
+    kind: "prisma-client",
+    difficulty: "medium",
+    instructions:
+      'Return the arguments object for prisma.post.create(...) that creates a post titled "Hi" and connects it to the author with id 1.',
+    fnName: "createPostArgs",
+    starterCode: `function createPostArgs() {
+  // Return args for prisma.post.create(...)
+
+}`,
+    tests: [
+      {
+        args: [],
+        expected: {
+          data: {
+            title: "Hi",
+            author: { connect: { id: 1 } },
+          },
+        },
+      },
+    ],
+  },
 ];
 
 export function parseProblemIds(param: string | null): number[] {

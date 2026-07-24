@@ -2,9 +2,12 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { problems, parseProblemIds, type Problem } from "@/lib/problems";
-import { runProblemSandboxed, formatValue, type RunResult } from "@/lib/runner";
-import { runReactProblem } from "@/lib/react-runner";
-import type { TestCase } from "@/lib/problems";
+import { formatValue, type RunResult } from "@/lib/runner";
+import {
+  callLabel,
+  editorLanguageFor,
+  runAny,
+} from "@/lib/exam-dispatch";
 import CodeEditor from "@/components/CodeEditor";
 import TimeAttackBar from "@/components/TimeAttackBar";
 import FreezeOverlay from "@/components/FreezeOverlay";
@@ -23,24 +26,6 @@ const statusBadge: Record<string, string> = {
   failed: "bg-amber-100 text-amber-700",
   error: "bg-red-100 text-red-700",
 };
-
-function runAny(problem: Problem, code: string): Promise<RunResult> {
-  return problem.kind === "react"
-    ? Promise.resolve(runReactProblem(problem, code))
-    : runProblemSandboxed(problem, code);
-}
-
-function callLabel(problem: Problem, t: TestCase): string {
-  if (problem.kind !== "react")
-    return `${problem.fnName}(${t.args.map((a) => formatValue(a)).join(", ")})`;
-  const props = Object.entries((t.args[0] ?? {}) as Record<string, unknown>)
-    .map(([k, v]) => `${k}={${formatValue(v)}}`)
-    .join(" ");
-  const clicks = t.clicks
-    ? ` then click <${t.clickOn}> ×${t.clicks}`
-    : "";
-  return `<${problem.fnName}${props ? " " + props : ""} />${clicks}`;
-}
 
 function Exam() {
   const searchParams = useSearchParams();
@@ -80,6 +65,7 @@ function Exam() {
     };
   });
   const [results, setResults] = useState<Record<number, RunResult>>({});
+  const [running, setRunning] = useState(false);
   const [applicantName, setApplicantName] = useState("");
   const [submitState, setSubmitState] = useState<
     "idle" | "sending" | "sent" | "error"
@@ -273,6 +259,11 @@ function Exam() {
               <div className="mb-2 flex items-center justify-between gap-4">
                 <h3 className="text-sm font-bold">Your Code</h3>
                 <div className="flex gap-2">
+                  {running && problem.kind === "sql" && (
+                    <span className="self-center text-xs text-slate-500">
+                      Starting Postgres…
+                    </span>
+                  )}
                   <button
                     type="button"
                     disabled={frozen}
@@ -293,10 +284,15 @@ function Exam() {
                   </button>
                   <button
                     type="button"
-                    disabled={frozen}
+                    disabled={frozen || running}
                     onClick={async () => {
-                      const result = await runAny(problem, code);
-                      setResults((r) => ({ ...r, [problem.id]: result }));
+                      setRunning(true);
+                      try {
+                        const result = await runAny(problem, code);
+                        setResults((r) => ({ ...r, [problem.id]: result }));
+                      } finally {
+                        setRunning(false);
+                      }
                     }}
                     className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                   >
@@ -307,6 +303,7 @@ function Exam() {
               <CodeEditor
                 value={code}
                 readOnly={frozen}
+                language={editorLanguageFor(problem)}
                 onChange={(value) =>
                   setAnswers((a) => ({ ...a, [problem.id]: value }))
                 }

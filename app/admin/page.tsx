@@ -4,8 +4,8 @@ import {
   problems,
   categories,
   type Problem,
-  type TestCase,
 } from "@/lib/problems";
+import { callLabel } from "@/lib/exam-dispatch";
 import { formatValue } from "@/lib/runner";
 import { clampMinutes, minutesToSeconds } from "@/lib/time-attack";
 
@@ -171,16 +171,6 @@ export default function AdminPage() {
   function loadSet(setIds: number[]) {
     setSelected(new Set(setIds));
     setCopied(false);
-  }
-
-  function callLabel(problem: Problem, t: TestCase): string {
-    if (problem.kind !== "react")
-      return `${problem.fnName}(${t.args.map((a) => JSON.stringify(a)).join(", ")})`;
-    const props = Object.entries((t.args[0] ?? {}) as Record<string, unknown>)
-      .map(([k, v]) => `${k}={${JSON.stringify(v)}}`)
-      .join(" ");
-    const clicks = t.clicks ? ` then click <${t.clickOn}> ×${t.clicks}` : "";
-    return `<${problem.fnName}${props ? " " + props : ""} />${clicks}`;
   }
 
   function toggle(id: number) {

@@ -32,6 +32,9 @@ const solutions: Record<number, string> = {
   25: `function runningTotal(ns) { let sum = 0; return ns.map(n => sum += n); }`,
   26: `function fibonacci(n) { const out = []; let [a, b] = [0, 1]; for (let i = 0; i < n; i++) { out.push(a); [a, b] = [b, a + b]; } return out; }`,
   27: `function unslug(slug) { return slug.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" "); }`,
+  43: `function findActiveUsersArgs() { return { where: { active: true } }; }`,
+  44: `function findPublishedPostsArgs() { return { where: { published: true }, include: { author: true } }; }`,
+  45: `function createPostArgs() { return { data: { title: "Hi", author: { connect: { id: 1 } } } }; }`,
 };
 
 function isClassicJsProblem(p: { kind?: string }) {
@@ -83,6 +86,41 @@ test("wrong values still fail", () => {
 test("parseProblemIds filters invalid ids", () => {
   assert.deepStrictEqual(parseProblemIds("1,2,999,abc,2"), [1, 2]);
   assert.deepStrictEqual(parseProblemIds(null), []);
+});
+
+test("includes Prisma client problems 43–45", () => {
+  assert.deepStrictEqual(
+    problems.slice(-3).map(({ id, kind, category }) => ({ id, kind, category })),
+    [
+      { id: 43, kind: "prisma-client", category: "prisma" },
+      { id: 44, kind: "prisma-client", category: "prisma" },
+      { id: 45, kind: "prisma-client", category: "prisma" },
+    ]
+  );
+});
+
+test("shared exam dispatch selects languages, labels, and runners", async () => {
+  const { callLabel, editorLanguageFor, runAny } = await import(
+    "./exam-dispatch.ts"
+  );
+  const jsProblem = problems[0];
+  const sqlProblem = problems.find((p) => p.kind === "sql")!;
+  const schemaProblem = problems.find((p) => p.kind === "prisma-schema")!;
+  const prismaClientProblem = problems.find((p) => p.id === 43)!;
+
+  assert.strictEqual(editorLanguageFor(jsProblem), "javascript");
+  assert.strictEqual(editorLanguageFor(sqlProblem), "sql");
+  assert.strictEqual(editorLanguageFor(schemaProblem), "prisma");
+  assert.strictEqual(callLabel(sqlProblem, sqlProblem.tests[0]), "SQL query → rows");
+  assert.strictEqual(
+    callLabel(schemaProblem, schemaProblem.tests[0]),
+    "schema structure"
+  );
+  assert.strictEqual(callLabel(jsProblem, jsProblem.tests[2]), "getActiveUsers([])");
+  assert.strictEqual(
+    (await runAny(prismaClientProblem, solutions[43])).status,
+    "passed"
+  );
 });
 
 test("captures console output per test", () => {

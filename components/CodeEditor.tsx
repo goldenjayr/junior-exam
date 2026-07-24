@@ -4,8 +4,7 @@ import { useMemo } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { sql, PostgreSQL } from "@codemirror/lang-sql";
-
-export type EditorLanguage = "javascript" | "sql" | "prisma";
+import type { EditorLanguage } from "@/lib/exam-dispatch";
 
 export default function CodeEditor({
   value,
