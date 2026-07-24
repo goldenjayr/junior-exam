@@ -724,6 +724,223 @@ export const problems: Problem[] = [
       { args: [{}], clickOn: "button", clicks: 2, expected: "Toggle Visible" },
     ],
   },
+  {
+    id: 34,
+    title: "Active Users",
+    category: "postgresql",
+    kind: "sql",
+    difficulty: "easy",
+    instructions:
+      "Write a query that returns the id, name, and active status of active users. Order the rows by id.",
+    fnName: "query",
+    starterCode: `-- SELECT active users
+`,
+    tests: [
+      {
+        args: [],
+        setupSql: `
+          CREATE TABLE users (id INT PRIMARY KEY, name TEXT, active BOOLEAN);
+          INSERT INTO users VALUES
+            (1, 'John', true),
+            (2, 'Maria', false),
+            (3, 'Peter', true);
+        `,
+        expected: [
+          { id: 1, name: "John", active: true },
+          { id: 3, name: "Peter", active: true },
+        ],
+      },
+      {
+        args: [],
+        setupSql: `
+          CREATE TABLE users (id INT PRIMARY KEY, name TEXT, active BOOLEAN);
+          INSERT INTO users VALUES
+            (4, 'Angela', false),
+            (7, 'Noah', true),
+            (2, 'Lina', true);
+        `,
+        expected: [
+          { id: 2, name: "Lina", active: true },
+          { id: 7, name: "Noah", active: true },
+        ],
+      },
+    ],
+  },
+  {
+    id: 35,
+    title: "Orders for Customer",
+    category: "postgresql",
+    kind: "sql",
+    difficulty: "easy",
+    instructions:
+      "Write a query that returns the id and total of every order placed by the customer named Maria. Order the rows by order id.",
+    fnName: "query",
+    starterCode: `-- SELECT Maria's orders
+`,
+    tests: [
+      {
+        args: [],
+        setupSql: `
+          CREATE TABLE customers (id INT PRIMARY KEY, name TEXT);
+          CREATE TABLE orders (
+            id INT PRIMARY KEY,
+            customer_id INT REFERENCES customers(id),
+            total INT
+          );
+          INSERT INTO customers VALUES (1, 'John'), (2, 'Maria'), (3, 'Peter');
+          INSERT INTO orders VALUES
+            (10, 2, 75),
+            (11, 1, 40),
+            (12, 2, 120);
+        `,
+        expected: [
+          { id: 10, total: 75 },
+          { id: 12, total: 120 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 36,
+    title: "Count by Status",
+    category: "postgresql",
+    kind: "sql",
+    difficulty: "medium",
+    instructions:
+      "Write a query that groups tickets by status and returns each status with its count as an integer column named count. Order the rows by status.",
+    fnName: "query",
+    starterCode: `-- Count tickets by status
+`,
+    tests: [
+      {
+        args: [],
+        setupSql: `
+          CREATE TABLE tickets (id INT PRIMARY KEY, status TEXT);
+          INSERT INTO tickets VALUES
+            (1, 'closed'),
+            (2, 'open'),
+            (3, 'open'),
+            (4, 'pending');
+        `,
+        expected: [
+          { status: "closed", count: 1 },
+          { status: "open", count: 2 },
+          { status: "pending", count: 1 },
+        ],
+      },
+      {
+        args: [],
+        setupSql: `
+          CREATE TABLE tickets (id INT PRIMARY KEY, status TEXT);
+          INSERT INTO tickets VALUES
+            (10, 'closed'),
+            (11, 'closed'),
+            (12, 'closed'),
+            (13, 'open');
+        `,
+        expected: [
+          { status: "closed", count: 3 },
+          { status: "open", count: 1 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 37,
+    title: "Recent Posts",
+    category: "postgresql",
+    kind: "sql",
+    difficulty: "medium",
+    instructions:
+      "Write a query that returns the id, title, and published_at date of posts published on or after 2024-01-01. Order newest posts first.",
+    fnName: "query",
+    starterCode: `-- SELECT recent posts
+`,
+    tests: [
+      {
+        args: [],
+        setupSql: `
+          CREATE TABLE posts (id INT PRIMARY KEY, title TEXT, published_at DATE);
+          INSERT INTO posts VALUES
+            (1, 'Old News', '2023-12-31'),
+            (2, 'New Year', '2024-01-01'),
+            (3, 'Spring Update', '2024-04-15');
+        `,
+        expected: [
+          {
+            id: 3,
+            title: "Spring Update",
+            published_at: new Date("2024-04-15T00:00:00.000Z"),
+          },
+          {
+            id: 2,
+            title: "New Year",
+            published_at: new Date("2024-01-01T00:00:00.000Z"),
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 38,
+    title: "Insert Returning",
+    category: "postgresql",
+    kind: "sql",
+    difficulty: "medium",
+    instructions:
+      "Insert a product with id 1, name Mug, and price 9.5. Return the inserted row's id, name, and price.",
+    fnName: "query",
+    starterCode: `-- INSERT a product and RETURN it
+`,
+    tests: [
+      {
+        args: [],
+        setupSql: `
+          CREATE TABLE products (
+            id SERIAL PRIMARY KEY,
+            name TEXT,
+            price NUMERIC
+          );
+        `,
+        expected: [{ id: 1, name: "Mug", price: "9.5" }],
+      },
+    ],
+  },
+  {
+    id: 39,
+    title: "Join and Filter",
+    category: "postgresql",
+    kind: "sql",
+    difficulty: "medium",
+    instructions:
+      "Write a query that returns each customer name and matching order id for orders with a total greater than 100. Name the order id column order_id and order the rows by order id.",
+    fnName: "query",
+    starterCode: `-- Join customers and orders
+`,
+    tests: [
+      {
+        args: [],
+        setupSql: `
+          CREATE TABLE customers (id INT PRIMARY KEY, name TEXT);
+          CREATE TABLE orders (
+            id INT PRIMARY KEY,
+            customer_id INT REFERENCES customers(id),
+            total INT
+          );
+          INSERT INTO customers VALUES (1, 'John'), (2, 'Maria'), (3, 'Peter');
+          INSERT INTO orders VALUES
+            (20, 1, 90),
+            (21, 2, 150),
+            (22, 1, 220),
+            (23, 3, 100);
+        `,
+        expected: [
+          { name: "Maria", order_id: 21 },
+          { name: "John", order_id: 22 },
+        ],
+      },
+    ],
+  },
 ];
 
 export function parseProblemIds(param: string | null): number[] {

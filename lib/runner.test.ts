@@ -34,15 +34,19 @@ const solutions: Record<number, string> = {
   27: `function unslug(slug) { return slug.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" "); }`,
 };
 
+function isClassicJsProblem(p: { kind?: string }) {
+  return p.kind === undefined || p.kind === "prisma-client";
+}
+
 test("every problem has a solution that passes all its tests", () => {
-  for (const p of problems.filter((p) => p.kind !== "react")) {
+  for (const p of problems.filter(isClassicJsProblem)) {
     const result = runProblem(p, solutions[p.id]);
     assert.strictEqual(result.status, "passed", `${p.title}: ${JSON.stringify(result)}`);
   }
 });
 
 test("starter code fails (returns undefined)", () => {
-  for (const p of problems.filter((p) => p.kind !== "react")) {
+  for (const p of problems.filter(isClassicJsProblem)) {
     assert.notStrictEqual(runProblem(p, p.starterCode).status, "passed", p.title);
   }
 });
