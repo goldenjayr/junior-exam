@@ -39,6 +39,7 @@ export const categories: Problem["category"][] = [
   "react",
   "postgresql",
   "prisma",
+  "python",
 ];
 
 export const problems: Problem[] = [
@@ -1137,6 +1138,149 @@ model User {
           },
         },
       },
+    ],
+  },
+  {
+    id: 46,
+    title: "Filter Active Users",
+    category: "python",
+    kind: "python",
+    difficulty: "easy",
+    instructions:
+      "Complete get_active_users so it returns only users whose active property is true.",
+    fnName: "get_active_users",
+    starterCode: `def get_active_users(users):
+    # Write your solution here
+    pass`,
+    tests: [
+      {
+        args: [
+          [
+            { id: 1, name: "John", active: true },
+            { id: 2, name: "Maria", active: false },
+            { id: 3, name: "Peter", active: true },
+          ],
+        ],
+        expected: [
+          { id: 1, name: "John", active: true },
+          { id: 3, name: "Peter", active: true },
+        ],
+      },
+      {
+        args: [[{ id: 1, name: "Solo", active: false }]],
+        expected: [],
+      },
+      { args: [[]], expected: [] },
+    ],
+  },
+  {
+    id: 47,
+    title: "Word Lengths",
+    category: "python",
+    kind: "python",
+    difficulty: "easy",
+    instructions:
+      "Complete word_lengths so it returns a list containing the length of each word.",
+    fnName: "word_lengths",
+    starterCode: `def word_lengths(words):
+    # Write your solution here
+    pass`,
+    tests: [
+      { args: [["hi", "world"]], expected: [2, 5] },
+      { args: [[]], expected: [] },
+    ],
+  },
+  {
+    id: 48,
+    title: "Group by Category",
+    category: "python",
+    kind: "python",
+    difficulty: "medium",
+    instructions:
+      "Complete group_by_category so it returns a dict mapping each category to a list of product names in that category.",
+    fnName: "group_by_category",
+    starterCode: `def group_by_category(products):
+    # Write your solution here
+    pass`,
+    tests: [
+      {
+        args: [
+          [
+            { name: "Laptop", category: "Electronics" },
+            { name: "Shirt", category: "Clothing" },
+            { name: "Phone", category: "Electronics" },
+          ],
+        ],
+        expected: {
+          Electronics: ["Laptop", "Phone"],
+          Clothing: ["Shirt"],
+        },
+      },
+      { args: [[]], expected: {} },
+    ],
+  },
+  {
+    id: 49,
+    title: "Is Palindrome",
+    category: "python",
+    kind: "python",
+    difficulty: "medium",
+    instructions:
+      "Complete is_palindrome so it ignores non-alphanumeric characters and case when checking whether text is a palindrome.",
+    fnName: "is_palindrome",
+    starterCode: `def is_palindrome(text):
+    # Write your solution here
+    pass`,
+    tests: [
+      { args: ["A man, a plan, a canal: Panama"], expected: true },
+      { args: ["hello"], expected: false },
+    ],
+  },
+  {
+    id: 50,
+    title: "Top N Frequencies",
+    category: "python",
+    kind: "python",
+    difficulty: "medium",
+    instructions:
+      "Complete top_n_frequencies so it returns the top n [word, count] pairs ordered by count descending, then word ascending for ties.",
+    fnName: "top_n_frequencies",
+    starterCode: `def top_n_frequencies(words, n):
+    # Write your solution here
+    pass`,
+    tests: [
+      {
+        args: [["a", "b", "a", "c", "b", "a"], 2],
+        expected: [
+          ["a", 3],
+          ["b", 2],
+        ],
+      },
+      {
+        args: [["pear", "apple", "pear", "apple", "banana"], 3],
+        expected: [
+          ["apple", 2],
+          ["pear", 2],
+          ["banana", 1],
+        ],
+      },
+    ],
+  },
+  {
+    id: 51,
+    title: "Flatten Nested Lists",
+    category: "python",
+    kind: "python",
+    difficulty: "hard",
+    instructions:
+      "Complete flatten so it recursively flattens nested lists into a flat list of integers.",
+    fnName: "flatten",
+    starterCode: `def flatten(values):
+    # Write your solution here
+    pass`,
+    tests: [
+      { args: [[[1, [2, 3]], 4]], expected: [1, 2, 3, 4] },
+      { args: [[]], expected: [] },
     ],
   },
 ];

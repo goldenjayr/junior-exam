@@ -90,7 +90,9 @@ test("parseProblemIds filters invalid ids", () => {
 
 test("includes Prisma client problems 43–45", () => {
   assert.deepStrictEqual(
-    problems.slice(-3).map(({ id, kind, category }) => ({ id, kind, category })),
+    problems
+      .filter((p) => p.kind === "prisma-client")
+      .map(({ id, kind, category }) => ({ id, kind, category })),
     [
       { id: 43, kind: "prisma-client", category: "prisma" },
       { id: 44, kind: "prisma-client", category: "prisma" },
@@ -107,19 +109,12 @@ test("shared exam dispatch selects languages, labels, and runners", async () => 
   const sqlProblem = problems.find((p) => p.kind === "sql")!;
   const schemaProblem = problems.find((p) => p.kind === "prisma-schema")!;
   const prismaClientProblem = problems.find((p) => p.id === 43)!;
+  const pythonProblem = problems.find((p) => p.kind === "python")!;
 
   assert.strictEqual(editorLanguageFor(jsProblem), "javascript");
   assert.strictEqual(editorLanguageFor(sqlProblem), "sql");
   assert.strictEqual(editorLanguageFor(schemaProblem), "prisma");
-  assert.strictEqual(
-    editorLanguageFor({
-      ...problems[0],
-      kind: "python",
-      category: "python",
-      fnName: "get_active_users",
-    }),
-    "python"
-  );
+  assert.strictEqual(editorLanguageFor(pythonProblem), "python");
   assert.strictEqual(callLabel(sqlProblem, sqlProblem.tests[0]), "SQL query → rows");
   assert.strictEqual(
     callLabel(schemaProblem, schemaProblem.tests[0]),
@@ -128,6 +123,17 @@ test("shared exam dispatch selects languages, labels, and runners", async () => 
   assert.strictEqual(callLabel(jsProblem, jsProblem.tests[2]), "getActiveUsers([])");
   assert.strictEqual(
     (await runAny(prismaClientProblem, solutions[43])).status,
+    "passed"
+  );
+  assert.strictEqual(
+    (
+      await runAny(
+        pythonProblem,
+        `def get_active_users(users):
+    return [u for u in users if u["active"]]
+`
+      )
+    ).status,
     "passed"
   );
 });

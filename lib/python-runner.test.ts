@@ -1,7 +1,41 @@
 import assert from "node:assert";
 import test from "node:test";
-import type { Problem } from "./problems.ts";
+import { problems, type Problem } from "./problems.ts";
 import { runPythonProblem } from "./python-runner.ts";
+
+const pythonSolutions: Record<number, string> = {
+  46: `def get_active_users(users):
+    return [u for u in users if u["active"]]
+`,
+  47: `def word_lengths(words):
+    return [len(w) for w in words]
+`,
+  48: `def group_by_category(products):
+    g = {}
+    for p in products:
+        g.setdefault(p["category"], []).append(p["name"])
+    return g
+`,
+  49: `def is_palindrome(text):
+    s = "".join(c.lower() for c in text if c.isalnum())
+    return s == s[::-1]
+`,
+  50: `def top_n_frequencies(words, n):
+    from collections import Counter
+    counts = Counter(words)
+    ranked = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    return [[w, c] for w, c in ranked[:n]]
+`,
+  51: `def flatten(values):
+    out = []
+    for v in values:
+        if isinstance(v, list):
+            out.extend(flatten(v))
+        else:
+            out.append(v)
+    return out
+`,
+};
 
 const filterActive: Problem = {
   id: 9001,
@@ -113,4 +147,25 @@ def get_active_users(users):
   const r = await runPythonProblem(filterActive, code);
   assert.strictEqual(r.status, "failed");
   assert.match(r.tests[0].error ?? "", /JSON-friendly/);
+});
+
+test("includes Python problems 46–51", () => {
+  assert.deepStrictEqual(
+    problems.filter((p) => p.kind === "python").map((p) => p.id),
+    [46, 47, 48, 49, 50, 51]
+  );
+});
+
+test("every python problem solution passes", async () => {
+  for (const p of problems.filter((x) => x.kind === "python")) {
+    const r = await runPythonProblem(p, pythonSolutions[p.id]);
+    assert.strictEqual(r.status, "passed", `${p.title}: ${JSON.stringify(r)}`);
+  }
+});
+
+test("python starter codes do not pass", async () => {
+  for (const p of problems.filter((x) => x.kind === "python")) {
+    const r = await runPythonProblem(p, p.starterCode);
+    assert.notStrictEqual(r.status, "passed", p.title);
+  }
 });
