@@ -67,7 +67,7 @@ export default function Home() {
             </h2>
             <p className="mt-1 text-sm text-slate-500">
               One question at a time — multiple answer styles across JS, React,
-              Postgres, Prisma, and more.
+              Postgres, Prisma, Python, and more.
             </p>
           </Link>
           <Link

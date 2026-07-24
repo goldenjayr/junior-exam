@@ -63,6 +63,13 @@ export const quizPresets: QuizPreset[] = [
     suggestedMinutes: 15,
   },
   {
+    name: "Python Essentials",
+    description:
+      "Core Python types, control flow, and list/dict interview idioms.",
+    ids: [271, 272, 273, 274, 276, 279, 281, 282, 284, 286, 288, 290, 293],
+    suggestedMinutes: 15,
+  },
+  {
     name: "Data Layer Blitz",
     description:
       "Mixed Postgres + Prisma for a short data-layer screen.",
@@ -72,7 +79,7 @@ export const quizPresets: QuizPreset[] = [
   {
     name: "Full Stack Blitz",
     description:
-      "Mixed junior topics across JS, TS, React, HTML, CSS, Tailwind, Node, PostgreSQL, and Prisma.",
+      "Mixed junior topics across JS, TS, React, HTML, CSS, Tailwind, Node, PostgreSQL, Prisma, and Python.",
     ids: [
       1, 4, 9, 17, 23, // js
       31, 32, 39, 47, // ts
@@ -82,6 +89,7 @@ export const quizPresets: QuizPreset[] = [
       181, 184, 192, // css
       151, 154, 167, // node
       211, 214, 241, 244, // postgres, prisma
+      271, 274, 281, // python
     ],
     suggestedMinutes: 25,
   },
@@ -89,13 +97,13 @@ export const quizPresets: QuizPreset[] = [
     name: "Time Attack 10",
     description:
       "Ten varied easy/medium items meant to pair with a tight countdown.",
-    ids: [1, 32, 62, 92, 122, 152, 211, 96, 181, 241],
+    ids: [1, 32, 62, 92, 122, 152, 211, 271, 181, 241],
     suggestedMinutes: 10,
   },
   {
     name: "Junior Knowledge Full",
     description:
-      "Broad bank sweep: first 12 questions from each topic for a longer knowledge check.",
+      "Broad bank sweep: first 12 questions from each topic, including Python, for a longer knowledge check.",
     ids: [
       // javascript 1-12
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
@@ -115,6 +123,8 @@ export const quizPresets: QuizPreset[] = [
       211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222,
       // prisma 241-252
       241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252,
+      // python 271-282
+      271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282,
     ],
     suggestedMinutes: 90,
   },
