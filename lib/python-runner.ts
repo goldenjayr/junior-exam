@@ -58,14 +58,18 @@ function isJsonFriendly(value: unknown, seen = new Set<object>()): boolean {
   if (typeof value !== "object") return false;
   if (seen.has(value)) return false;
   seen.add(value);
-  if (Array.isArray(value))
-    return value.every((item) => isJsonFriendly(item, seen));
-  if (
-    Object.getPrototypeOf(value) !== Object.prototype &&
-    Object.getPrototypeOf(value) !== null
-  )
-    return false;
-  return Object.values(value).every((item) => isJsonFriendly(item, seen));
+  try {
+    if (Array.isArray(value))
+      return value.every((item) => isJsonFriendly(item, seen));
+    if (
+      Object.getPrototypeOf(value) !== Object.prototype &&
+      Object.getPrototypeOf(value) !== null
+    )
+      return false;
+    return Object.values(value).every((item) => isJsonFriendly(item, seen));
+  } finally {
+    seen.delete(value);
+  }
 }
 
 function normalizeReturnValue(result: unknown): unknown {
@@ -118,9 +122,15 @@ export async function gradeWithPyodide(
     };
   }
 
-  const fn = pyodide.globals.get(problem.fnName) as (
-    ...args: unknown[]
-  ) => unknown;
+  const fn = pyodide.globals.get(problem.fnName);
+  if (typeof fn !== "function") {
+    destroyProxy(fn);
+    return {
+      status: "error",
+      tests: [],
+      error: `${problem.fnName} is not callable.`,
+    };
+  }
   const tests: TestResult[] = [];
 
   try {
