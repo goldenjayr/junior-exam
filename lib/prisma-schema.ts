@@ -93,6 +93,39 @@ function normalizeAttributeArgs(args: string): string {
   return normalized;
 }
 
+function normalizeRelationArgs(args: string): string {
+  const parts: string[] = [];
+  let start = 0;
+  let quote = "";
+  let depth = 0;
+
+  for (let index = 0; index < args.length; index++) {
+    const character = args[index];
+    if (quote) {
+      if (character === "\\" && index + 1 < args.length) index++;
+      else if (character === quote) quote = "";
+    } else if (character === '"' || character === "'") {
+      quote = character;
+    } else if ("([{".includes(character)) {
+      depth++;
+    } else if (")]}".includes(character)) {
+      depth--;
+    } else if (character === "," && depth === 0) {
+      parts.push(normalizeAttributeArgs(args.slice(start, index)));
+      start = index + 1;
+    }
+  }
+  parts.push(normalizeAttributeArgs(args.slice(start)));
+
+  const positional = parts.filter((part) => !/^[A-Za-z_]\w*:/.test(part));
+  const named = parts
+    .filter((part) => /^[A-Za-z_]\w*:/.test(part))
+    .sort((left, right) =>
+      left.slice(0, left.indexOf(":")).localeCompare(right.slice(0, right.indexOf(":")))
+    );
+  return [...positional, ...named].join(",");
+}
+
 function parseAttribute(source: string, start: number): [string, number] {
   const match = /^@([A-Za-z_]\w*)/.exec(source.slice(start));
   if (!match) throw new Error("Invalid Prisma schema field attribute");
@@ -116,7 +149,7 @@ function parseAttribute(source: string, start: number): [string, number] {
   }
   if (name === "relation")
     return [
-      args ? `relation(${normalizeAttributeArgs(args)})` : "relation",
+      args ? `relation(${normalizeRelationArgs(args)})` : "relation",
       index,
     ];
   throw new Error(`Unsupported Prisma field attribute: @${name}`);

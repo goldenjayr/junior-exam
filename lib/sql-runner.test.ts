@@ -35,6 +35,27 @@ test("correct SELECT passes", async () => {
   assert.equal(r.status, "passed", JSON.stringify(r));
 });
 
+test("normalizes trailing zeros in decimal row values", async () => {
+  const numericValue: Problem = {
+    ...filterActive,
+    id: 9003,
+    title: "Numeric normalization fixture",
+    tests: [
+      {
+        args: [],
+        expected: [{ price: "9.5" }],
+      },
+    ],
+  };
+
+  const result = await runSqlProblem(
+    numericValue,
+    "SELECT 9.50::numeric(10, 2) AS price;"
+  );
+
+  assert.equal(result.status, "passed", JSON.stringify(result));
+});
+
 test("wrong SELECT fails", async () => {
   const r = await runSqlProblem(filterActive, "SELECT id, name, active FROM users;");
   assert.equal(r.status, "failed");

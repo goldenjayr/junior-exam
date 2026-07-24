@@ -28,7 +28,15 @@ function normalizeRows(rows: Record<string, unknown>[]): Record<string, unknown>
   return rows.map((row) => {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(row)) {
-      out[k] = typeof v === "bigint" ? Number(v) : v;
+      if (typeof v === "bigint") {
+        out[k] = Number(v);
+      } else if (typeof v === "string" && /^[+-]?\d+\.\d+$/.test(v)) {
+        const [integer, fraction] = v.split(".");
+        const trimmedFraction = fraction.replace(/0+$/, "");
+        out[k] = trimmedFraction ? `${integer}.${trimmedFraction}` : integer;
+      } else {
+        out[k] = v;
+      }
     }
     return out;
   });

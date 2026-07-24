@@ -223,6 +223,27 @@ test("problem 41 rejects bare or incorrect relation arguments", () => {
   }
 });
 
+test("problem 41 accepts relation named arguments in any order", () => {
+  const problem = problems.find((candidate) => candidate.id === 41);
+  assert.ok(problem);
+
+  const result = runPrismaSchemaProblem(
+    problem,
+    `model User {
+      id Int @id
+      posts Post[]
+    }
+
+    model Post {
+      id Int @id
+      authorId Int
+      author User @relation(references: [id], fields: [authorId])
+    }`
+  );
+
+  assert.equal(result.status, "passed", JSON.stringify(result));
+});
+
 const solutions: Record<number, string> = {
   40: `model User {
     id Int @id
