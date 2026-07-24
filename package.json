@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/copy-pglite-assets.mjs && next dev",
+    "build": "node scripts/copy-pglite-assets.mjs && next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test lib/runner.test.ts lib/quiz/grade.test.ts lib/time-attack.test.ts lib/shuffle.test.ts lib/sql-runner.test.ts lib/prisma-schema.test.ts"
+    "test": "node --test lib/runner.test.ts lib/quiz/grade.test.ts lib/time-attack.test.ts lib/shuffle.test.ts lib/sql-runner.test.ts lib/prisma-schema.test.ts",
+    "postinstall": "node scripts/copy-pglite-assets.mjs"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",

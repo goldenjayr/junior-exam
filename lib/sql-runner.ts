@@ -42,15 +42,48 @@ function normalizeRows(rows: Record<string, unknown>[]): Record<string, unknown>
   });
 }
 
+function isolationError(): Error {
+  return new Error(
+    "Postgres (PGlite) needs SharedArrayBuffer. This page is not cross-origin isolated — deploy with Cross-Origin-Opener-Policy: same-origin and Cross-Origin-Embedder-Policy: require-corp (localhost works without them)."
+  );
+}
+
+async function createPglite() {
+  // Node tests: package loader resolves wasm beside node_modules.
+  if (typeof window === "undefined") {
+    const { PGlite } = await import("@electric-sql/pglite");
+    return PGlite.create();
+  }
+
+  // Browser/production: Next/Turbopack mangles PGlite's Emscripten glue
+  // ("instantiateWasm is not a function"). Load the published ESM build
+  // from /public so import.meta.url resolves wasm/data correctly.
+  // Variable URL + webpackIgnore keeps the bundler from rewriting the import.
+  const pgliteUrl = `${window.location.origin}/pglite/index.js`;
+  const { PGlite } = await import(
+    /* webpackIgnore: true */
+    /* @vite-ignore */
+    pgliteUrl
+  );
+  return PGlite.create();
+}
+
 export async function runSqlProblem(
   problem: Problem,
   code: string
 ): Promise<RunResult> {
-  const { PGlite } = await import("@electric-sql/pglite");
+  // Fail fast on staging/prod misconfig instead of hanging on "Starting Postgres…".
+  if (
+    typeof window !== "undefined" &&
+    typeof SharedArrayBuffer === "undefined"
+  ) {
+    return { status: "error", tests: [], error: isolationError().message };
+  }
+
   const tests: TestResult[] = [];
 
   for (const testCase of problem.tests) {
-    const db = new PGlite();
+    const db = await createPglite();
     try {
       if (testCase.setupSql) await db.exec(testCase.setupSql);
       const result = await db.query(code);
