@@ -225,3 +225,12 @@ test("registers the complete PostgreSQL question bank", () => {
   assert.strictEqual(questions[0]?.id, 211);
   assert.strictEqual(questions.at(-1)?.id, 235);
 });
+
+test("registers the complete Prisma question bank", () => {
+  const questions = quizQuestions.filter((question) => question.topic === "prisma");
+
+  assert.ok(quizTopics.includes("prisma"));
+  assert.strictEqual(questions.length, 25);
+  assert.strictEqual(questions[0]?.id, 241);
+  assert.strictEqual(questions.at(-1)?.id, 265);
+});
