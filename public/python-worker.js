@@ -81,18 +81,21 @@ function normalizeReturnValue(result) {
 self.onmessage = async (event) => {
   const { problem, code } = event.data;
   const logs = [];
+  let globals;
+  let builtins;
   try {
     const pyodide = await pyodideReady;
     pyodide.setStdout?.({ batched: (s) => logs.push(s) });
-    if (pyodide.globals.has(problem.fnName))
-      pyodide.globals.delete(problem.fnName);
+    globals = pyodide.toPy({});
+    builtins = pyodide.globals.get("__builtins__");
+    globals.set("__builtins__", builtins);
     let definitionResult;
     try {
-      definitionResult = await pyodide.runPythonAsync(code);
+      definitionResult = await pyodide.runPythonAsync(code, { globals });
     } finally {
       destroyProxy(definitionResult);
     }
-    if (!pyodide.globals.has(problem.fnName)) {
+    if (!globals.has(problem.fnName)) {
       self.postMessage({
         status: "error",
         tests: [],
@@ -100,7 +103,7 @@ self.onmessage = async (event) => {
       });
       return;
     }
-    const fn = pyodide.globals.get(problem.fnName);
+    const fn = globals.get(problem.fnName);
     if (typeof fn !== "function") {
       destroyProxy(fn);
       self.postMessage({
@@ -153,5 +156,8 @@ self.onmessage = async (event) => {
       tests: [],
       error: error instanceof Error ? error.message : String(error),
     });
+  } finally {
+    destroyProxy(builtins);
+    destroyProxy(globals);
   }
 };

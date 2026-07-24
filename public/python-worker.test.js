@@ -46,21 +46,31 @@ async function createWorker(pyodide) {
 
 function createPyodide(definitions) {
   const counters = {};
-  const values = new Map();
-  return {
-    counters,
-    values,
-    globals: {
+  const createGlobals = () => {
+    const values = new Map();
+    return {
       has: (name) => values.has(name),
       get: (name) => values.get(name),
-      delete: (name) => values.delete(name),
+      set: (name, value) => values.set(name, value),
+      destroy: () => {
+        counters.globals = (counters.globals ?? 0) + 1;
+      },
+    };
+  };
+  return {
+    counters,
+    globals: {
+      get: () => ({}),
     },
     setStdout() {},
-    runPythonAsync: async (code) => {
-      definitions(code, values, counters);
+    runPythonAsync: async (code, { globals }) => {
+      definitions(code, globals, counters);
       return proxy(undefined, counters, "definition");
     },
-    toPy: (value) => proxy(value, counters, "arg"),
+    toPy: (value) =>
+      value && typeof value === "object" && !Array.isArray(value)
+        ? createGlobals()
+        : proxy(value, counters, "arg"),
   };
 }
 
@@ -69,10 +79,10 @@ const problem = {
   tests: [{ args: [1], expected: 1 }],
 };
 
-test("worker clears stale functions and reports missing definitions", async () => {
-  const pyodide = createPyodide((code, values, counters) => {
+test("worker isolates submissions and reports missing definitions", async () => {
+  const pyodide = createPyodide((code, globals, counters) => {
     if (code === "define")
-      values.set(
+      globals.set(
         "answer",
         Object.assign(
           () => proxy(1, counters, "result"),
@@ -94,8 +104,8 @@ test("worker clears stale functions and reports missing definitions", async () =
 });
 
 test("worker rejects non-callables as a top-level error", async () => {
-  const pyodide = createPyodide((_code, values, counters) => {
-    values.set("answer", proxy(42, counters, "fn"));
+  const pyodide = createPyodide((_code, globals, counters) => {
+    globals.set("answer", proxy(42, counters, "fn"));
   });
   const worker = await createWorker(pyodide);
 
@@ -111,8 +121,8 @@ test("worker rejects non-callables as a top-level error", async () => {
 
 test("worker rejects values that JSON.stringify would silently change", async () => {
   for (const invalid of [new Set([1]), Number.POSITIVE_INFINITY]) {
-    const pyodide = createPyodide((_code, values, counters) => {
-      values.set(
+    const pyodide = createPyodide((_code, globals, counters) => {
+      globals.set(
         "answer",
         Object.assign(
           () => proxy(invalid, counters, "result"),
@@ -129,8 +139,8 @@ test("worker rejects values that JSON.stringify would silently change", async ()
 });
 
 test("worker destroys definition, function, argument, and result proxies", async () => {
-  const pyodide = createPyodide((_code, values, counters) => {
-    values.set(
+  const pyodide = createPyodide((_code, globals, counters) => {
+    globals.set(
       "answer",
       Object.assign(
         () => proxy(1, counters, "result"),
@@ -146,5 +156,6 @@ test("worker destroys definition, function, argument, and result proxies", async
     arg: 1,
     result: 1,
     fn: 1,
+    globals: 1,
   });
 });

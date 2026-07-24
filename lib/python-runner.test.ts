@@ -86,6 +86,27 @@ test("missing function is reported", async () => {
   assert.match(r.error ?? "", /get_active_users/);
 });
 
+test("candidate helpers do not leak between submissions", async () => {
+  const firstRun = await runPythonProblem(
+    filterActive,
+    `def only_in_first_submission(users):
+    return [u for u in users if u["active"]]
+
+def get_active_users(users):
+    return only_in_first_submission(users)
+`
+  );
+  assert.strictEqual(firstRun.status, "passed", JSON.stringify(firstRun));
+
+  const secondRun = await runPythonProblem(
+    filterActive,
+    `def get_active_users(users):
+    return only_in_first_submission(users)
+`
+  );
+  assert.notStrictEqual(secondRun.status, "passed", JSON.stringify(secondRun));
+});
+
 test("non-callable function name is reported as a top-level error", async () => {
   const r = await runPythonProblem(filterActive, "get_active_users = 42\n");
   assert.strictEqual(r.status, "error");

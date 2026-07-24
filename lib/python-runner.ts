@@ -117,72 +117,81 @@ export async function gradeWithPyodide(
 ): Promise<RunResult> {
   let currentLogs: string[] = [];
   pyodide.setStdout({ batched: (output) => currentLogs.push(output) });
+  const globals = pyodide.toPy({});
+  let builtins: unknown;
 
   try {
-    if (pyodide.globals.has(problem.fnName))
-      pyodide.globals.delete(problem.fnName);
-    const definitionResult = await pyodide.runPythonAsync(code);
-    destroyProxy(definitionResult);
+    builtins = pyodide.globals.get("__builtins__");
+    globals.set("__builtins__", builtins);
+    let definitionResult: unknown;
+    try {
+      definitionResult = await pyodide.runPythonAsync(code, { globals });
+    } finally {
+      destroyProxy(definitionResult);
+    }
+
+    if (!globals.has(problem.fnName)) {
+      return {
+        status: "error",
+        tests: [],
+        error: `Function ${problem.fnName} was not defined.`,
+      };
+    }
+
+    const fn = globals.get(problem.fnName);
+    if (typeof fn !== "function") {
+      destroyProxy(fn);
+      return {
+        status: "error",
+        tests: [],
+        error: `${problem.fnName} is not callable.`,
+      };
+    }
+    const tests: TestResult[] = [];
+
+    try {
+      for (const test of problem.tests) {
+        currentLogs = [];
+        let pythonArgs: unknown[] = [];
+        let pythonResult: unknown;
+
+        try {
+          const jsonArgs = JSON.parse(JSON.stringify(test.args)) as unknown[];
+          pythonArgs = jsonArgs.map((arg) => pyodide.toPy(arg));
+          pythonResult = fn(...pythonArgs);
+          const actual = normalizeReturnValue(pythonResult);
+          tests.push({
+            test,
+            passed: deepEqual(actual, test.expected),
+            actual,
+            logs: [...currentLogs],
+          });
+        } catch (error) {
+          tests.push({
+            test,
+            passed: false,
+            error: errorMessage(error),
+            logs: [...currentLogs],
+          });
+        } finally {
+          destroyProxy(pythonResult);
+          pythonArgs.forEach(destroyProxy);
+        }
+      }
+    } finally {
+      destroyProxy(fn);
+    }
+
+    return {
+      status: tests.every((test) => test.passed) ? "passed" : "failed",
+      tests,
+    };
   } catch (error) {
     return { status: "error", tests: [], error: errorMessage(error) };
-  }
-
-  if (!pyodide.globals.has(problem.fnName)) {
-    return {
-      status: "error",
-      tests: [],
-      error: `Function ${problem.fnName} was not defined.`,
-    };
-  }
-
-  const fn = pyodide.globals.get(problem.fnName);
-  if (typeof fn !== "function") {
-    destroyProxy(fn);
-    return {
-      status: "error",
-      tests: [],
-      error: `${problem.fnName} is not callable.`,
-    };
-  }
-  const tests: TestResult[] = [];
-
-  try {
-    for (const test of problem.tests) {
-      currentLogs = [];
-      let pythonArgs: unknown[] = [];
-      let pythonResult: unknown;
-
-      try {
-        const jsonArgs = JSON.parse(JSON.stringify(test.args)) as unknown[];
-        pythonArgs = jsonArgs.map((arg) => pyodide.toPy(arg));
-        pythonResult = fn(...pythonArgs);
-        const actual = normalizeReturnValue(pythonResult);
-        tests.push({
-          test,
-          passed: deepEqual(actual, test.expected),
-          actual,
-          logs: [...currentLogs],
-        });
-      } catch (error) {
-        tests.push({
-          test,
-          passed: false,
-          error: errorMessage(error),
-          logs: [...currentLogs],
-        });
-      } finally {
-        destroyProxy(pythonResult);
-        pythonArgs.forEach(destroyProxy);
-      }
-    }
   } finally {
-    destroyProxy(fn);
+    destroyProxy(builtins);
+    destroyProxy(globals);
   }
-
-  return {
-    status: tests.every((test) => test.passed) ? "passed" : "failed",
-    tests,
-  };
 }
 
 export async function runPythonProblem(
