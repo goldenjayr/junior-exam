@@ -21,8 +21,9 @@ export type Problem = {
     | "logic"
     | "react"
     | "postgresql"
-    | "prisma";
-  kind?: "react" | "sql" | "prisma-schema" | "prisma-client";
+    | "prisma"
+    | "python";
+  kind?: "react" | "sql" | "prisma-schema" | "prisma-client" | "python";
   difficulty: "easy" | "medium" | "hard";
   instructions: string;
   fnName: string;
