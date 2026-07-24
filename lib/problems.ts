@@ -1,17 +1,24 @@
 export type TestCase = {
   args: unknown[];
   expected: unknown;
-  // React problems only: click this selector N times before asserting.
   clickOn?: string;
   clicks?: number;
+  /** SQL problems: seed schema + data before candidate query. */
+  setupSql?: string;
 };
 
 export type Problem = {
   id: number;
   title: string;
-  category: "arrays" | "strings" | "objects" | "logic" | "react";
-  // "react" problems are JSX components graded on rendered text content.
-  kind?: "react";
+  category:
+    | "arrays"
+    | "strings"
+    | "objects"
+    | "logic"
+    | "react"
+    | "postgresql"
+    | "prisma";
+  kind?: "react" | "sql" | "prisma-schema" | "prisma-client";
   difficulty: "easy" | "medium" | "hard";
   instructions: string;
   fnName: string;
@@ -25,6 +32,8 @@ export const categories: Problem["category"][] = [
   "objects",
   "logic",
   "react",
+  "postgresql",
+  "prisma",
 ];
 
 export const problems: Problem[] = [
