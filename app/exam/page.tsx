@@ -14,6 +14,8 @@ import FreezeOverlay from "@/components/FreezeOverlay";
 import { parseTimeLimit } from "@/lib/time-attack";
 import { useTimeAttack } from "@/lib/use-time-attack";
 import { parseShuffle, sessionItemOrder } from "@/lib/shuffle";
+import { parseCheat } from "@/lib/cheat";
+import { getExamSolution } from "@/lib/exam-solutions";
 
 const statusLabel: Record<string, string> = {
   passed: "Passed",
@@ -30,6 +32,7 @@ const statusBadge: Record<string, string> = {
 function Exam() {
   const searchParams = useSearchParams();
   const shuffle = parseShuffle(searchParams.get("s"));
+  const cheat = parseCheat(searchParams.get("cheat"));
   const limitSeconds = parseTimeLimit(searchParams.get("t"));
   const pParam = searchParams.get("p") ?? "all";
   const orderSessionKey = `exam:${pParam}:s=${shuffle ? 1 : 0}`;
@@ -66,6 +69,7 @@ function Exam() {
   });
   const [results, setResults] = useState<Record<number, RunResult>>({});
   const [running, setRunning] = useState(false);
+  const [showAnswer, setShowAnswer] = useState(false);
   const [applicantName, setApplicantName] = useState("");
   const [submitState, setSubmitState] = useState<
     "idle" | "sending" | "sent" | "error"
@@ -75,6 +79,10 @@ function Exam() {
     limitSeconds,
     timerSessionId
   );
+
+  useEffect(() => {
+    setShowAnswer(false);
+  }, [selectedId]);
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(answers));
@@ -271,6 +279,15 @@ function Exam() {
                       Starting Python…
                     </span>
                   )}
+                  {cheat && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAnswer((v) => !v)}
+                      className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800 transition-transform hover:bg-amber-100 active:scale-95"
+                    >
+                      {showAnswer ? "Hide answer" : "Show answer"}
+                    </button>
+                  )}
                   <button
                     type="button"
                     disabled={frozen}
@@ -320,6 +337,17 @@ function Exam() {
                   </button>
                 </div>
               </div>
+              {cheat && showAnswer && (
+                <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <p className="mb-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+                    Official answer (read-only)
+                  </p>
+                  <pre className="overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-slate-800">
+                    {getExamSolution(problem.id) ??
+                      "No solution available for this problem."}
+                  </pre>
+                </div>
+              )}
               <CodeEditor
                 value={code}
                 readOnly={frozen}

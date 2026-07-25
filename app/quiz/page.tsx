@@ -15,6 +15,8 @@ import FreezeOverlay from "@/components/FreezeOverlay";
 import { parseTimeLimit } from "@/lib/time-attack";
 import { useTimeAttack } from "@/lib/use-time-attack";
 import { parseShuffle, sessionItemOrder } from "@/lib/shuffle";
+import { parseCheat } from "@/lib/cheat";
+import { formatCorrectAnswer } from "@/lib/quiz/reveal";
 
 function parseMode(raw: string | null): QuizMode {
   return raw === "practice" ? "practice" : "assessment";
@@ -49,6 +51,7 @@ function QuizPlayer() {
   const mode = parseMode(searchParams.get("mode"));
   const limitSeconds = parseTimeLimit(searchParams.get("t"));
   const shuffle = parseShuffle(searchParams.get("s"));
+  const cheat = parseCheat(searchParams.get("cheat"));
   const qParam = searchParams.get("q") ?? "";
   const orderSessionKey = `quiz:${qParam}:s=${shuffle ? 1 : 0}`;
 
@@ -69,6 +72,7 @@ function QuizPlayer() {
   const timerSessionId = `quiz:${qParam}:${searchParams.get("t") ?? ""}`;
 
   const [index, setIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
   const [answers, setAnswers] = useState<Record<number, AnswerEntry>>(() => {
     try {
       return JSON.parse(localStorage.getItem(storageKey) ?? "{}");
@@ -88,6 +92,10 @@ function QuizPlayer() {
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(answers));
   }, [answers, storageKey]);
+
+  useEffect(() => {
+    setShowAnswer(false);
+  }, [index]);
 
   const question = sessionQuestions[index];
 
@@ -306,6 +314,33 @@ function QuizPlayer() {
           disabled={locked}
           showHint={mode === "practice" && !locked}
         />
+
+        {cheat && (
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => setShowAnswer((v) => !v)}
+              className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800 transition-transform hover:bg-amber-100 active:scale-95"
+            >
+              {showAnswer ? "Hide answer" : "Show answer"}
+            </button>
+            {showAnswer && (
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+                  Correct answer (read-only)
+                </p>
+                <pre className="whitespace-pre-wrap font-mono text-sm text-slate-800">
+                  {formatCorrectAnswer(question)}
+                </pre>
+                {question.explanation && (
+                  <p className="mt-3 text-sm text-slate-600">
+                    {question.explanation}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {mode === "practice" && entry?.locked && entry.graded && (
           <FeedbackBurst

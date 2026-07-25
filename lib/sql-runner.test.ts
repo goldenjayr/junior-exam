@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { problems, type Problem } from "./problems.ts";
+import { examSolutions } from "./exam-solutions.ts";
 import { runSqlProblem } from "./sql-runner.ts";
 
 const filterActive: Problem = {
@@ -67,31 +68,6 @@ test("syntax error reports error status", async () => {
   assert.ok(r.error || r.tests.some((t) => t.error));
 });
 
-const solutions: Record<number, string> = {
-  34: "SELECT id, name, active FROM users WHERE active = true ORDER BY id;",
-  35: `SELECT orders.id, orders.total
-       FROM orders
-       JOIN customers ON customers.id = orders.customer_id
-       WHERE customers.name = 'Maria'
-       ORDER BY orders.id;`,
-  36: `SELECT status, COUNT(*)::int AS count
-       FROM tickets
-       GROUP BY status
-       ORDER BY status;`,
-  37: `SELECT id, title, published_at
-       FROM posts
-       WHERE published_at >= '2024-01-01'
-       ORDER BY published_at DESC;`,
-  38: `INSERT INTO products (id, name, price)
-       VALUES (1, 'Mug', 9.5)
-       RETURNING id, name, price;`,
-  39: `SELECT customers.name, orders.id AS order_id
-       FROM customers
-       JOIN orders ON orders.customer_id = customers.id
-       WHERE orders.total > 100
-       ORDER BY orders.id;`,
-};
-
 test("official solutions pass SQL problems 34-39", async () => {
   const sqlProblems = problems.filter((problem) => problem.id >= 34 && problem.id <= 39);
   assert.deepEqual(
@@ -100,7 +76,7 @@ test("official solutions pass SQL problems 34-39", async () => {
   );
 
   for (const problem of sqlProblems) {
-    const result = await runSqlProblem(problem, solutions[problem.id]);
+    const result = await runSqlProblem(problem, examSolutions[problem.id]);
     assert.equal(
       result.status,
       "passed",

@@ -3,6 +3,7 @@ import test from "node:test";
 import { parsePrismaSchema, schemaContains } from "./prisma-schema.ts";
 import { runPrismaSchemaProblem } from "./prisma-schema-runner.ts";
 import { problems, type Problem } from "./problems.ts";
+import { examSolutions } from "./exam-solutions.ts";
 
 test("parses model fields with id, unique, default, and optional types", () => {
   const ast = parsePrismaSchema(`
@@ -244,32 +245,6 @@ test("problem 41 accepts relation named arguments in any order", () => {
   assert.equal(result.status, "passed", JSON.stringify(result));
 });
 
-const solutions: Record<number, string> = {
-  40: `model User {
-    id Int @id
-    email String @unique
-  }`,
-  41: `model User {
-    id Int @id
-    posts Post[]
-  }
-
-  model Post {
-    id Int @id
-    authorId Int
-    author User @relation(fields: [authorId], references: [id])
-  }`,
-  42: `enum Role {
-    USER
-    ADMIN
-  }
-
-  model User {
-    id Int @id
-    role Role
-  }`,
-};
-
 test("official solutions pass Prisma problems 40-42", () => {
   const prismaProblems = problems.filter(
     (problem) => problem.id >= 40 && problem.id <= 42
@@ -280,7 +255,7 @@ test("official solutions pass Prisma problems 40-42", () => {
   );
 
   for (const problem of prismaProblems) {
-    const result = runPrismaSchemaProblem(problem, solutions[problem.id]);
+    const result = runPrismaSchemaProblem(problem, examSolutions[problem.id]);
     assert.equal(
       result.status,
       "passed",
