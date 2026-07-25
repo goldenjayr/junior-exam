@@ -108,12 +108,14 @@ function Exam() {
           timeUsedSeconds: timeUsed,
           results: examProblems.map((p) => {
             const r = graded.get(p.id)!;
+            const correctness = r.tests.filter((t) => t.test.maxMs == null);
             return {
               title: p.title,
               difficulty: p.difficulty,
               status: r.status,
-              passed: r.tests.filter((t) => t.passed).length,
-              total: r.tests.length,
+              passed: correctness.filter((t) => t.passed).length,
+              total: correctness.length || r.tests.length,
+              efficiency: r.efficiency,
               code: answers[p.id] ?? p.starterCode,
               error: r.error,
             };
@@ -305,6 +307,7 @@ function Exam() {
                               error instanceof Error
                                 ? error.message
                                 : String(error),
+                            efficiency: "na",
                           },
                         }));
                       } finally {
@@ -343,6 +346,11 @@ function Exam() {
                     >
                       <p className="font-sans text-[11px] font-semibold text-slate-400">
                         Case {i + 1}
+                        {typeof t.maxMs === "number" && (
+                          <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700">
+                            Performance ≤{t.maxMs}ms
+                          </span>
+                        )}
                       </p>
                       <div className="mt-2 flex flex-col gap-2">
                         <div>
@@ -358,7 +366,11 @@ function Exam() {
                             Expected
                           </p>
                           <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-50 p-2 font-mono text-xs text-slate-800">
-                            {formatValue(t.expected)}
+                            {typeof t.maxMs === "number" &&
+                            Array.isArray(t.expected) &&
+                            t.expected.length > 12
+                              ? `[…${t.expected.length} items]`
+                              : formatValue(t.expected)}
                           </pre>
                         </div>
                       </div>
@@ -373,8 +385,16 @@ function Exam() {
                     Test Results
                     {result && result.tests.length > 0 && (
                       <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-600">
-                        {result.tests.filter((t) => t.passed).length}/
-                        {result.tests.length}
+                        {
+                          result.tests.filter(
+                            (t) => t.test.maxMs == null && t.passed
+                          ).length
+                        }
+                        /
+                        {
+                          result.tests.filter((t) => t.test.maxMs == null)
+                            .length || result.tests.length
+                        }
                       </span>
                     )}
                   </h3>
@@ -386,6 +406,13 @@ function Exam() {
                     </span>
                   )}
                 </div>
+
+                {result?.status === "passed" &&
+                  result.efficiency === "slow" && (
+                    <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                      Correct, but slow on large inputs — efficiency needs work.
+                    </p>
+                  )}
 
                 {!result && (
                   <div className="mt-3 grid min-h-32 place-items-center rounded-lg border border-dashed border-slate-300 text-sm text-slate-400">
@@ -400,62 +427,79 @@ function Exam() {
                 )}
 
                 <div className="mt-3 flex flex-col gap-2">
-                  {result?.tests.map((t, i) => (
-                    <div
-                      key={i}
-                      style={{ animationDelay: `${i * 60}ms` }}
-                      className={`animate-fade-up rounded-lg border p-3 text-sm ${
-                        t.passed
-                          ? "border-green-200 bg-green-50"
-                          : "border-red-200 bg-red-50"
-                      }`}
-                    >
-                      <div className="flex items-baseline gap-2">
-                        <span
-                          className={`grid h-4 w-4 shrink-0 translate-y-0.5 place-items-center rounded-full text-[10px] font-bold text-white ${
-                            t.passed ? "bg-green-600" : "bg-red-600"
-                          }`}
-                        >
-                          {t.passed ? "✓" : "✗"}
-                        </span>
-                        <pre className="min-w-0 flex-1 whitespace-pre-wrap font-mono text-xs text-slate-600">
-                          {callLabel(problem, t.test)}
-                        </pre>
-                      </div>
-                      {!t.passed && (
-                        <div className="mt-2 grid gap-2 font-mono text-xs sm:grid-cols-2">
-                          <div>
-                            <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                              Expected
-                            </p>
-                            <pre className="overflow-x-auto whitespace-pre-wrap">
-                              {formatValue(t.test.expected)}
-                            </pre>
-                          </div>
-                          <div>
-                            <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                              {t.error ? "Error" : "Received"}
-                            </p>
-                            <pre
-                              className={`overflow-x-auto whitespace-pre-wrap ${t.error ? "text-red-700" : ""}`}
-                            >
-                              {t.error ?? formatValue(t.actual)}
-                            </pre>
-                          </div>
-                        </div>
-                      )}
-                      {t.logs && t.logs.length > 0 && (
-                        <div className="mt-2">
-                          <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                            Console
-                          </p>
-                          <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-900 p-2 font-mono text-[11px] leading-relaxed text-slate-100">
-                            {t.logs.join("\n")}
+                  {result?.tests.map((t, i) => {
+                    const isPerfSlow =
+                      Boolean(t.performanceFailed) &&
+                      typeof t.test.maxMs === "number" &&
+                      typeof t.durationMs === "number" &&
+                      t.durationMs > t.test.maxMs;
+                    const rowClass = t.passed
+                      ? "border-green-200 bg-green-50"
+                      : isPerfSlow
+                        ? "border-amber-200 bg-amber-50"
+                        : "border-red-200 bg-red-50";
+                    const markClass = t.passed
+                      ? "bg-green-600"
+                      : isPerfSlow
+                        ? "bg-amber-500"
+                        : "bg-red-600";
+                    return (
+                      <div
+                        key={i}
+                        style={{ animationDelay: `${i * 60}ms` }}
+                        className={`animate-fade-up rounded-lg border p-3 text-sm ${rowClass}`}
+                      >
+                        <div className="flex items-baseline gap-2">
+                          <span
+                            className={`grid h-4 w-4 shrink-0 translate-y-0.5 place-items-center rounded-full text-[10px] font-bold text-white ${markClass}`}
+                          >
+                            {t.passed ? "✓" : isPerfSlow ? "!" : "✗"}
+                          </span>
+                          <pre className="min-w-0 flex-1 whitespace-pre-wrap font-mono text-xs text-slate-600">
+                            {callLabel(problem, t.test)}
                           </pre>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        {isPerfSlow && (
+                          <p className="mt-2 font-sans text-xs text-amber-800">
+                            Over budget: {Math.round(t.durationMs!)}ms /{" "}
+                            {t.test.maxMs}ms
+                          </p>
+                        )}
+                        {!t.passed && !isPerfSlow && (
+                          <div className="mt-2 grid gap-2 font-mono text-xs sm:grid-cols-2">
+                            <div>
+                              <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                Expected
+                              </p>
+                              <pre className="overflow-x-auto whitespace-pre-wrap">
+                                {formatValue(t.test.expected)}
+                              </pre>
+                            </div>
+                            <div>
+                              <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                {t.error ? "Error" : "Received"}
+                              </p>
+                              <pre
+                                className={`overflow-x-auto whitespace-pre-wrap ${t.error ? "text-red-700" : ""}`}
+                              >
+                                {t.error ?? formatValue(t.actual)}
+                              </pre>
+                            </div>
+                          </div>
+                        )}
+                        {t.logs && t.logs.length > 0 && (
+                          <div className="mt-2">
+                            <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                              Console
+                            </p>
+                            <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-900 p-2 font-mono text-[11px] leading-relaxed text-slate-100">
+                              {t.logs.join("\n")}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

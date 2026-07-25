@@ -99,6 +99,7 @@ test("worker isolates submissions and reports missing definitions", async () => 
     status: "error",
     tests: [],
     error: "Function answer was not defined.",
+    efficiency: "na",
     }
   );
 });
@@ -115,6 +116,7 @@ test("worker rejects non-callables as a top-level error", async () => {
     status: "error",
     tests: [],
     error: "answer is not callable.",
+    efficiency: "na",
     }
   );
 });

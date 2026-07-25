@@ -28,6 +28,7 @@ export function runReactProblem(problem: Problem, code: string): RunResult {
       status: "error",
       tests: [],
       error: error instanceof Error ? error.message : String(error),
+      efficiency: "na",
     };
   }
 
@@ -77,5 +78,6 @@ export function runReactProblem(problem: Problem, code: string): RunResult {
   return {
     status: tests.every((t) => t.passed) ? "passed" : "failed",
     tests,
+    efficiency: "na",
   };
 }

@@ -77,7 +77,12 @@ export async function runSqlProblem(
     typeof window !== "undefined" &&
     typeof SharedArrayBuffer === "undefined"
   ) {
-    return { status: "error", tests: [], error: isolationError().message };
+    return {
+      status: "error",
+      tests: [],
+      error: isolationError().message,
+      efficiency: "na",
+    };
   }
 
   const tests: TestResult[] = [];
@@ -128,7 +133,12 @@ export async function runSqlProblem(
     const first = tests.find((t) => t.error);
     const allSetupErrors = tests.every((t) => !t.passed && t.actual === undefined);
     if (allSetupErrors && tests.length === 1) {
-      return { status: "error", tests, error: first?.error };
+      return {
+        status: "error",
+        tests,
+        error: first?.error,
+        efficiency: "na",
+      };
     }
   }
 
@@ -142,5 +152,6 @@ export async function runSqlProblem(
     status,
     tests,
     error: status === "error" ? tests.find((t) => t.error)?.error : undefined,
+    efficiency: "na",
   };
 }

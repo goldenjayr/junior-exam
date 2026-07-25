@@ -27,7 +27,7 @@ const solutions: Record<number, string> = {
   20: `function mergeSorted(a, b) { return [...a, ...b].sort((x, y) => x - y); }`,
   21: `function isAnagram(a, b) { const norm = s => [...s.toLowerCase()].sort().join(""); return norm(a) === norm(b); }`,
   22: `function pluck(items, key) { return items.map(i => i[key]); }`,
-  23: `function twoSum(ns, t) { for (let i = 0; i < ns.length; i++) for (let j = i + 1; j < ns.length; j++) if (ns[i] + ns[j] === t) return [i, j]; }`,
+  23: `function twoSum(ns, t) { const seen = new Map(); for (let i = 0; i < ns.length; i++) { const need = t - ns[i]; if (seen.has(need)) return [seen.get(need), i]; seen.set(ns[i], i); } }`,
   24: `function isBalanced(t) { const pairs = { ")": "(", "]": "[", "}": "{" }; const st = []; for (const c of t) { if ("([{".includes(c)) st.push(c); else if (c in pairs) { if (st.pop() !== pairs[c]) return false; } } return st.length === 0; }`,
   25: `function runningTotal(ns) { let sum = 0; return ns.map(n => sum += n); }`,
   26: `function fibonacci(n) { const out = []; let [a, b] = [0, 1]; for (let i = 0; i < n; i++) { out.push(a); [a, b] = [b, a + b]; } return out; }`,
@@ -45,6 +45,12 @@ test("every problem has a solution that passes all its tests", () => {
   for (const p of problems.filter(isClassicJsProblem)) {
     const result = runProblem(p, solutions[p.id]);
     assert.strictEqual(result.status, "passed", `${p.title}: ${JSON.stringify(result)}`);
+    const expectedEff = p.tests.some((t) => t.maxMs != null) ? "ok" : "na";
+    assert.strictEqual(
+      result.efficiency,
+      expectedEff,
+      `${p.title}: efficiency`
+    );
   }
 });
 
@@ -146,4 +152,96 @@ test("captures console output per test", () => {
   );
   assert.strictEqual(r.status, "passed");
   assert.ok(r.tests[0].logs?.[0]?.startsWith("got "));
+});
+
+test("efficiency is na when no maxMs cases", () => {
+  const minMax = problems.find((p) => p.fnName === "minMax")!;
+  assert.ok(!minMax.tests.some((t) => t.maxMs != null));
+  const r = runProblem(
+    minMax,
+    "function minMax(ns){ return { min: Math.min(...ns), max: Math.max(...ns) }; }"
+  );
+  assert.strictEqual(r.status, "passed");
+  assert.strictEqual(r.efficiency, "na");
+});
+
+test("efficiency soft-badge: correct but slow still passes", () => {
+  const fixture = {
+    id: 9001,
+    title: "Perf Fixture",
+    category: "logic" as const,
+    difficulty: "easy" as const,
+    instructions: "sum numbers",
+    fnName: "sumNums",
+    starterCode: "function sumNums(ns) {}",
+    tests: [
+      { args: [[1, 2, 3]], expected: 6 },
+      {
+        args: [Array.from({ length: 200 }, (_, i) => i)],
+        expected: 19900,
+        maxMs: 5,
+      },
+    ],
+  };
+  // Busy-wait so wall time exceeds maxMs while still returning the right answer.
+  const slow = `function sumNums(ns) {
+  const end = performance.now() + 20;
+  while (performance.now() < end) {}
+  return ns.reduce((a, b) => a + b, 0);
+}`;
+  const r = runProblem(fixture, slow);
+  assert.strictEqual(r.status, "passed");
+  assert.strictEqual(r.efficiency, "slow");
+  assert.strictEqual(r.tests[0].passed, true);
+  assert.strictEqual(r.tests[1].passed, false);
+  assert.strictEqual(r.tests[1].performanceFailed, true);
+});
+
+test("efficiency ok when under budget", () => {
+  const fixture = {
+    id: 9002,
+    title: "Perf Fixture Fast",
+    category: "logic" as const,
+    difficulty: "easy" as const,
+    instructions: "sum numbers",
+    fnName: "sumNums",
+    starterCode: "function sumNums(ns) {}",
+    tests: [
+      { args: [[1, 2, 3]], expected: 6 },
+      {
+        args: [Array.from({ length: 200 }, (_, i) => i)],
+        expected: 19900,
+        maxMs: 200,
+      },
+    ],
+  };
+  const fast = `function sumNums(ns) { return ns.reduce((a, b) => a + b, 0); }`;
+  const r = runProblem(fixture, fast);
+  assert.strictEqual(r.status, "passed");
+  assert.strictEqual(r.efficiency, "ok");
+  assert.strictEqual(r.tests[1].passed, true);
+});
+
+test("wrong answer fails even with maxMs cases", () => {
+  const fixture = {
+    id: 9003,
+    title: "Perf Fixture Wrong",
+    category: "logic" as const,
+    difficulty: "easy" as const,
+    instructions: "sum numbers",
+    fnName: "sumNums",
+    starterCode: "function sumNums(ns) {}",
+    tests: [
+      { args: [[1, 2, 3]], expected: 6 },
+      {
+        args: [[1, 2, 3, 4]],
+        expected: 10,
+        maxMs: 200,
+      },
+    ],
+  };
+  const wrong = `function sumNums(ns) { return 0; }`;
+  const r = runProblem(fixture, wrong);
+  assert.strictEqual(r.status, "failed");
+  assert.strictEqual(r.efficiency, "slow");
 });

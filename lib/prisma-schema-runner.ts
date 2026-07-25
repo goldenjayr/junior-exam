@@ -14,6 +14,7 @@ export function runPrismaSchemaProblem(
       status: "error",
       tests: [],
       error: error instanceof Error ? error.message : String(error),
+      efficiency: "na",
     };
   }
 
@@ -30,5 +31,6 @@ export function runPrismaSchemaProblem(
   return {
     status: tests.every((test) => test.passed) ? "passed" : "failed",
     tests,
+    efficiency: "na",
   };
 }

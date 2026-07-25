@@ -1,17 +1,22 @@
 import type { Problem, TestCase } from "./problems.ts";
 
+export type Efficiency = "ok" | "slow" | "na";
+
 export type TestResult = {
   test: TestCase;
   passed: boolean;
   actual?: unknown;
   error?: string;
   logs?: string[];
+  durationMs?: number;
+  performanceFailed?: boolean;
 };
 
 export type RunResult = {
   status: "passed" | "failed" | "error";
   tests: TestResult[];
   error?: string;
+  efficiency: Efficiency;
 };
 
 export function formatValue(value: unknown): string {
@@ -100,18 +105,37 @@ export function runProblem(problem: Problem, code: string): RunResult {
       status: "error",
       tests: [],
       error: error instanceof Error ? error.message : String(error),
+      efficiency: "na",
     };
   }
 
   const tests: TestResult[] = problem.tests.map((test) => {
     logs.length = 0;
+    const isPerf = typeof test.maxMs === "number";
     try {
-      const actual = fn(...structuredClone(test.args));
+      const args = structuredClone(test.args);
+      const start = performance.now();
+      const actual = fn(...args);
+      const durationMs = performance.now() - start;
+      const correct = deepEqual(actual, test.expected);
+      if (isPerf) {
+        const withinBudget = durationMs <= test.maxMs!;
+        const ok = correct && withinBudget;
+        return {
+          test,
+          passed: ok,
+          actual: sanitize(actual),
+          logs: [...logs],
+          durationMs,
+          performanceFailed: !ok,
+        };
+      }
       return {
         test,
-        passed: deepEqual(actual, test.expected),
+        passed: correct,
         actual: sanitize(actual),
         logs: [...logs],
+        durationMs,
       };
     } catch (error) {
       return {
@@ -119,14 +143,37 @@ export function runProblem(problem: Problem, code: string): RunResult {
         passed: false,
         error: error instanceof Error ? error.message : String(error),
         logs: [...logs],
+        ...(isPerf ? { performanceFailed: true } : {}),
       };
     }
   });
 
-  return {
-    status: tests.every((t) => t.passed) ? "passed" : "failed",
-    tests,
-  };
+  const correctness = tests.filter((t) => t.test.maxMs == null);
+  const perf = tests.filter((t) => t.test.maxMs != null);
+  const status = (
+    correctness.length > 0 ? correctness : tests
+  ).every((t) => t.passed)
+    ? "passed"
+    : "failed";
+
+  let efficiency: Efficiency;
+  if (perf.length === 0) efficiency = "na";
+  else if (perf.every((t) => t.passed)) efficiency = "ok";
+  else efficiency = "slow";
+
+  return { status, tests, efficiency };
+}
+
+function sandboxTimeoutMs(problem: Problem, override?: number): number {
+  if (override != null) return override;
+  const perfBudget = problem.tests.reduce(
+    (sum, t) => sum + (t.maxMs ?? 0),
+    0
+  );
+  // Extra headroom so slow-but-correct solutions finish and get efficiency:"slow"
+  // instead of a hard worker kill.
+  if (perfBudget === 0) return 3000;
+  return Math.max(10000, perfBudget + 5000);
 }
 
 // Runs candidate code in a Web Worker so infinite loops can't freeze the
@@ -135,11 +182,12 @@ export function runProblem(problem: Problem, code: string): RunResult {
 export function runProblemSandboxed(
   problem: Problem,
   code: string,
-  timeoutMs = 3000
+  timeoutMs?: number
 ): Promise<RunResult> {
   if (typeof Worker === "undefined")
     return Promise.resolve(runProblem(problem, code));
 
+  const ms = sandboxTimeoutMs(problem, timeoutMs);
   const src = `const run = ${runProblem.toString()};
 onmessage = (e) => postMessage(run(e.data.problem, e.data.code));`;
   const url = URL.createObjectURL(
@@ -154,9 +202,10 @@ onmessage = (e) => postMessage(run(e.data.problem, e.data.code));`;
       resolve({
         status: "error",
         tests: [],
-        error: `Your code took longer than ${timeoutMs / 1000} seconds to run — check for infinite loops.`,
+        error: `Your code took longer than ${ms / 1000} seconds to run — check for infinite loops.`,
+        efficiency: "na",
       });
-    }, timeoutMs);
+    }, ms);
     worker.onmessage = (e) => {
       clearTimeout(timer);
       worker.terminate();
@@ -169,6 +218,7 @@ onmessage = (e) => postMessage(run(e.data.problem, e.data.code));`;
         status: "error",
         tests: [],
         error: e.message || "Your code could not be executed.",
+        efficiency: "na",
       });
     };
   }).finally(() => URL.revokeObjectURL(url));

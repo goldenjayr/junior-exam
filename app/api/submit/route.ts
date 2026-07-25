@@ -20,6 +20,7 @@ type ExamResult = {
   total: number;
   code: string;
   error?: string;
+  efficiency?: "ok" | "slow" | "na";
 };
 
 type QuizResult = {
@@ -59,6 +60,12 @@ function timerMetaHtml(body: Submission): string {
   return `<p><em>Time attack: ${esc(parts.join(" · "))}</em></p>`;
 }
 
+function efficiencyLabel(efficiency?: ExamResult["efficiency"]): string {
+  if (efficiency === "ok") return " · Efficiency: ok";
+  if (efficiency === "slow") return " · Efficiency: needs work";
+  return "";
+}
+
 function examHtml(name: string, body: Submission, results: ExamResult[]) {
   const solved = results.filter((r) => r.status === "passed").length;
   return `
@@ -70,7 +77,7 @@ function examHtml(name: string, body: Submission, results: ExamResult[]) {
         (r) => `
       <h3>${esc(r.title)} (${esc(r.difficulty)}) — ${
           r.status === "passed" ? "✅" : "❌"
-        } ${r.passed}/${r.total} tests</h3>
+        } ${r.passed}/${r.total} tests${efficiencyLabel(r.efficiency)}</h3>
       ${r.error ? `<p style="color:#b91c1c">Error: ${esc(r.error)}</p>` : ""}
       <pre style="background:#f1f5f9;padding:12px;border-radius:8px;font-size:12px">${esc(
         r.code

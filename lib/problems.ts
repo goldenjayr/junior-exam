@@ -9,6 +9,11 @@ export type TestCase = {
   verifySql?: string;
   /** SQL problems: expected rows returned by verifySql. */
   verifyExpected?: unknown;
+  /**
+   * When set, this case is an efficiency probe (soft).
+   * Failing it does not flip overall correctness status.
+   */
+  maxMs?: number;
 };
 
 export type Problem = {
@@ -29,6 +34,8 @@ export type Problem = {
   fnName: string;
   starterCode: string;
   tests: TestCase[];
+  /** Author hint for expected asymptotic cost (not graded in v1). */
+  expectedComplexity?: { time: string; space?: string };
 };
 
 export const categories: Problem["category"][] = [
@@ -41,6 +48,40 @@ export const categories: Problem["category"][] = [
   "prisma",
   "python",
 ];
+
+/** Large inputs for efficiency probes — kept at module scope so expected stays stable. */
+const PERF_TWO_SUM_N = 30000;
+// Mostly 1s; unique pair at the end so nested loops do ~n² work before hitting it.
+const perfTwoSumNums = Array.from({ length: PERF_TWO_SUM_N }, () => 1);
+perfTwoSumNums[PERF_TWO_SUM_N - 2] = 2;
+perfTwoSumNums[PERF_TWO_SUM_N - 1] = 9;
+const perfTwoSumTarget = 11;
+const perfTwoSumExpected = [PERF_TWO_SUM_N - 2, PERF_TWO_SUM_N - 1];
+
+const PERF_DEDUPE_N = 80000;
+const perfDedupeInput = Array.from({ length: PERF_DEDUPE_N }, (_, i) => i % 40000);
+const perfDedupeExpected = Array.from({ length: 40000 }, (_, i) => i);
+
+const PERF_ANAGRAM_HALF = 4000;
+const perfAnagramA = "a".repeat(PERF_ANAGRAM_HALF) + "b".repeat(PERF_ANAGRAM_HALF);
+const perfAnagramB = "b".repeat(PERF_ANAGRAM_HALF) + "a".repeat(PERF_ANAGRAM_HALF);
+
+const PERF_MERGE_N = 15000;
+const perfMergeA = Array.from({ length: PERF_MERGE_N }, (_, i) => i * 2);
+const perfMergeB = Array.from({ length: PERF_MERGE_N }, (_, i) => i * 2 + 1);
+const perfMergeExpected = Array.from({ length: PERF_MERGE_N * 2 }, (_, i) => i);
+
+const PERF_FIB_N = 40;
+const perfFibExpected = (() => {
+  const out: number[] = [];
+  let a = 0;
+  let b = 1;
+  for (let i = 0; i < PERF_FIB_N; i++) {
+    out.push(a);
+    [a, b] = [b, a + b];
+  }
+  return out;
+})();
 
 export const problems: Problem[] = [
   {
@@ -144,10 +185,17 @@ export const problems: Problem[] = [
   // Write your solution here
 
 }`,
+    expectedComplexity: { time: "O(n)" },
     tests: [
       { args: [[1, 2, 2, 3, 4, 4, 5]], expected: [1, 2, 3, 4, 5] },
       { args: [[7, 7, 7]], expected: [7] },
       { args: [[]], expected: [] },
+      // Nested membership scans blow past this; Set/filter is well under.
+      {
+        args: [perfDedupeInput],
+        expected: perfDedupeExpected,
+        maxMs: 300,
+      },
     ],
   },
   {
@@ -470,10 +518,17 @@ export const problems: Problem[] = [
   // Write your solution here
 
 }`,
+    expectedComplexity: { time: "O(n + m)" },
     tests: [
       { args: [[1, 3, 5], [2, 4, 6]], expected: [1, 2, 3, 4, 5, 6] },
       { args: [[], [1, 2]], expected: [1, 2] },
       { args: [[1, 1], [1]], expected: [1, 1, 1] },
+      // Catches pathological quadratic merges; concat+sort / two-pointer stay under.
+      {
+        args: [perfMergeA, perfMergeB],
+        expected: perfMergeExpected,
+        maxMs: 400,
+      },
     ],
   },
   {
@@ -488,11 +543,18 @@ export const problems: Problem[] = [
   // Write your solution here
 
 }`,
+    expectedComplexity: { time: "O(n)" },
     tests: [
       { args: ["listen", "silent"], expected: true },
       { args: ["Hello", "olleh"], expected: true },
       { args: ["hello", "world"], expected: false },
       { args: ["aab", "abb"], expected: false },
+      // Nested char scans struggle; sort/count stays under budget.
+      {
+        args: [perfAnagramA, perfAnagramB],
+        expected: true,
+        maxMs: 200,
+      },
     ],
   },
   {
@@ -533,10 +595,17 @@ export const problems: Problem[] = [
   // Write your solution here
 
 }`,
+    expectedComplexity: { time: "O(n)" },
     tests: [
       { args: [[2, 7, 11, 15], 9], expected: [0, 1] },
       { args: [[3, 2, 4], 6], expected: [1, 2] },
       { args: [[3, 3], 6], expected: [0, 1] },
+      // Nested loops often exceed this; a hash map stays well under.
+      {
+        args: [perfTwoSumNums, perfTwoSumTarget],
+        expected: perfTwoSumExpected,
+        maxMs: 300,
+      },
     ],
   },
   {
@@ -588,10 +657,17 @@ export const problems: Problem[] = [
   // Write your solution here
 
 }`,
+    expectedComplexity: { time: "O(n)" },
     tests: [
       { args: [7], expected: [0, 1, 1, 2, 3, 5, 8] },
       { args: [1], expected: [0] },
       { args: [0], expected: [] },
+      // Naive exponential recursion blows past this; iterative stays under.
+      {
+        args: [PERF_FIB_N],
+        expected: perfFibExpected,
+        maxMs: 100,
+      },
     ],
   },
   {

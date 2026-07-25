@@ -32,9 +32,22 @@ export function callLabel(problem: Problem, testCase: TestCase): string {
       : "";
     return `<${problem.fnName}${props ? ` ${props}` : ""} />${clicks}`;
   }
-  return `${problem.fnName}(${testCase.args
-    .map((arg) => formatValue(arg))
-    .join(", ")})`;
+  const args = testCase.args
+    .map((arg) => summarizeArg(arg))
+    .join(", ");
+  const perf =
+    typeof testCase.maxMs === "number" ? `  [perf ≤${testCase.maxMs}ms]` : "";
+  return `${problem.fnName}(${args})${perf}`;
+}
+
+function summarizeArg(arg: unknown): string {
+  if (typeof arg === "string" && arg.length > 40) {
+    return JSON.stringify(`${arg.slice(0, 16)}…(${arg.length} chars)`);
+  }
+  if (Array.isArray(arg) && arg.length > 12) {
+    return `[…${arg.length} items]`;
+  }
+  return formatValue(arg);
 }
 
 export function runAny(problem: Problem, code: string): Promise<RunResult> {

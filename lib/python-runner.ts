@@ -135,6 +135,7 @@ export async function gradeWithPyodide(
         status: "error",
         tests: [],
         error: `Function ${problem.fnName} was not defined.`,
+        efficiency: "na",
       };
     }
 
@@ -145,6 +146,7 @@ export async function gradeWithPyodide(
         status: "error",
         tests: [],
         error: `${problem.fnName} is not callable.`,
+        efficiency: "na",
       };
     }
     const tests: TestResult[] = [];
@@ -185,9 +187,15 @@ export async function gradeWithPyodide(
     return {
       status: tests.every((test) => test.passed) ? "passed" : "failed",
       tests,
+      efficiency: "na",
     };
   } catch (error) {
-    return { status: "error", tests: [], error: errorMessage(error) };
+    return {
+      status: "error",
+      tests: [],
+      error: errorMessage(error),
+      efficiency: "na",
+    };
   } finally {
     destroyProxy(builtins);
     destroyProxy(globals);
@@ -213,6 +221,7 @@ export async function runPythonProblem(
               error: `Your code took longer than ${
                 browserTimeoutMs / 1000
               } seconds to run — check for infinite loops.`,
+              efficiency: "na",
             });
           }, browserTimeoutMs);
 
@@ -227,6 +236,7 @@ export async function runPythonProblem(
               status: "error",
               tests: [],
               error: event.message,
+              efficiency: "na",
             });
           };
           activeWorker.postMessage({ problem, code });

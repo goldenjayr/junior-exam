@@ -100,6 +100,7 @@ self.onmessage = async (event) => {
         status: "error",
         tests: [],
         error: `Function ${problem.fnName} was not defined.`,
+        efficiency: "na",
       });
       return;
     }
@@ -110,6 +111,7 @@ self.onmessage = async (event) => {
         status: "error",
         tests: [],
         error: `${problem.fnName} is not callable.`,
+        efficiency: "na",
       });
       return;
     }
@@ -149,12 +151,14 @@ self.onmessage = async (event) => {
     self.postMessage({
       status: tests.every((t) => t.passed) ? "passed" : "failed",
       tests,
+      efficiency: "na",
     });
   } catch (error) {
     self.postMessage({
       status: "error",
       tests: [],
       error: error instanceof Error ? error.message : String(error),
+      efficiency: "na",
     });
   } finally {
     destroyProxy(builtins);
