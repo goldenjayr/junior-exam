@@ -16,6 +16,7 @@ import { useTimeAttack } from "@/lib/use-time-attack";
 import { parseShuffle, sessionItemOrder } from "@/lib/shuffle";
 import { parseCheat } from "@/lib/cheat";
 import { getExamSolution } from "@/lib/exam-solutions";
+import { schemaSqlForProblem } from "@/lib/sql-schema";
 
 const statusLabel: Record<string, string> = {
   passed: "Passed",
@@ -147,6 +148,7 @@ function Exam() {
   }
 
   const code = answers[problem.id] ?? problem.starterCode;
+  const schemaSql = schemaSqlForProblem(problem);
   const result = results[problem.id];
   const passedCount = examProblems.filter(
     (p) => results[p.id]?.status === "passed"
@@ -264,6 +266,19 @@ function Exam() {
                 {problem.instructions}
               </p>
             </div>
+
+            {schemaSql && (
+              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <h3 className="text-sm font-bold">Schema</h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  Table definitions available for this problem. Test data varies
+                  per case.
+                </p>
+                <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-900 p-3 font-mono text-xs leading-relaxed text-slate-100">
+                  {schemaSql}
+                </pre>
+              </div>
+            )}
 
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between gap-4">
