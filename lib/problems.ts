@@ -27,8 +27,9 @@ export type Problem = {
     | "react"
     | "postgresql"
     | "prisma"
-    | "python";
-  kind?: "react" | "sql" | "prisma-schema" | "prisma-client" | "python";
+    | "python"
+    | "typescript";
+  kind?: "react" | "sql" | "prisma-schema" | "prisma-client" | "python" | "typescript";
   difficulty: "easy" | "medium" | "hard";
   instructions: string;
   fnName: string;
@@ -47,6 +48,7 @@ export const categories: Problem["category"][] = [
   "postgresql",
   "prisma",
   "python",
+  "typescript",
 ];
 
 /** Large inputs for efficiency probes — kept at module scope so expected stays stable. */
@@ -1356,6 +1358,179 @@ model User {
     pass`,
     tests: [
       { args: [[[1, [2, 3]], 4]], expected: [1, 2, 3, 4] },
+      { args: [[]], expected: [] },
+    ],
+  },
+  {
+    id: 52,
+    title: "Typed Active Users",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "easy",
+    instructions:
+      "Complete getActiveUsers so it returns only users whose active property is true. Use the provided User type.",
+    fnName: "getActiveUsers",
+    starterCode: `type User = { id: number; name: string; active: boolean };
+
+function getActiveUsers(users: User[]): User[] {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [
+          [
+            { id: 1, name: "John", active: true },
+            { id: 2, name: "Maria", active: false },
+            { id: 3, name: "Peter", active: true },
+          ],
+        ],
+        expected: [
+          { id: 1, name: "John", active: true },
+          { id: 3, name: "Peter", active: true },
+        ],
+      },
+      {
+        args: [[{ id: 1, name: "Solo", active: false }]],
+        expected: [],
+      },
+      { args: [[]], expected: [] },
+    ],
+  },
+  {
+    id: 53,
+    title: "Pluck Property",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "easy",
+    instructions:
+      "Complete pluck so it returns an array of the given key's values from each item. The generic signature is already provided.",
+    fnName: "pluck",
+    starterCode: `function pluck<T, K extends keyof T>(items: T[], key: K): T[K][] {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [
+          [
+            { id: 1, name: "Ada" },
+            { id: 2, name: "Grace" },
+          ],
+          "name",
+        ],
+        expected: ["Ada", "Grace"],
+      },
+      {
+        args: [
+          [
+            { id: 10, score: 90 },
+            { id: 11, score: 85 },
+          ],
+          "score",
+        ],
+        expected: [90, 85],
+      },
+    ],
+  },
+  {
+    id: 54,
+    title: "Api Result Message",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "medium",
+    instructions:
+      "Complete getMessage so it returns data when status is ok and message when status is error.",
+    fnName: "getMessage",
+    starterCode: `type ApiResult =
+  | { status: "ok"; data: string }
+  | { status: "error"; message: string };
+
+function getMessage(result: ApiResult): string {
+  // Write your solution here
+
+}`,
+    tests: [
+      { args: [{ status: "ok", data: "Saved" }], expected: "Saved" },
+      { args: [{ status: "error", message: "Not found" }], expected: "Not found" },
+    ],
+  },
+  {
+    id: 55,
+    title: "Count By Role",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "medium",
+    instructions:
+      "Complete countByRole so it returns an object mapping each role to how many employees have that role.",
+    fnName: "countByRole",
+    starterCode: `type Employee = { name: string; role: string };
+
+function countByRole(employees: Employee[]): Record<string, number> {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [
+          [
+            { name: "Ada", role: "Engineer" },
+            { name: "Grace", role: "Engineer" },
+            { name: "Linus", role: "Manager" },
+          ],
+        ],
+        expected: { Engineer: 2, Manager: 1 },
+      },
+      { args: [[]], expected: {} },
+    ],
+  },
+  {
+    id: 56,
+    title: "Parse User Id",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "easy",
+    instructions:
+      "Complete parseUserId so it returns a number whether the input is a numeric string or already a number.",
+    fnName: "parseUserId",
+    starterCode: `function parseUserId(id: string | number): number {
+  // Write your solution here
+
+}`,
+    tests: [
+      { args: ["42"], expected: 42 },
+      { args: [7], expected: 7 },
+      { args: ["0"], expected: 0 },
+    ],
+  },
+  {
+    id: 57,
+    title: "Omit Email",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "medium",
+    instructions:
+      "Complete omitEmail so it returns each user without the email field. Use the provided User type.",
+    fnName: "omitEmail",
+    starterCode: `type User = { id: number; name: string; email: string };
+
+function omitEmail(users: User[]): Omit<User, "email">[] {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [
+          [
+            { id: 1, name: "Ada", email: "ada@example.com" },
+            { id: 2, name: "Grace", email: "grace@example.com" },
+          ],
+        ],
+        expected: [
+          { id: 1, name: "Ada" },
+          { id: 2, name: "Grace" },
+        ],
+      },
       { args: [[]], expected: [] },
     ],
   },

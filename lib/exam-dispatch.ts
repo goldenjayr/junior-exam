@@ -8,13 +8,15 @@ import { runReactProblem } from "./react-runner.ts";
 import { runSqlProblem } from "./sql-runner.ts";
 import { runPrismaSchemaProblem } from "./prisma-schema-runner.ts";
 import { runPythonProblem } from "./python-runner.ts";
+import { runTypeScriptProblem } from "./typescript-runner.ts";
 
-export type EditorLanguage = "javascript" | "sql" | "prisma" | "python";
+export type EditorLanguage = "javascript" | "sql" | "prisma" | "python" | "typescript";
 
 export function editorLanguageFor(problem: Problem): EditorLanguage {
   if (problem.kind === "sql") return "sql";
   if (problem.kind === "prisma-schema") return "prisma";
   if (problem.kind === "python") return "python";
+  if (problem.kind === "typescript") return "typescript";
   return "javascript";
 }
 
@@ -60,6 +62,8 @@ export function runAny(problem: Problem, code: string): Promise<RunResult> {
       return Promise.resolve(runPrismaSchemaProblem(problem, code));
     case "python":
       return runPythonProblem(problem, code);
+    case "typescript":
+      return runTypeScriptProblem(problem, code);
     default:
       return runProblemSandboxed(problem, code);
   }

@@ -84,11 +84,13 @@ test("shared exam dispatch selects languages, labels, and runners", async () => 
   const schemaProblem = problems.find((p) => p.kind === "prisma-schema")!;
   const prismaClientProblem = problems.find((p) => p.id === 43)!;
   const pythonProblem = problems.find((p) => p.kind === "python")!;
+  const tsProblem = problems.find((p) => p.kind === "typescript")!;
 
   assert.strictEqual(editorLanguageFor(jsProblem), "javascript");
   assert.strictEqual(editorLanguageFor(sqlProblem), "sql");
   assert.strictEqual(editorLanguageFor(schemaProblem), "prisma");
   assert.strictEqual(editorLanguageFor(pythonProblem), "python");
+  assert.strictEqual(editorLanguageFor(tsProblem), "typescript");
   assert.strictEqual(callLabel(sqlProblem, sqlProblem.tests[0]), "SQL query → rows");
   assert.strictEqual(
     callLabel(schemaProblem, schemaProblem.tests[0]),
@@ -108,6 +110,10 @@ test("shared exam dispatch selects languages, labels, and runners", async () => 
 `
       )
     ).status,
+    "passed"
+  );
+  assert.strictEqual(
+    (await runAny(tsProblem, examSolutions[52]!)).status,
     "passed"
   );
 });

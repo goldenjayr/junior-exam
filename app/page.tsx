@@ -66,8 +66,8 @@ export default function Home() {
               Take a Quiz →
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              One question at a time — multiple answer styles across JS, React,
-              Postgres, Prisma, Python, and more.
+              One question at a time — multiple answer styles across JS, TypeScript,
+              React, Postgres, Prisma, Python, and more.
             </p>
           </Link>
           <Link

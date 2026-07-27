@@ -11,6 +11,39 @@ import { clampMinutes, minutesToSeconds } from "@/lib/time-attack";
 
 const difficulties = ["easy", "medium", "hard"] as const;
 
+const categoryLabels: Record<Problem["category"], string> = {
+  arrays: "Arrays",
+  strings: "Strings",
+  objects: "Objects",
+  logic: "Logic",
+  react: "React",
+  postgresql: "PostgreSQL",
+  prisma: "Prisma",
+  python: "Python",
+  typescript: "TypeScript",
+};
+
+const categoryGroups: {
+  label: string;
+  categories: Problem["category"][];
+}[] = [
+  {
+    label: "JavaScript fundamentals",
+    categories: ["arrays", "strings", "objects", "logic"],
+  },
+  {
+    label: "Languages & stack",
+    categories: ["react", "typescript", "python", "postgresql", "prisma"],
+  },
+];
+
+const categoryCounts = Object.fromEntries(
+  categories.map((category) => [
+    category,
+    problems.filter((problem) => problem.category === category).length,
+  ])
+) as Record<Problem["category"], number>;
+
 // ponytail: curated presets, hand-picked ids. Move into lib/problems.ts
 // if presets ever need to be shared or validated against the bank.
 const presets: { name: string; description: string; ids: number[] }[] = [
@@ -96,10 +129,15 @@ const presets: { name: string; description: string; ids: number[] }[] = [
     ids: [46, 47, 48, 49, 50, 51],
   },
   {
+    name: "TypeScript Basics",
+    description: "~40 min · typed functions, unions, generics, and narrowing",
+    ids: [52, 53, 54, 55, 56, 57],
+  },
+  {
     name: "Junior Full Stack",
     description:
-      "~60 min · JS/React junior mix plus SQL, Prisma, and one Python item",
-    ids: [1, 2, 6, 9, 12, 28, 34, 43, 46],
+      "~60 min · JS/React junior mix plus SQL, Prisma, TypeScript, and one Python item",
+    ids: [1, 2, 6, 9, 12, 28, 34, 43, 46, 52],
   },
 ];
 
@@ -171,6 +209,20 @@ export default function AdminPage() {
       (p.title + p.instructions).toLowerCase().includes(query.toLowerCase())
   );
 
+  const filtersActive =
+    query.length > 0 ||
+    difficulty !== "all" ||
+    category !== "all" ||
+    onlySelected;
+
+  function clearFilters() {
+    setQuery("");
+    setDifficulty("all");
+    setCategory("all");
+    setOnlySelected(false);
+    setCopied(false);
+  }
+
   const selectedProblems = problems.filter((p) => selected.has(p.id));
   const totalMinutes = selectedProblems.reduce(
     (sum, p) => sum + minutesFor[p.difficulty],
@@ -226,15 +278,44 @@ export default function AdminPage() {
           {/* Left: problem bank */}
           <section className="animate-fade-up">
             <div className="sticky top-6 z-10 mb-4 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search problems…"
-                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-400"
-              />
-              <div className="flex flex-wrap items-center gap-1.5">
-                {["all", ...difficulties].map((d) => (
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search by title or instructions…"
+                  className="min-w-[12rem] flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-400"
+                />
+                <span className="shrink-0 text-xs text-slate-500">
+                  {visible.length}/{problems.length}
+                </span>
+                {filtersActive && (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-700"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
+                <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Diff
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDifficulty("all")}
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    difficulty === "all"
+                      ? "bg-slate-900 text-white"
+                      : "border border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  Any
+                </button>
+                {difficulties.map((d) => (
                   <button
                     key={d}
                     type="button"
@@ -248,7 +329,7 @@ export default function AdminPage() {
                     {d}
                   </button>
                 ))}
-                <span className="mx-1 text-slate-300">|</span>
+                <span className="mx-1 h-4 w-px bg-slate-200" aria-hidden />
                 <button
                   type="button"
                   onClick={() => setOnlySelected(!onlySelected)}
@@ -258,22 +339,55 @@ export default function AdminPage() {
                       : "border border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  ✓ Selected only{selected.size ? ` (${selected.size})` : ""}
+                  Selected only{selected.size ? ` (${selected.size})` : ""}
                 </button>
-                <span className="mx-1 text-slate-300">|</span>
-                {["all", ...categories].map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setCategory(c)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
-                      category === c
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300 hover:bg-slate-50"
-                    }`}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
+                <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Topic
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCategory("all")}
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    category === "all"
+                      ? "bg-slate-900 text-white"
+                      : "border border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  All
+                </button>
+                {categoryGroups.map((group, groupIndex) => (
+                  <span
+                    key={group.label}
+                    className="contents"
                   >
-                    {c}
-                  </button>
+                    {groupIndex > 0 && (
+                      <span
+                        className="mx-0.5 h-4 w-px bg-slate-200"
+                        aria-hidden
+                      />
+                    )}
+                    {group.categories.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setCategory(c)}
+                        title={group.label}
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          category === c
+                            ? "bg-blue-600 text-white"
+                            : "border border-slate-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        {categoryLabels[c]}
+                        <span className="ml-1 opacity-60">
+                          {categoryCounts[c]}
+                        </span>
+                      </button>
+                    ))}
+                  </span>
                 ))}
               </div>
             </div>
@@ -309,8 +423,8 @@ export default function AdminPage() {
                         {p.instructions}
                       </span>
                     </span>
-                    <span className="shrink-0 text-xs capitalize text-slate-400">
-                      {p.category} · ~{minutesFor[p.difficulty]}m
+                    <span className="shrink-0 text-xs text-slate-400">
+                      {categoryLabels[p.category]} · ~{minutesFor[p.difficulty]}m
                     </span>
                     <button
                       type="button"
@@ -327,9 +441,18 @@ export default function AdminPage() {
                 );
               })}
               {!visible.length && (
-                <p className="p-8 text-center text-sm text-slate-400">
-                  No problems match your filters.
-                </p>
+                <div className="p-8 text-center text-sm text-slate-400">
+                  <p>No problems match your filters.</p>
+                  {filtersActive && (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="mt-2 font-semibold text-blue-600 hover:text-blue-700"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </section>

@@ -22,6 +22,7 @@ export default function CodeEditor({
     if (language === "sql") return [sql({ dialect: PostgreSQL })];
     if (language === "prisma") return []; // plain text v1
     if (language === "python") return [python()];
+    if (language === "typescript") return [javascript({ typescript: true })];
     return [javascript({ jsx: true })];
   }, [language]);
 

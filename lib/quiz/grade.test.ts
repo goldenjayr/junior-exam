@@ -234,3 +234,12 @@ test("registers the complete Prisma question bank", () => {
   assert.strictEqual(questions[0]?.id, 241);
   assert.strictEqual(questions.at(-1)?.id, 265);
 });
+
+test("registers the complete TypeScript question bank", () => {
+  const questions = quizQuestions.filter((question) => question.topic === "typescript");
+
+  assert.ok(quizTopics.includes("typescript"));
+  assert.strictEqual(questions.length, 30);
+  assert.strictEqual(questions[0]?.id, 31);
+  assert.strictEqual(questions.at(-1)?.id, 60);
+});

@@ -106,6 +106,39 @@ export const examSolutions: Record<number, string> = {
             out.append(v)
     return out
 `,
+  52: `type User = { id: number; name: string; active: boolean };
+
+function getActiveUsers(users: User[]): User[] {
+  return users.filter((user) => user.active);
+}`,
+  53: `function pluck<T, K extends keyof T>(items: T[], key: K): T[K][] {
+  return items.map((item) => item[key]);
+}`,
+  54: `type ApiResult =
+  | { status: "ok"; data: string }
+  | { status: "error"; message: string };
+
+function getMessage(result: ApiResult): string {
+  if (result.status === "ok") return result.data;
+  return result.message;
+}`,
+  55: `type Employee = { name: string; role: string };
+
+function countByRole(employees: Employee[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const employee of employees) {
+    counts[employee.role] = (counts[employee.role] ?? 0) + 1;
+  }
+  return counts;
+}`,
+  56: `function parseUserId(id: string | number): number {
+  return typeof id === "number" ? id : Number(id);
+}`,
+  57: `type User = { id: number; name: string; email: string };
+
+function omitEmail(users: User[]): Omit<User, "email">[] {
+  return users.map(({ id, name }) => ({ id, name }));
+}`,
 };
 
 export function getExamSolution(id: number): string | undefined {
