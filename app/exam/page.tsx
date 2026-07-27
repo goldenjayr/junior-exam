@@ -82,10 +82,6 @@ function Exam() {
   );
 
   useEffect(() => {
-    setShowAnswer(false);
-  }, [selectedId]);
-
-  useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(answers));
   }, [answers, storageKey]);
 
@@ -218,7 +214,10 @@ function Exam() {
                     key={p.id}
                     type="button"
                     disabled={frozen}
-                    onClick={() => setSelectedId(p.id)}
+                    onClick={() => {
+                      setShowAnswer(false);
+                      setSelectedId(p.id);
+                    }}
                     className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${
                       selected
                         ? "border-blue-200 bg-blue-50"

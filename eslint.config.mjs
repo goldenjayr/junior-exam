@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local git worktrees + vendored browser assets (not app source)
+    ".worktrees/**",
+    "public/pglite/**",
+    "public/python-worker.test.js",
   ]),
 ]);
 

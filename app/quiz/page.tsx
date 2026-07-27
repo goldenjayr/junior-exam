@@ -93,10 +93,6 @@ function QuizPlayer() {
     localStorage.setItem(storageKey, JSON.stringify(answers));
   }, [answers, storageKey]);
 
-  useEffect(() => {
-    setShowAnswer(false);
-  }, [index]);
-
   const question = sessionQuestions[index];
 
   function lockCurrentIfNeeded(fromIndex: number) {
@@ -122,6 +118,7 @@ function QuizPlayer() {
     if (frozen) return;
     if (nextIndex === index) return;
     lockCurrentIfNeeded(index);
+    setShowAnswer(false);
     setIndex(nextIndex);
   }
 
