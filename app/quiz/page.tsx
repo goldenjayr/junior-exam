@@ -275,7 +275,9 @@ function QuizPlayer() {
               {mode === "practice" ? "Practice mode" : "Assessment"}
             </h1>
             <p className="mt-1 text-sm text-slate-500">
-              One question at a time. Leaving a question locks your answer.
+              {mode === "practice"
+                ? "One question at a time. Check your answer anytime, or leave to lock it."
+                : "One question at a time. Leaving a question locks your answer."}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -346,7 +348,7 @@ function QuizPlayer() {
           />
         )}
 
-        <div className="mt-6 flex items-center justify-between gap-3">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             disabled={frozen || index === 0}
@@ -355,25 +357,39 @@ function QuizPlayer() {
           >
             ← Back
           </button>
-          {index < sessionQuestions.length - 1 ? (
-            <button
-              type="button"
-              disabled={frozen}
-              onClick={() => goTo(index + 1)}
-              className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next →
-            </button>
-          ) : (
-            <button
-              type="button"
-              disabled={frozen}
-              onClick={() => lockCurrentIfNeeded(index)}
-              className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Lock answer
-            </button>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {mode === "practice" && !entry?.locked && (
+              <button
+                type="button"
+                disabled={
+                  frozen || !entry || !hasAnswerValue(entry.value)
+                }
+                onClick={() => lockCurrentIfNeeded(index)}
+                className="rounded-lg border border-blue-300 bg-blue-50 px-5 py-2 text-sm font-bold text-blue-700 transition-transform hover:bg-blue-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Check answer
+              </button>
+            )}
+            {index < sessionQuestions.length - 1 ? (
+              <button
+                type="button"
+                disabled={frozen}
+                onClick={() => goTo(index + 1)}
+                className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next →
+              </button>
+            ) : mode === "assessment" ? (
+              <button
+                type="button"
+                disabled={frozen || entry?.locked}
+                onClick={() => lockCurrentIfNeeded(index)}
+                className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Lock answer
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
 
