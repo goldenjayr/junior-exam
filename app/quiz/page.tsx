@@ -12,7 +12,7 @@ import QuizProgress from "@/components/quiz/QuizProgress";
 import FeedbackBurst from "@/components/quiz/FeedbackBurst";
 import TimeAttackBar from "@/components/TimeAttackBar";
 import FreezeOverlay from "@/components/FreezeOverlay";
-import { parseTimeLimit } from "@/lib/time-attack";
+import { parseTimeLimit, timeAttackStorageKey } from "@/lib/time-attack";
 import { useTimeAttack } from "@/lib/use-time-attack";
 import { parseShuffle, sessionItemOrder } from "@/lib/shuffle";
 import { parseCheat } from "@/lib/cheat";
@@ -53,7 +53,8 @@ function QuizPlayer() {
   const shuffle = parseShuffle(searchParams.get("s"));
   const cheat = parseCheat(searchParams.get("cheat"));
   const qParam = searchParams.get("q") ?? "";
-  const orderSessionKey = `quiz:${qParam}:s=${shuffle ? 1 : 0}`;
+  const [attempt, setAttempt] = useState(0);
+  const orderSessionKey = `quiz:${qParam}:s=${shuffle ? 1 : 0}:a${attempt}`;
 
   const sessionQuestions = useMemo(() => {
     const ids = parseQuizIds(searchParams.get("q"));
@@ -69,7 +70,7 @@ function QuizPlayer() {
   }, [searchParams, shuffle, orderSessionKey]);
 
   const storageKey = `quiz-answers:${qParam}:${mode}`;
-  const timerSessionId = `quiz:${qParam}:${searchParams.get("t") ?? ""}`;
+  const timerSessionId = `quiz:${qParam}:${searchParams.get("t") ?? ""}:a${attempt}`;
 
   const [index, setIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
@@ -203,6 +204,25 @@ function QuizPlayer() {
     }
   }
 
+  function retakeQuiz() {
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {
+      /* ignore */
+    }
+    try {
+      sessionStorage.removeItem(timeAttackStorageKey(timerSessionId));
+      sessionStorage.removeItem(`item-order:${orderSessionKey}`);
+    } catch {
+      /* ignore */
+    }
+    setAnswers({});
+    setIndex(0);
+    setShowAnswer(false);
+    setSubmitState("idle");
+    setAttempt((n) => n + 1);
+  }
+
   if (!sessionQuestions.length) {
     return (
       <main className="grid min-h-screen place-items-center bg-slate-100 px-6 text-center text-slate-500">
@@ -229,6 +249,20 @@ function QuizPlayer() {
   const lockedFlags = sessionQuestions.map((q) =>
     Boolean(answers[q.id]?.locked)
   );
+  const quizFinished =
+    sessionQuestions.length > 0 &&
+    (frozen ||
+      sessionQuestions.every((q) => Boolean(answers[q.id]?.locked)));
+
+  const retakeButton = quizFinished ? (
+    <button
+      type="button"
+      onClick={retakeQuiz}
+      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-transform hover:bg-slate-50 active:scale-95"
+    >
+      Retake quiz
+    </button>
+  ) : null;
 
   const submitControls = (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -289,6 +323,7 @@ function QuizPlayer() {
                 ? `${correctCount} correct`
                 : `${answeredFlags.filter(Boolean).length} / ${sessionQuestions.length} answered`}
             </div>
+            {retakeButton}
             {!frozen && submitControls}
           </div>
         </header>
@@ -397,6 +432,7 @@ function QuizPlayer() {
         <FreezeOverlay>
           <div className="flex flex-col items-stretch gap-2">
             {submitControls}
+            {retakeButton}
           </div>
         </FreezeOverlay>
       )}
