@@ -83,6 +83,19 @@ export default function Home() {
               and Time Attack.
             </p>
           </Link>
+          <Link
+            href="/random-exam"
+            className="group rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-100 sm:col-span-2"
+          >
+            <span className="text-2xl">🎲</span>
+            <h2 className="mt-3 text-lg font-bold group-hover:text-blue-600">
+              Random Exam →
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Pick language, difficulty, and count — spin for a surprise set and
+              jump straight in.
+            </p>
+          </Link>
         </div>
 
         <dl
