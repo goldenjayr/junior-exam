@@ -1,32 +1,182 @@
 /** Official exam solutions for tests and optional `?cheat=1` reveal. */
 export const examSolutions: Record<number, string> = {
-  1: `function getActiveUsers(users) { return users.filter(u => u.active); }`,
-  2: `function countEmployeesByRole(es) { const c = {}; for (const e of es) c[e.role] = (c[e.role] || 0) + 1; return c; }`,
-  3: `function findEmployeeById(es, id) { return es.find(e => e.id === id); }`,
-  4: `function removeDuplicates(ns) { return [...new Set(ns)]; }`,
-  5: `function calculateAverage(s) { return s.reduce((a, b) => a + b, 0) / s.length; }`,
-  6: `function reverseString(t) { return [...t].reverse().join(""); }`,
-  7: `function isPalindrome(t) { const s = t.toLowerCase(); return s === [...s].reverse().join(""); }`,
-  8: `function sumEvens(ns) { return ns.filter(n => n % 2 === 0).reduce((a, b) => a + b, 0); }`,
-  9: `function fizzBuzz(n) { return Array.from({length: n}, (_, i) => { const x = i + 1; return x % 15 === 0 ? "FizzBuzz" : x % 3 === 0 ? "Fizz" : x % 5 === 0 ? "Buzz" : x; }); }`,
-  10: `function groupByCategory(ps) { const g = {}; for (const p of ps) (g[p.category] ||= []).push(p.name); return g; }`,
-  11: `function flatten(vs) { return vs.flat(Infinity); }`,
-  12: `function chunk(vs, size) { const out = []; for (let i = 0; i < vs.length; i += size) out.push(vs.slice(i, i + size)); return out; }`,
-  13: `function sortByAge(es) { return [...es].sort((a, b) => a.age - b.age); }`,
-  14: `function countVowels(t) { return (t.match(/[aeiou]/gi) || []).length; }`,
-  15: `function longestWord(s) { return s.split(" ").reduce((a, b) => b.length > a.length ? b : a); }`,
-  16: `function capitalizeWords(s) { return s.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "); }`,
-  17: `function minMax(ns) { return { min: Math.min(...ns), max: Math.max(...ns) }; }`,
-  18: `function charCount(t) { const c = {}; for (const ch of t) c[ch] = (c[ch] || 0) + 1; return c; }`,
-  19: `function totalCartPrice(items) { return items.reduce((sum, i) => sum + i.price * i.quantity, 0); }`,
-  20: `function mergeSorted(a, b) { return [...a, ...b].sort((x, y) => x - y); }`,
-  21: `function isAnagram(a, b) { const norm = s => [...s.toLowerCase()].sort().join(""); return norm(a) === norm(b); }`,
-  22: `function pluck(items, key) { return items.map(i => i[key]); }`,
-  23: `function twoSum(ns, t) { const seen = new Map(); for (let i = 0; i < ns.length; i++) { const need = t - ns[i]; if (seen.has(need)) return [seen.get(need), i]; seen.set(ns[i], i); } }`,
-  24: `function isBalanced(t) { const pairs = { ")": "(", "]": "[", "}": "{" }; const st = []; for (const c of t) { if ("([{".includes(c)) st.push(c); else if (c in pairs) { if (st.pop() !== pairs[c]) return false; } } return st.length === 0; }`,
-  25: `function runningTotal(ns) { let sum = 0; return ns.map(n => sum += n); }`,
-  26: `function fibonacci(n) { const out = []; let [a, b] = [0, 1]; for (let i = 0; i < n; i++) { out.push(a); [a, b] = [b, a + b]; } return out; }`,
-  27: `function unslug(slug) { return slug.split("-").map(w => w[0].toUpperCase() + w.slice(1)).join(" "); }`,
+  1: `// Keep users whose active flag is true.
+function getActiveUsers(users) {
+  return users.filter((user) => user.active);
+}`,
+  2: `// Tally how many employees have each role.
+function countEmployeesByRole(employees) {
+  const counts = {};
+  for (const employee of employees) {
+    counts[employee.role] = (counts[employee.role] || 0) + 1;
+  }
+  return counts;
+}`,
+  3: `// Find the first employee with a matching id.
+function findEmployeeById(employees, id) {
+  return employees.find((employee) => employee.id === id);
+}`,
+  4: `// Drop duplicates while preserving first-seen order via Set.
+function removeDuplicates(numbers) {
+  return [...new Set(numbers)];
+}`,
+  5: `// Average = sum of scores divided by how many there are.
+function calculateAverage(scores) {
+  const total = scores.reduce((sum, score) => sum + score, 0);
+  return total / scores.length;
+}`,
+  6: `// Spread into chars, reverse, then join back into a string.
+function reverseString(text) {
+  return [...text].reverse().join("");
+}`,
+  7: `// Compare the lowercased string to its reverse.
+function isPalindrome(text) {
+  const normalized = text.toLowerCase();
+  return normalized === [...normalized].reverse().join("");
+}`,
+  8: `// Keep only even numbers, then add them up.
+function sumEvens(numbers) {
+  return numbers
+    .filter((number) => number % 2 === 0)
+    .reduce((sum, number) => sum + number, 0);
+}`,
+  9: `// For each 1..n, label Fizz / Buzz / FizzBuzz or leave the number.
+function fizzBuzz(n) {
+  return Array.from({ length: n }, (_, index) => {
+    const value = index + 1;
+    if (value % 15 === 0) return "FizzBuzz";
+    if (value % 3 === 0) return "Fizz";
+    if (value % 5 === 0) return "Buzz";
+    return value;
+  });
+}`,
+  10: `// Group product names under their category key.
+function groupByCategory(products) {
+  const groups = {};
+  for (const product of products) {
+    (groups[product.category] ||= []).push(product.name);
+  }
+  return groups;
+}`,
+  11: `// Flatten nested arrays to any depth.
+function flatten(values) {
+  return values.flat(Infinity);
+}`,
+  12: `// Slice the array into consecutive chunks of the given size.
+function chunk(values, size) {
+  const chunks = [];
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size));
+  }
+  return chunks;
+}`,
+  13: `// Sort a copy by age ascending so the input is not mutated.
+function sortByAge(employees) {
+  return [...employees].sort((a, b) => a.age - b.age);
+}`,
+  14: `// Count case-insensitive vowel matches with a regex.
+function countVowels(text) {
+  return (text.match(/[aeiou]/gi) || []).length;
+}`,
+  15: `// Among space-separated words, keep the one with the greatest length.
+function longestWord(sentence) {
+  return sentence
+    .split(" ")
+    .reduce((longest, word) => (word.length > longest.length ? word : longest));
+}`,
+  16: `// Uppercase the first character of each space-separated word.
+function capitalizeWords(sentence) {
+  return sentence
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}`,
+  17: `// Return both extremes in one pass via Math.min / Math.max.
+function minMax(numbers) {
+  return {
+    min: Math.min(...numbers),
+    max: Math.max(...numbers),
+  };
+}`,
+  18: `// Count how often each character appears.
+function charCount(text) {
+  const counts = {};
+  for (const char of text) {
+    counts[char] = (counts[char] || 0) + 1;
+  }
+  return counts;
+}`,
+  19: `// Sum price × quantity for every cart line item.
+function totalCartPrice(items) {
+  return items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+}`,
+  20: `// Concatenate then sort numerically (simple merge for interview scope).
+function mergeSorted(a, b) {
+  return [...a, ...b].sort((left, right) => left - right);
+}`,
+  21: `// Anagrams share the same sorted lowercase character multiset.
+function isAnagram(a, b) {
+  const normalize = (text) => [...text.toLowerCase()].sort().join("");
+  return normalize(a) === normalize(b);
+}`,
+  22: `// Collect one property from every item.
+function pluck(items, key) {
+  return items.map((item) => item[key]);
+}`,
+  23: `// One pass: remember each value's index and look up target - value.
+function twoSum(numbers, target) {
+  const seen = new Map();
+  for (let index = 0; index < numbers.length; index++) {
+    const need = target - numbers[index];
+    if (seen.has(need)) {
+      return [seen.get(need), index];
+    }
+    seen.set(numbers[index], index);
+  }
+}`,
+  24: `// Stack open brackets; each closer must match the latest opener.
+function isBalanced(text) {
+  const pairs = { ")": "(", "]": "[", "}": "{" };
+  const stack = [];
+
+  for (const char of text) {
+    if ("([{".includes(char)) {
+      stack.push(char);
+    } else if (char in pairs) {
+      if (stack.pop() !== pairs[char]) return false;
+    }
+  }
+
+  return stack.length === 0;
+}`,
+  25: `// Running sum: each position is the sum of all values up to there.
+function runningTotal(numbers) {
+  let sum = 0;
+  return numbers.map((number) => (sum += number));
+}`,
+  26: `// Walk the Fibonacci recurrence and collect the first n values.
+function fibonacci(n) {
+  const sequence = [];
+  let a = 0;
+  let b = 1;
+
+  for (let index = 0; index < n; index++) {
+    sequence.push(a);
+    [a, b] = [b, a + b];
+  }
+
+  return sequence;
+}`,
+  27: `// Split on hyphens, capitalize each word, then join with spaces.
+function unslug(slug) {
+  return slug
+    .split("-")
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
+}`,
   34: "SELECT id, name, active FROM users WHERE active = true ORDER BY id;",
   35: `SELECT orders.id, orders.total
        FROM orders
@@ -72,9 +222,26 @@ export const examSolutions: Record<number, string> = {
     id Int @id
     role Role
   }`,
-  43: `function findActiveUsersArgs() { return { where: { active: true } }; }`,
-  44: `function findPublishedPostsArgs() { return { where: { published: true }, include: { author: true } }; }`,
-  45: `function createPostArgs() { return { data: { title: "Hi", author: { connect: { id: 1 } } } }; }`,
+  43: `// findMany args: only rows where active is true.
+function findActiveUsersArgs() {
+  return { where: { active: true } };
+}`,
+  44: `// findMany args: published posts, and include each post's author.
+function findPublishedPostsArgs() {
+  return {
+    where: { published: true },
+    include: { author: true },
+  };
+}`,
+  45: `// create args: title "Hi", connected to author id 1.
+function createPostArgs() {
+  return {
+    data: {
+      title: "Hi",
+      author: { connect: { id: 1 } },
+    },
+  };
+}`,
   46: `def get_active_users(users):
     return [u for u in users if u["active"]]
 `,
