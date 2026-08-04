@@ -380,6 +380,9 @@ function QuizPlayer() {
           <FeedbackBurst
             correct={entry.graded.correct}
             explanation={question.explanation}
+            correctAnswer={
+              entry.graded.correct ? undefined : formatCorrectAnswer(question)
+            }
           />
         )}
 

@@ -3,9 +3,11 @@
 export default function FeedbackBurst({
   correct,
   explanation,
+  correctAnswer,
 }: {
   correct: boolean;
   explanation?: string;
+  correctAnswer?: string;
 }) {
   return (
     <div
@@ -17,6 +19,12 @@ export default function FeedbackBurst({
       role="status"
     >
       <p className="font-bold">{correct ? "Correct!" : "Not quite"}</p>
+      {!correct && correctAnswer && (
+        <p className="mt-1">
+          <span className="font-semibold">Answer: </span>
+          <span className="whitespace-pre-wrap font-mono">{correctAnswer}</span>
+        </p>
+      )}
       {explanation && <p className="mt-1 leading-relaxed opacity-90">{explanation}</p>}
     </div>
   );
