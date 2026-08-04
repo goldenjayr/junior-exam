@@ -243,3 +243,21 @@ test("registers the complete TypeScript question bank", () => {
   assert.strictEqual(questions[0]?.id, 31);
   assert.strictEqual(questions.at(-1)?.id, 60);
 });
+
+test("registers JS logic-trace questions 301–310", () => {
+  const logic = quizQuestions.filter(
+    (q) => q.topic === "javascript" && q.id >= 301 && q.id <= 310
+  );
+  assert.strictEqual(logic.length, 10);
+  assert.deepStrictEqual(
+    logic.map((q) => q.id),
+    [301, 302, 303, 304, 305, 306, 307, 308, 309, 310]
+  );
+  const byType = Object.fromEntries(
+    ["output", "hotspot", "order"].map((t) => [
+      t,
+      logic.filter((q) => q.type === t).length,
+    ])
+  );
+  assert.deepStrictEqual(byType, { output: 4, hotspot: 3, order: 3 });
+});
