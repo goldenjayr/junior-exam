@@ -432,4 +432,167 @@ console.log(a.x, b.x);`,
     accept: ["1 2", "1, 2", "1,2"],
     explanation: "Object spread copies enumerable own properties; updating `b.x` does not change `a`.",
   },
+  {
+    id: 301,
+    type: "output",
+    topic: "javascript",
+    difficulty: "easy",
+    prompt: "What is logged (three values, space-separated)?",
+    code: `for (var i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 0);
+}`,
+    accept: ["3 3 3", "3, 3, 3", "3,3,3"],
+    explanation:
+      "`var` is function-scoped; all three timeouts see the final `i` after the loop finishes.",
+  },
+  {
+    id: 302,
+    type: "output",
+    topic: "javascript",
+    difficulty: "medium",
+    prompt: "What is logged?",
+    code: `"use strict";
+const obj = {
+  n: 1,
+  get() {
+    return this && this.n;
+  },
+};
+const g = obj.get;
+console.log(g());`,
+    accept: ["undefined"],
+    explanation:
+      "Extracting the method loses the receiver. Calling `g()` unbound makes `this` falsy under the guard, so the expression yields `undefined` instead of `1`.",
+  },
+  {
+    id: 303,
+    type: "order",
+    topic: "javascript",
+    difficulty: "medium",
+    prompt: "Order these from earliest to latest in the event loop:",
+    items: [
+      { id: "sync", label: "Synchronous console.log on the call stack" },
+      { id: "promise", label: "Promise.then callback (microtask)" },
+      { id: "timeout", label: "setTimeout(fn, 0) callback (macrotask)" },
+    ],
+    correctOrder: ["sync", "promise", "timeout"],
+    explanation:
+      "The current stack runs first; then the microtask queue drains before the next macrotask.",
+  },
+  {
+    id: 304,
+    type: "hotspot",
+    topic: "javascript",
+    difficulty: "easy",
+    prompt: "Click the line that throws at runtime.",
+    code: `const user = { name: "Ada" };
+user.age = 30;
+user = { name: "Grace" };
+console.log(user.name);`,
+    regions: [
+      { id: "r1", label: "Line 1: const declaration", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: mutate property", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: reassign const", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: log", startLine: 4, endLine: 4 },
+    ],
+    correctRegionId: "r3",
+    explanation:
+      "Property mutation on a const object is fine; reassigning the binding throws.",
+  },
+  {
+    id: 305,
+    type: "output",
+    topic: "javascript",
+    difficulty: "medium",
+    prompt: "What is logged?",
+    code: `const a = { x: 1 };
+const b = a;
+b.x = 2;
+console.log(a.x);`,
+    accept: ["2"],
+    explanation: "`b` aliases `a`; mutating `b.x` mutates the same object.",
+  },
+  {
+    id: 306,
+    type: "order",
+    topic: "javascript",
+    difficulty: "hard",
+    prompt:
+      'Order the logged labels from earliest to latest.\n\n```js\nconsole.log("S");\nPromise.resolve()\n  .then(() => {\n    console.log("M1");\n    return Promise.resolve();\n  })\n  .then(() => console.log("M2"));\nsetTimeout(() => console.log("T"), 0);\n```',
+    items: [
+      { id: "S", label: '"S"' },
+      { id: "M1", label: '"M1"' },
+      { id: "M2", label: '"M2"' },
+      { id: "T", label: '"T"' },
+    ],
+    correctOrder: ["S", "M1", "M2", "T"],
+    explanation:
+      "Nested microtasks still run before the next macrotask (`setTimeout`).",
+  },
+  {
+    id: 307,
+    type: "hotspot",
+    topic: "javascript",
+    difficulty: "medium",
+    prompt: "Click the line that causes a Temporal Dead Zone ReferenceError.",
+    code: `console.log(a);
+let a = 1;
+var b = 2;
+console.log(b);`,
+    regions: [
+      { id: "r1", label: "Line 1: log a before init", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: let a", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: var b", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: log b", startLine: 4, endLine: 4 },
+    ],
+    correctRegionId: "r1",
+    explanation:
+      "`let`/`const` are in the TDZ until initialized; accessing `a` on line 1 throws.",
+  },
+  {
+    id: 308,
+    type: "output",
+    topic: "javascript",
+    difficulty: "hard",
+    prompt: "What is logged (three values, space-separated)?",
+    code: `setTimeout(() => console.log("A"), 0);
+Promise.resolve().then(() => console.log("B"));
+console.log("C");`,
+    accept: ["C B A", "C, B, A", "C,B,A"],
+    explanation: "Sync `C` first; microtask `B` before macrotask `A`.",
+  },
+  {
+    id: 309,
+    type: "hotspot",
+    topic: "javascript",
+    difficulty: "medium",
+    prompt: "Click the line that mutates the original `nums` array.",
+    code: `const nums = [3, 1, 2];
+const sorted = nums.sort();
+console.log(nums);
+console.log(sorted);`,
+    regions: [
+      { id: "r1", label: "Line 1: declare nums", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: nums.sort()", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: log nums", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: log sorted", startLine: 4, endLine: 4 },
+    ],
+    correctRegionId: "r2",
+    explanation:
+      "`sort` mutates in place and returns the same array reference; prefer `toSorted` or a copy for immutability.",
+  },
+  {
+    id: 310,
+    type: "order",
+    topic: "javascript",
+    difficulty: "easy",
+    prompt: "Order the typical steps to handle a successful async fetch of JSON:",
+    items: [
+      { id: "fetch", label: "fetch(url)" },
+      { id: "res", label: "await response.json()" },
+      { id: "use", label: "use the parsed data" },
+    ],
+    correctOrder: ["fetch", "res", "use"],
+    explanation: "Get a Response, parse the body, then work with the data.",
+  },
 ];

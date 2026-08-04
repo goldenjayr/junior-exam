@@ -14,6 +14,13 @@ export const quizPresets: QuizPreset[] = [
     suggestedMinutes: 12,
   },
   {
+    name: "JS Logic Trace",
+    description:
+      "Junior–mid code-tracing: closures, this, references, TDZ, mutation, and event-loop order.",
+    ids: [301, 302, 303, 304, 305, 306, 307, 308, 309, 310],
+    suggestedMinutes: 15,
+  },
+  {
     name: "TypeScript Essentials",
     description:
       "Static typing, unions, utilities, narrowing, and common junior TS interview topics.",
