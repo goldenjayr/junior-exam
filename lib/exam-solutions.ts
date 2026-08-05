@@ -306,6 +306,76 @@ function countByRole(employees: Employee[]): Record<string, number> {
 function omitEmail(users: User[]): Omit<User, "email">[] {
   return users.map(({ id, name }) => ({ id, name }));
 }`,
+  58: `// Trim parts, drop empties, join with a single space.
+function formatFullName(first, last) {
+  return [first, last]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(" ");
+}`,
+  59: `// Keep done tasks and return their titles in order.
+function getCompletedTitles(tasks) {
+  return tasks.filter((task) => task.done).map((task) => task.title);
+}`,
+  60: `// Skip nullish values, then join key=value pairs.
+function buildQueryString(params) {
+  return Object.keys(params)
+    .filter((key) => params[key] != null)
+    .map((key) => \`\${key}=\${String(params[key])}\`)
+    .join("&");
+}`,
+  61: `// Flatten groups, then unique while keeping first-seen order.
+function uniqueTags(groups) {
+  return [...new Set(groups.flat())];
+}`,
+  62: `// Apply percent off and round to cents.
+function applyDiscount(price, percent) {
+  return Math.round(price * (1 - percent / 100) * 100) / 100;
+}`,
+  63: `// Sort a copy by createdAt descending.
+function sortMessagesNewestFirst(messages) {
+  return [...messages].sort(
+    (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
+  );
+}`,
+  64: `type Person = { first: string; last: string };
+
+function formatFullName(person: Person): string {
+  return [person.first, person.last]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(" ");
+}`,
+  65: `type Product = { id: number; name: string; inStock: boolean };
+
+function getInStockNames(products: Product[]): string[] {
+  return products.filter((p) => p.inStock).map((p) => p.name);
+}`,
+  66: `type Settings = { theme: string; pageSize: number; notifications: boolean };
+
+function mergeSettings(
+  defaults: Settings,
+  overrides: Partial<Settings>
+): Settings {
+  return { ...defaults, ...overrides };
+}`,
+  67: `function safeDivide(a: number, b: number): number | null {
+  return b === 0 ? null : a / b;
+}`,
+  68: `type OrderStatus = "pending" | "shipped" | "cancelled";
+
+function statusLabel(status: OrderStatus): string {
+  const labels: Record<OrderStatus, string> = {
+    pending: "Pending",
+    shipped: "Shipped",
+    cancelled: "Cancelled",
+  };
+  return labels[status];
+}`,
+  69: `function paginate<T>(items: T[], page: number, pageSize: number): T[] {
+  const start = (page - 1) * pageSize;
+  return items.slice(start, start + pageSize);
+}`,
 };
 
 export function getExamSolution(id: number): string | undefined {

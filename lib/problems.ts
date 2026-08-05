@@ -1534,6 +1534,320 @@ function omitEmail(users: User[]): Omit<User, "email">[] {
       { args: [[]], expected: [] },
     ],
   },
+  {
+    id: 58,
+    title: "Format Full Name",
+    category: "strings",
+    difficulty: "easy",
+    instructions:
+      "Complete formatFullName so it returns a single display name from first and last. Trim each part, join with one space, and omit empty parts. If both are empty after trim, return an empty string.",
+    fnName: "formatFullName",
+    starterCode: `function formatFullName(first, last) {
+  // Write your solution here
+
+}`,
+    tests: [
+      { args: ["Ada", "Lovelace"], expected: "Ada Lovelace" },
+      { args: ["  Grace  ", " Hopper "], expected: "Grace Hopper" },
+      { args: ["Solo", ""], expected: "Solo" },
+      { args: ["", "Madonna"], expected: "Madonna" },
+      { args: ["  ", "  "], expected: "" },
+    ],
+  },
+  {
+    id: 59,
+    title: "Pick Completed Tasks",
+    category: "arrays",
+    difficulty: "easy",
+    instructions:
+      "Complete getCompletedTitles so it returns the title of every task whose done property is true, in the same order as the input.",
+    fnName: "getCompletedTitles",
+    starterCode: `function getCompletedTitles(tasks) {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [
+          [
+            { title: "Ship", done: true },
+            { title: "Draft", done: false },
+            { title: "Review", done: true },
+          ],
+        ],
+        expected: ["Ship", "Review"],
+      },
+      {
+        args: [[{ title: "Todo", done: false }]],
+        expected: [],
+      },
+      { args: [[]], expected: [] },
+    ],
+  },
+  {
+    id: 60,
+    title: "Build Query String",
+    category: "objects",
+    difficulty: "easy",
+    instructions:
+      "Complete buildQueryString so it turns a plain object into a query string like `a=1&b=x`. Skip keys whose value is null or undefined. Convert other values with String(...). Do not add a leading `?`. Key order may follow Object.keys order.",
+    fnName: "buildQueryString",
+    starterCode: `function buildQueryString(params) {
+  // Write your solution here
+
+}`,
+    tests: [
+      { args: [{ a: 1, b: "x" }], expected: "a=1&b=x" },
+      { args: [{ q: "hi", page: null, sort: "asc" }], expected: "q=hi&sort=asc" },
+      { args: [{ empty: undefined }], expected: "" },
+      { args: [{}], expected: "" },
+    ],
+  },
+  {
+    id: 61,
+    title: "Unique Tags",
+    category: "arrays",
+    difficulty: "easy",
+    instructions:
+      "Complete uniqueTags so it flattens an array of tag arrays into one list of unique tags, preserving first-seen order.",
+    fnName: "uniqueTags",
+    starterCode: `function uniqueTags(groups) {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [
+          [
+            ["js", "ts"],
+            ["ts", "react"],
+            ["js"],
+          ],
+        ],
+        expected: ["js", "ts", "react"],
+      },
+      { args: [[["a"], ["a", "b"]]], expected: ["a", "b"] },
+      { args: [[]], expected: [] },
+    ],
+  },
+  {
+    id: 62,
+    title: "Apply Discount",
+    category: "logic",
+    difficulty: "easy",
+    instructions:
+      "Complete applyDiscount so it returns price after a percent discount, rounded to 2 decimal places. Example: price 100 and percent 15 → 85.",
+    fnName: "applyDiscount",
+    starterCode: `function applyDiscount(price, percent) {
+  // Write your solution here
+
+}`,
+    tests: [
+      { args: [100, 15], expected: 85 },
+      { args: [19.99, 10], expected: 17.99 },
+      { args: [50, 0], expected: 50 },
+      { args: [10, 100], expected: 0 },
+    ],
+  },
+  {
+    id: 63,
+    title: "Newest Messages First",
+    category: "arrays",
+    difficulty: "easy",
+    instructions:
+      "Complete sortMessagesNewestFirst so it returns a new array of messages sorted by createdAt descending (newest first). Do not mutate the input array. createdAt values are ISO date strings.",
+    fnName: "sortMessagesNewestFirst",
+    starterCode: `function sortMessagesNewestFirst(messages) {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [
+          [
+            { id: 1, createdAt: "2024-01-01T10:00:00.000Z" },
+            { id: 2, createdAt: "2024-06-01T10:00:00.000Z" },
+            { id: 3, createdAt: "2024-03-01T10:00:00.000Z" },
+          ],
+        ],
+        expected: [
+          { id: 2, createdAt: "2024-06-01T10:00:00.000Z" },
+          { id: 3, createdAt: "2024-03-01T10:00:00.000Z" },
+          { id: 1, createdAt: "2024-01-01T10:00:00.000Z" },
+        ],
+      },
+      { args: [[]], expected: [] },
+    ],
+  },
+  {
+    id: 64,
+    title: "Typed Format Full Name",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "easy",
+    instructions:
+      "Complete formatFullName so it returns a display name from a Person. Trim each part, join with one space, and omit empty parts.",
+    fnName: "formatFullName",
+    starterCode: `type Person = { first: string; last: string };
+
+function formatFullName(person: Person): string {
+  // Write your solution here
+
+}`,
+    tests: [
+      { args: [{ first: "Ada", last: "Lovelace" }], expected: "Ada Lovelace" },
+      { args: [{ first: "  Grace  ", last: " Hopper " }], expected: "Grace Hopper" },
+      { args: [{ first: "Solo", last: "" }], expected: "Solo" },
+      { args: [{ first: "  ", last: "  " }], expected: "" },
+    ],
+  },
+  {
+    id: 65,
+    title: "Active Product Names",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "easy",
+    instructions:
+      "Complete getInStockNames so it returns the names of products where inStock is true, in input order.",
+    fnName: "getInStockNames",
+    starterCode: `type Product = { id: number; name: string; inStock: boolean };
+
+function getInStockNames(products: Product[]): string[] {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [
+          [
+            { id: 1, name: "Keyboard", inStock: true },
+            { id: 2, name: "Mouse", inStock: false },
+            { id: 3, name: "Monitor", inStock: true },
+          ],
+        ],
+        expected: ["Keyboard", "Monitor"],
+      },
+      {
+        args: [[{ id: 1, name: "Sold out", inStock: false }]],
+        expected: [],
+      },
+    ],
+  },
+  {
+    id: 66,
+    title: "Merge Settings",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "easy",
+    instructions:
+      "Complete mergeSettings so it returns a full Settings object by shallow-merging defaults with overrides. Override keys win when provided.",
+    fnName: "mergeSettings",
+    starterCode: `type Settings = { theme: string; pageSize: number; notifications: boolean };
+
+function mergeSettings(
+  defaults: Settings,
+  overrides: Partial<Settings>
+): Settings {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [
+          { theme: "light", pageSize: 20, notifications: true },
+          { theme: "dark" },
+        ],
+        expected: { theme: "dark", pageSize: 20, notifications: true },
+      },
+      {
+        args: [
+          { theme: "light", pageSize: 20, notifications: true },
+          { pageSize: 50, notifications: false },
+        ],
+        expected: { theme: "light", pageSize: 50, notifications: false },
+      },
+      {
+        args: [
+          { theme: "light", pageSize: 20, notifications: true },
+          {},
+        ],
+        expected: { theme: "light", pageSize: 20, notifications: true },
+      },
+    ],
+  },
+  {
+    id: 67,
+    title: "Safe Divide",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "easy",
+    instructions:
+      "Complete safeDivide so it returns a / b as a number, or null when b is 0.",
+    fnName: "safeDivide",
+    starterCode: `function safeDivide(a: number, b: number): number | null {
+  // Write your solution here
+
+}`,
+    tests: [
+      { args: [10, 2], expected: 5 },
+      { args: [7, 0], expected: null },
+      { args: [0, 5], expected: 0 },
+      { args: [-9, 3], expected: -3 },
+    ],
+  },
+  {
+    id: 68,
+    title: "Label By Status",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "easy",
+    instructions:
+      'Complete statusLabel so it maps OrderStatus to a display string: pending → "Pending", shipped → "Shipped", cancelled → "Cancelled".',
+    fnName: "statusLabel",
+    starterCode: `type OrderStatus = "pending" | "shipped" | "cancelled";
+
+function statusLabel(status: OrderStatus): string {
+  // Write your solution here
+
+}`,
+    tests: [
+      { args: ["pending"], expected: "Pending" },
+      { args: ["shipped"], expected: "Shipped" },
+      { args: ["cancelled"], expected: "Cancelled" },
+    ],
+  },
+  {
+    id: 69,
+    title: "Paginate Items",
+    category: "typescript",
+    kind: "typescript",
+    difficulty: "easy",
+    instructions:
+      "Complete paginate so it returns a 1-based page slice of items. pageSize is how many items per page. If the page is out of range, return an empty array. Do not mutate the input.",
+    fnName: "paginate",
+    starterCode: `function paginate<T>(items: T[], page: number, pageSize: number): T[] {
+  // Write your solution here
+
+}`,
+    tests: [
+      {
+        args: [["a", "b", "c", "d", "e"], 1, 2],
+        expected: ["a", "b"],
+      },
+      {
+        args: [["a", "b", "c", "d", "e"], 2, 2],
+        expected: ["c", "d"],
+      },
+      {
+        args: [["a", "b", "c", "d", "e"], 3, 2],
+        expected: ["e"],
+      },
+      {
+        args: [["a", "b"], 5, 2],
+        expected: [],
+      },
+    ],
+  },
 ];
 
 export function parseProblemIds(param: string | null): number[] {

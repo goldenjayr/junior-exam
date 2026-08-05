@@ -24,14 +24,14 @@ test("correct TypeScript solution passes", () => {
   assert.strictEqual(result.status, "passed");
 });
 
-test("starter code does not pass TypeScript problems 52-57", () => {
+test("starter code does not pass TypeScript problems 52-69", () => {
   for (const problem of problems.filter((p) => p.kind === "typescript")) {
     const result = runTypeScriptProblemSync(problem, problem.starterCode);
     assert.notStrictEqual(result.status, "passed", problem.title);
   }
 });
 
-test("official solutions pass TypeScript problems 52-57", async () => {
+test("official solutions pass TypeScript problems 52-69", async () => {
   for (const problem of problems.filter((p) => p.kind === "typescript")) {
     const result = runTypeScriptProblemSync(
       problem,
@@ -45,7 +45,7 @@ test("official solutions pass TypeScript problems 52-57", async () => {
   }
 });
 
-test("includes TypeScript problems 52-57", () => {
+test("includes TypeScript problems 52-69", () => {
   assert.deepStrictEqual(
     problems
       .filter((p) => p.kind === "typescript")
@@ -57,6 +57,12 @@ test("includes TypeScript problems 52-57", () => {
       { id: 55, kind: "typescript", category: "typescript" },
       { id: 56, kind: "typescript", category: "typescript" },
       { id: 57, kind: "typescript", category: "typescript" },
+      { id: 64, kind: "typescript", category: "typescript" },
+      { id: 65, kind: "typescript", category: "typescript" },
+      { id: 66, kind: "typescript", category: "typescript" },
+      { id: 67, kind: "typescript", category: "typescript" },
+      { id: 68, kind: "typescript", category: "typescript" },
+      { id: 69, kind: "typescript", category: "typescript" },
     ]
   );
 });
