@@ -239,9 +239,9 @@ test("registers the complete TypeScript question bank", () => {
   const questions = quizQuestions.filter((question) => question.topic === "typescript");
 
   assert.ok(quizTopics.includes("typescript"));
-  assert.strictEqual(questions.length, 30);
+  assert.strictEqual(questions.length, 42);
   assert.strictEqual(questions[0]?.id, 31);
-  assert.strictEqual(questions.at(-1)?.id, 60);
+  assert.strictEqual(questions.at(-1)?.id, 330);
 });
 
 test("registers JS logic-trace questions 301–310", () => {
@@ -271,5 +271,28 @@ test("registers JS event-loop order questions 311–313", () => {
   assert.deepStrictEqual(
     loop.map((q) => q.id),
     [311, 312, 313]
+  );
+});
+
+test("registers JS hotspot questions 314–318", () => {
+  const spots = quizQuestions.filter(
+    (q) => q.topic === "javascript" && q.id >= 314 && q.id <= 318
+  );
+  assert.strictEqual(spots.length, 5);
+  assert.ok(spots.every((q) => q.type === "hotspot"));
+  assert.deepStrictEqual(
+    spots.map((q) => q.id),
+    [314, 315, 316, 317, 318]
+  );
+});
+
+test("registers TS deep-dive questions 319–330", () => {
+  const deep = quizQuestions.filter(
+    (q) => q.topic === "typescript" && q.id >= 319 && q.id <= 330
+  );
+  assert.strictEqual(deep.length, 12);
+  assert.deepStrictEqual(
+    deep.map((q) => q.id),
+    [319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330]
   );
 });

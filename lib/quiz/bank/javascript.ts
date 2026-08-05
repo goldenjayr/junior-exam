@@ -650,4 +650,108 @@ console.log(sorted);`,
     explanation:
       "Sync `S` first. Nested microtask `P2` still runs before any macrotask. Timer `T1` was queued before `T2`, so macrotasks run `T1` then `T2`.",
   },
+  {
+    id: 314,
+    type: "hotspot",
+    topic: "javascript",
+    difficulty: "easy",
+    prompt: "Click the line that throws at runtime.",
+    code: `const user = null;
+const name = user.name;
+console.log(name);
+console.log("done");`,
+    regions: [
+      { id: "r1", label: "Line 1: const user = null", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: user.name", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: log name", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: log done", startLine: 4, endLine: 4 },
+    ],
+    correctRegionId: "r2",
+    explanation:
+      "Reading a property of `null` throws `TypeError`. Use optional chaining (`user?.name`) when the value may be nullish.",
+  },
+  {
+    id: 315,
+    type: "hotspot",
+    topic: "javascript",
+    difficulty: "medium",
+    prompt: "Click the line that throws at runtime.",
+    code: `const config = Object.freeze({ theme: "dark" });
+config.theme = "light";
+console.log(config.theme);
+const copy = { ...config };`,
+    regions: [
+      { id: "r1", label: "Line 1: Object.freeze", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: assign theme", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: log theme", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: spread copy", startLine: 4, endLine: 4 },
+    ],
+    correctRegionId: "r2",
+    explanation:
+      "In strict mode (modules default), assigning to a frozen property throws. Spread still works because it reads, not writes.",
+  },
+  {
+    id: 316,
+    type: "hotspot",
+    topic: "javascript",
+    difficulty: "medium",
+    prompt: "Click the line that throws at runtime.",
+    code: `const handlers = { onSave: undefined };
+const label = "save";
+handlers.onSave();
+console.log(label);`,
+    regions: [
+      { id: "r1", label: "Line 1: handlers object", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: label", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: call onSave", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: log label", startLine: 4, endLine: 4 },
+    ],
+    correctRegionId: "r3",
+    explanation:
+      "Calling `undefined` as a function throws `TypeError`. Guard with `handlers.onSave?.()` or check the type first.",
+  },
+  {
+    id: 317,
+    type: "hotspot",
+    topic: "javascript",
+    difficulty: "medium",
+    prompt: "Click the line that is invalid (await outside an async function).",
+    code: `function load() {
+  const res = await fetch("/api");
+  return res.json();
+}
+load();`,
+    regions: [
+      { id: "r1", label: "Line 1: function load", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: await fetch", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: return res.json()", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: closing brace", startLine: 4, endLine: 4 },
+      { id: "r5", label: "Line 5: load()", startLine: 5, endLine: 5 },
+    ],
+    correctRegionId: "r2",
+    explanation:
+      "`await` is only legal in async functions (or at module top level). Mark `load` as `async function load()`.",
+  },
+  {
+    id: 318,
+    type: "hotspot",
+    topic: "javascript",
+    difficulty: "hard",
+    prompt: "Click the line that throws at runtime.",
+    code: `const rows = null;
+for (const row of rows) {
+  console.log(row.id);
+}
+console.log("done");`,
+    regions: [
+      { id: "r1", label: "Line 1: const rows = null", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: for...of rows", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: log row.id", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: closing brace", startLine: 4, endLine: 4 },
+      { id: "r5", label: "Line 5: log done", startLine: 5, endLine: 5 },
+    ],
+    correctRegionId: "r2",
+    explanation:
+      "`for...of` requires an iterable. `null` is not iterable, so the loop header throws before the body runs.",
+  },
 ];

@@ -422,4 +422,222 @@ const n: number = 1;`,
     placeholder: "keyof",
     explanation: "`keyof User` produces a union of `User`'s property names (e.g. `\"id\" | \"name\"`).",
   },
+  {
+    id: 319,
+    type: "hotspot",
+    topic: "typescript",
+    difficulty: "medium",
+    prompt: "Click the line that is a type error (excess property check).",
+    code: `type User = { name: string };
+const u: User = {
+  name: "Ada",
+  age: 30,
+};
+console.log(u.name);`,
+    regions: [
+      { id: "r1", label: "Line 1: type User", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: const u: User", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: name", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: age", startLine: 4, endLine: 4 },
+      { id: "r5", label: "Line 5: closing };", startLine: 5, endLine: 5 },
+      { id: "r6", label: "Line 6: log", startLine: 6, endLine: 6 },
+    ],
+    correctRegionId: "r4",
+    explanation:
+      "Object literals assigned to a typed variable get excess property checks; `age` is not on `User`.",
+  },
+  {
+    id: 320,
+    type: "hotspot",
+    topic: "typescript",
+    difficulty: "medium",
+    prompt: "Click the line that is a type error under strict null checks.",
+    code: `function len(s: string) {
+  return s.length;
+}
+const input: string | null = Math.random() > 0.5 ? "hi" : null;
+len(input);
+len(input ?? "");`,
+    regions: [
+      { id: "r1", label: "Line 1: function len", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: return length", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: closing brace", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: input union", startLine: 4, endLine: 4 },
+      { id: "r5", label: "Line 5: len(input)", startLine: 5, endLine: 5 },
+      { id: "r6", label: "Line 6: len(input ?? \"\")", startLine: 6, endLine: 6 },
+    ],
+    correctRegionId: "r5",
+    explanation:
+      "`string | null` is not assignable to `string`. Narrow or default first (`??`, `if`, etc.).",
+  },
+  {
+    id: 321,
+    type: "hotspot",
+    topic: "typescript",
+    difficulty: "hard",
+    prompt: "Click the line that is a type error (wrong generic constraint usage).",
+    code: `function pluck<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
+}
+const user = { name: "Ada", age: 36 };
+pluck(user, "name");
+pluck(user, "email");`,
+    regions: [
+      { id: "r1", label: "Line 1: pluck signature", startLine: 1, endLine: 1 },
+      { id: "r2", label: "Line 2: return obj[key]", startLine: 2, endLine: 2 },
+      { id: "r3", label: "Line 3: closing brace", startLine: 3, endLine: 3 },
+      { id: "r4", label: "Line 4: user object", startLine: 4, endLine: 4 },
+      { id: "r5", label: "Line 5: pluck name", startLine: 5, endLine: 5 },
+      { id: "r6", label: "Line 6: pluck email", startLine: 6, endLine: 6 },
+    ],
+    correctRegionId: "r6",
+    explanation:
+      "`K extends keyof T` means the key must exist on `T`. `\"email\"` is not a key of `user`.",
+  },
+  {
+    id: 322,
+    type: "snippet",
+    topic: "typescript",
+    difficulty: "medium",
+    prompt: "Which snippet correctly narrows `value` to `string` before calling `.toUpperCase()`?",
+    snippets: [
+      {
+        id: "a",
+        code: `function show(value: string | number) {
+  if (typeof value === "string") {
+    return value.toUpperCase();
+  }
+  return String(value);
+}`,
+      },
+      {
+        id: "b",
+        code: `function show(value: string | number) {
+  return value.toUpperCase();
+}`,
+      },
+      {
+        id: "c",
+        code: `function show(value: string | number) {
+  return (value as number).toUpperCase();
+}`,
+      },
+    ],
+    correctId: "a",
+    explanation:
+      "`typeof` narrows the union in that branch. Calling `.toUpperCase()` on `string | number` (or asserting to `number`) is wrong.",
+  },
+  {
+    id: 323,
+    type: "snippet",
+    topic: "typescript",
+    difficulty: "medium",
+    prompt: "Which utility correctly builds a type with only `id` and `email` from `User`?",
+    snippets: [
+      { id: "a", code: `type User = { id: string; name: string; email: string };
+type Contact = Pick<User, "id" | "email">;` },
+      { id: "b", code: `type User = { id: string; name: string; email: string };
+type Contact = Omit<User, "id" | "email">;` },
+      { id: "c", code: `type User = { id: string; name: string; email: string };
+type Contact = Partial<User>;` },
+    ],
+    correctId: "a",
+    explanation:
+      "`Pick` keeps listed keys. `Omit` removes them. `Partial` makes all keys optional but keeps every property.",
+  },
+  {
+    id: 324,
+    type: "order",
+    topic: "typescript",
+    difficulty: "medium",
+    prompt:
+      "Order the typical steps to safely use an `unknown` JSON value:",
+    items: [
+      { id: "parse", label: "Parse / receive as unknown" },
+      { id: "guard", label: "Validate / narrow with type guards" },
+      { id: "use", label: "Use the narrowed fields" },
+    ],
+    correctOrder: ["parse", "guard", "use"],
+    explanation:
+      "Keep untrusted data as `unknown`, prove the shape, then use it — avoid leaping with `as`.",
+  },
+  {
+    id: 325,
+    type: "output",
+    topic: "typescript",
+    difficulty: "medium",
+    prompt: "What is logged at runtime?",
+    code: `const modes = ["read", "write"] as const;
+console.log(modes[0]);`,
+    accept: ['"read"', "read"],
+    explanation:
+      "`as const` makes a readonly tuple of literal types, but runtime values are still ordinary strings — `read` is logged.",
+  },
+  {
+    id: 326,
+    type: "single",
+    topic: "typescript",
+    difficulty: "medium",
+    prompt: "What is the `never` type mainly used for?",
+    options: [
+      { id: "a", label: "Values that should not occur (exhaustive checks, functions that always throw)" },
+      { id: "b", label: "Any JSON value" },
+      { id: "c", label: "Optional properties only" },
+      { id: "d", label: "Replacing `any` in all codebases" },
+    ],
+    correctId: "a",
+    explanation:
+      "`never` is the bottom type: no values inhabit it. Useful for exhaustiveness and impossible states.",
+  },
+  {
+    id: 327,
+    type: "single",
+    topic: "typescript",
+    difficulty: "easy",
+    prompt: "What does `Record<string, number>` describe?",
+    options: [
+      { id: "a", label: "An object type whose keys are strings and values are numbers" },
+      { id: "b", label: "An array of numbers" },
+      { id: "c", label: "A Map that only exists at compile time" },
+      { id: "d", label: "A tuple of [string, number]" },
+    ],
+    correctId: "a",
+    explanation: "`Record<K, V>` is a mapped object type: every key in `K` maps to value type `V`.",
+  },
+  {
+    id: 328,
+    type: "multi",
+    topic: "typescript",
+    difficulty: "medium",
+    prompt: "Which widen or erase type information at compile time? (select all)",
+    options: [
+      { id: "a", label: "Annotating `const x: string = \"hi\"` (vs `as const` / inference of literal)" },
+      { id: "b", label: "Using `as SomeType` assertions" },
+      { id: "c", label: "`satisfies SomeType` when it preserves a narrower inferred type" },
+      { id: "d", label: "Emitting JavaScript (all types erased)" },
+    ],
+    correctIds: ["a", "b", "d"],
+    explanation:
+      "Wide annotations and assertions can lose precision; emit always erases types. `satisfies` is designed to check without forcing that widening.",
+  },
+  {
+    id: 329,
+    type: "boolean",
+    topic: "typescript",
+    difficulty: "easy",
+    prompt: "`interface` declarations with the same name in the same scope merge their members.",
+    correct: true,
+    explanation: "Declaration merging is an interface feature; `type` aliases do not merge this way.",
+  },
+  {
+    id: 330,
+    type: "fill",
+    topic: "typescript",
+    difficulty: "medium",
+    prompt:
+      "Complete: `type NoName = ____<User, \"name\">` removes the `name` property from `User`.",
+    accept: ["Omit"],
+    placeholder: "Omit",
+    explanation: "`Omit<User, \"name\">` builds a type with all keys except `name`.",
+  },
 ];

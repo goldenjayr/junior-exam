@@ -28,10 +28,24 @@ export const quizPresets: QuizPreset[] = [
     suggestedMinutes: 12,
   },
   {
+    name: "JS Hotspots",
+    description:
+      "Click the buggy line: const reassign, TDZ, null access, freeze, bad calls, await, and iterables.",
+    ids: [304, 307, 309, 314, 315, 316, 317, 318],
+    suggestedMinutes: 12,
+  },
+  {
     name: "TypeScript Essentials",
     description:
       "Static typing, unions, utilities, narrowing, and common junior TS interview topics.",
     ids: [31, 32, 33, 34, 36, 38, 39, 42, 47, 49, 51, 55, 56, 57, 59],
+    suggestedMinutes: 15,
+  },
+  {
+    name: "TS Deep Dive",
+    description:
+      "Diverse TS practice: hotspots, Pick/Omit, narrowing snippets, unknown handling, never/Record, and utilities.",
+    ids: [319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330],
     suggestedMinutes: 15,
   },
   {
