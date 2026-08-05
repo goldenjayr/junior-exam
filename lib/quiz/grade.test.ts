@@ -261,3 +261,15 @@ test("registers JS logic-trace questions 301–310", () => {
   );
   assert.deepStrictEqual(byType, { output: 4, hotspot: 3, order: 3 });
 });
+
+test("registers JS event-loop order questions 311–313", () => {
+  const loop = quizQuestions.filter(
+    (q) => q.topic === "javascript" && q.id >= 311 && q.id <= 313
+  );
+  assert.strictEqual(loop.length, 3);
+  assert.ok(loop.every((q) => q.type === "order"));
+  assert.deepStrictEqual(
+    loop.map((q) => q.id),
+    [311, 312, 313]
+  );
+});

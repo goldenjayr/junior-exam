@@ -21,6 +21,13 @@ export const quizPresets: QuizPreset[] = [
     suggestedMinutes: 15,
   },
   {
+    name: "JS Event Loop",
+    description:
+      "Microtask vs macrotask ordering: sync, Promises, queueMicrotask, and nested setTimeout.",
+    ids: [303, 306, 308, 311, 312, 313],
+    suggestedMinutes: 12,
+  },
+  {
     name: "TypeScript Essentials",
     description:
       "Static typing, unions, utilities, narrowing, and common junior TS interview topics.",

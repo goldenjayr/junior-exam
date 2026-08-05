@@ -595,4 +595,59 @@ console.log(sorted);`,
     correctOrder: ["fetch", "res", "use"],
     explanation: "Get a Response, parse the body, then work with the data.",
   },
+  {
+    id: 311,
+    type: "order",
+    topic: "javascript",
+    difficulty: "medium",
+    prompt:
+      'Order the logged labels from earliest to latest.\n\n```js\nconsole.log("1");\nsetTimeout(() => console.log("2"), 0);\nqueueMicrotask(() => console.log("3"));\nPromise.resolve().then(() => console.log("4"));\nconsole.log("5");\n```',
+    items: [
+      { id: "1", label: '"1"' },
+      { id: "5", label: '"5"' },
+      { id: "3", label: '"3"' },
+      { id: "4", label: '"4"' },
+      { id: "2", label: '"2"' },
+    ],
+    correctOrder: ["1", "5", "3", "4", "2"],
+    explanation:
+      "Sync logs run first (`1`, `5`). Microtasks (`queueMicrotask` then `Promise.then`) drain next, in the order they were queued. `setTimeout` is a macrotask and runs last.",
+  },
+  {
+    id: 312,
+    type: "order",
+    topic: "javascript",
+    difficulty: "hard",
+    prompt:
+      'Order the logged labels from earliest to latest.\n\n```js\nconsole.log("A");\n\nsetTimeout(() => console.log("B"), 0);\n\nPromise.resolve()\n  .then(() => {\n    console.log("C");\n    setTimeout(() => console.log("D"), 0);\n    return Promise.resolve();\n  })\n  .then(() => {\n    console.log("E");\n  });\n\nconsole.log("F");\n```',
+    items: [
+      { id: "A", label: '"A"' },
+      { id: "F", label: '"F"' },
+      { id: "C", label: '"C"' },
+      { id: "E", label: '"E"' },
+      { id: "B", label: '"B"' },
+      { id: "D", label: '"D"' },
+    ],
+    correctOrder: ["A", "F", "C", "E", "B", "D"],
+    explanation:
+      "Sync: `A` then `F`. Microtasks: `C`, then chained `E` (still before any timer). Macrotasks: `B` was queued first, then `D` from inside the promise callback — so `B` then `D`.",
+  },
+  {
+    id: 313,
+    type: "order",
+    topic: "javascript",
+    difficulty: "hard",
+    prompt:
+      'Order the logged labels from earliest to latest.\n\n```js\nsetTimeout(() => console.log("T1"), 0);\nPromise.resolve().then(() => {\n  console.log("P1");\n  setTimeout(() => console.log("T2"), 0);\n  Promise.resolve().then(() => console.log("P2"));\n});\nconsole.log("S");\n```',
+    items: [
+      { id: "S", label: '"S"' },
+      { id: "P1", label: '"P1"' },
+      { id: "P2", label: '"P2"' },
+      { id: "T1", label: '"T1"' },
+      { id: "T2", label: '"T2"' },
+    ],
+    correctOrder: ["S", "P1", "P2", "T1", "T2"],
+    explanation:
+      "Sync `S` first. Nested microtask `P2` still runs before any macrotask. Timer `T1` was queued before `T2`, so macrotasks run `T1` then `T2`.",
+  },
 ];
