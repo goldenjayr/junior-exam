@@ -155,7 +155,7 @@ export const reactQuestions: QuizQuestion[] = [
     difficulty: "easy",
     prompt: "What prop name passes a click handler to a button in React?",
     accept: ["onClick"],
-    placeholder: "onClick",
+    placeholder: "event prop",
     explanation: "DOM events use camelCase in React: `onClick`, `onChange`, etc.",
   },
   {

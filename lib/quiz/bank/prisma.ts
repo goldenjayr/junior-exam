@@ -170,7 +170,7 @@ export const prismaQuestions: QuizQuestion[] = [
     difficulty: "easy",
     prompt: "Complete the field attribute that makes email unique: `email String @____`",
     accept: ["unique"],
-    placeholder: "unique",
+    placeholder: "attribute name",
     explanation: "`@unique` makes values in this field unique.",
   },
   {
@@ -180,7 +180,7 @@ export const prismaQuestions: QuizQuestion[] = [
     difficulty: "medium",
     prompt: "Complete the query option that filters active users: `prisma.user.findMany({ ____: { active: true } })`",
     accept: ["where"],
-    placeholder: "where",
+    placeholder: "query arg",
     explanation: "`where` supplies the filtering conditions for a Prisma query.",
   },
   {
@@ -190,7 +190,7 @@ export const prismaQuestions: QuizQuestion[] = [
     difficulty: "medium",
     prompt: "Which Client method inserts one record? `prisma.user.____({ data: { email: 'a@example.com' } })`",
     accept: ["create"],
-    placeholder: "create",
+    placeholder: "Client method",
     explanation: "`create` inserts one record using the values in `data`.",
   },
   {

@@ -174,7 +174,7 @@ export const tailwindQuestions: QuizQuestion[] = [
     difficulty: "medium",
     prompt: "Complete the class for medium screens and up: `____:text-lg` (breakpoint prefix only).",
     accept: ["md"],
-    placeholder: "md",
+    placeholder: "breakpoint prefix",
     explanation: "`md:text-lg` applies larger text from the md breakpoint upward.",
   },
   {

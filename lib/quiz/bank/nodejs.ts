@@ -155,7 +155,7 @@ export const nodejsQuestions: QuizQuestion[] = [
     difficulty: "easy",
     prompt: "What global object is used to exit the process with a status code, e.g. `____.exit(1)`?",
     accept: ["process"],
-    placeholder: "process",
+    placeholder: "global object",
     explanation: "`process.exit(code)` terminates the Node process.",
   },
   {
@@ -174,7 +174,7 @@ export const nodejsQuestions: QuizQuestion[] = [
     difficulty: "medium",
     prompt: "Express (and many apps) use which HTTP method name for reading a resource by URL? (common REST verb)",
     accept: ["GET", "get"],
-    placeholder: "GET",
+    placeholder: "HTTP method",
     explanation: "GET retrieves a resource without a request body in typical REST design.",
   },
   {

@@ -169,7 +169,7 @@ export const typescriptQuestions: QuizQuestion[] = [
     difficulty: "medium",
     prompt: "Complete the utility: `ReadonlyArray<string>` is roughly equivalent to `____ string[]` (modifier + type).",
     accept: ["readonly string[]", "readonly string []"],
-    placeholder: "e.g. readonly string[]",
+    placeholder: "type expression",
     explanation: "Readonly arrays cannot be mutated via push/pop/etc. at the type level.",
   },
   {
@@ -419,7 +419,7 @@ const n: number = 1;`,
     difficulty: "medium",
     prompt: "What operator extracts the property names of a type as a string union? `type Keys = ____ User;`",
     accept: ["keyof"],
-    placeholder: "keyof",
+    placeholder: "operator",
     explanation: "`keyof User` produces a union of `User`'s property names (e.g. `\"id\" | \"name\"`).",
   },
   {
@@ -637,7 +637,7 @@ console.log(modes[0]);`,
     prompt:
       "Complete: `type NoName = ____<User, \"name\">` removes the `name` property from `User`.",
     accept: ["Omit"],
-    placeholder: "Omit",
+    placeholder: "utility type",
     explanation: "`Omit<User, \"name\">` builds a type with all keys except `name`.",
   },
 ];

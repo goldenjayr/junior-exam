@@ -169,7 +169,7 @@ export const cssQuestions: QuizQuestion[] = [
     difficulty: "medium",
     prompt: "Complete: `box-sizing: ____;` makes width/height include padding and border.",
     accept: ["border-box"],
-    placeholder: "border-box",
+    placeholder: "box-sizing value",
     explanation: "`border-box` is widely used so declared width matches the visible box size.",
   },
   {
@@ -179,7 +179,7 @@ export const cssQuestions: QuizQuestion[] = [
     difficulty: "medium",
     prompt: "What pseudo-class styles a link while the pointer is over it? (include the colon, e.g. `:name`)",
     accept: [":hover"],
-    placeholder: ":hover",
+    placeholder: "pseudo-class",
     explanation: "`:hover` matches when the user hovers; also useful with `:focus-visible` for keyboard users.",
   },
   {

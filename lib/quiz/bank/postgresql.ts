@@ -170,7 +170,7 @@ export const postgresqlQuestions: QuizQuestion[] = [
     difficulty: "easy",
     prompt: "Complete the query to return only rows where `active` is true: `SELECT * FROM users ____ active = true;`",
     accept: ["WHERE", "where"],
-    placeholder: "WHERE",
+    placeholder: "SQL clause",
     explanation: "WHERE filters individual rows before any grouping.",
   },
   {
@@ -180,7 +180,7 @@ export const postgresqlQuestions: QuizQuestion[] = [
     difficulty: "medium",
     prompt: "Which command ends a transaction and keeps its changes? `____;`",
     accept: ["COMMIT", "commit"],
-    placeholder: "COMMIT",
+    placeholder: "SQL keyword",
     explanation: "COMMIT persists the transaction's completed work.",
   },
   {
@@ -190,7 +190,7 @@ export const postgresqlQuestions: QuizQuestion[] = [
     difficulty: "medium",
     prompt: "Add the clause that returns inserted columns: `INSERT INTO users (email) VALUES ('a@example.com') ____ id;`",
     accept: ["RETURNING", "returning"],
-    placeholder: "RETURNING",
+    placeholder: "SQL clause",
     explanation: "RETURNING lets INSERT, UPDATE, or DELETE return values from affected rows.",
   },
   {
