@@ -155,6 +155,29 @@ const difficultyBadge: Record<Problem["difficulty"], string> = {
   hard: "bg-red-50 text-red-600",
 };
 
+function toggleFilterValue(current: Set<string>, value: string): Set<string> {
+  const next = new Set(current);
+  if (next.has(value)) next.delete(value);
+  else next.add(value);
+  return next;
+}
+
+function difficultyPillClass(active: boolean) {
+  return `rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+    active
+      ? "bg-slate-900 text-white"
+      : "border border-slate-300 hover:bg-slate-50"
+  }`;
+}
+
+function categoryPillClass(active: boolean) {
+  return `rounded-full px-2.5 py-1 text-xs font-semibold ${
+    active
+      ? "bg-blue-600 text-white"
+      : "border border-slate-300 hover:bg-slate-50"
+  }`;
+}
+
 type SavedExam = { name: string; ids: number[] };
 
 // ponytail: ids only — emails live server-side in app/api/submit/route.ts.
@@ -165,8 +188,12 @@ export default function AdminPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [copied, setCopied] = useState(false);
   const [query, setQuery] = useState("");
-  const [difficulty, setDifficulty] = useState<string>("all");
-  const [category, setCategory] = useState<string>("all");
+  const [difficultiesFilter, setDifficultiesFilter] = useState<Set<string>>(
+    () => new Set()
+  );
+  const [categoriesFilter, setCategoriesFilter] = useState<Set<string>>(
+    () => new Set()
+  );
   const [onlySelected, setOnlySelected] = useState(false);
   const [examiner, setExaminer] = useState(examinerIds[0]);
   const [timeMode, setTimeMode] = useState<"off" | "preset" | "custom">("off");
@@ -204,21 +231,22 @@ export default function AdminPage() {
   const visible = problems.filter(
     (p) =>
       (!onlySelected || selected.has(p.id)) &&
-      (difficulty === "all" || p.difficulty === difficulty) &&
-      (category === "all" || p.category === category) &&
+      (difficultiesFilter.size === 0 ||
+        difficultiesFilter.has(p.difficulty)) &&
+      (categoriesFilter.size === 0 || categoriesFilter.has(p.category)) &&
       (p.title + p.instructions).toLowerCase().includes(query.toLowerCase())
   );
 
   const filtersActive =
     query.length > 0 ||
-    difficulty !== "all" ||
-    category !== "all" ||
+    difficultiesFilter.size > 0 ||
+    categoriesFilter.size > 0 ||
     onlySelected;
 
   function clearFilters() {
     setQuery("");
-    setDifficulty("all");
-    setCategory("all");
+    setDifficultiesFilter(new Set());
+    setCategoriesFilter(new Set());
     setOnlySelected(false);
     setCopied(false);
   }
@@ -322,12 +350,8 @@ export default function AdminPage() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => setDifficulty("all")}
-                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                    difficulty === "all"
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-300 hover:bg-slate-50"
-                  }`}
+                  onClick={() => setDifficultiesFilter(new Set())}
+                  className={difficultyPillClass(difficultiesFilter.size === 0)}
                 >
                   Any
                 </button>
@@ -335,12 +359,10 @@ export default function AdminPage() {
                   <button
                     key={d}
                     type="button"
-                    onClick={() => setDifficulty(d)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
-                      difficulty === d
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300 hover:bg-slate-50"
-                    }`}
+                    onClick={() =>
+                      setDifficultiesFilter((s) => toggleFilterValue(s, d))
+                    }
+                    className={difficultyPillClass(difficultiesFilter.has(d))}
                   >
                     {d}
                   </button>
@@ -365,12 +387,8 @@ export default function AdminPage() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => setCategory("all")}
-                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                    category === "all"
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-300 hover:bg-slate-50"
-                  }`}
+                  onClick={() => setCategoriesFilter(new Set())}
+                  className={categoryPillClass(categoriesFilter.size === 0)}
                 >
                   All
                 </button>
@@ -389,13 +407,11 @@ export default function AdminPage() {
                       <button
                         key={c}
                         type="button"
-                        onClick={() => setCategory(c)}
+                        onClick={() =>
+                          setCategoriesFilter((s) => toggleFilterValue(s, c))
+                        }
                         title={group.label}
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          category === c
-                            ? "bg-blue-600 text-white"
-                            : "border border-slate-300 hover:bg-slate-50"
-                        }`}
+                        className={categoryPillClass(categoriesFilter.has(c))}
                       >
                         {categoryLabels[c]}
                         <span className="ml-1 opacity-60">
