@@ -1,5 +1,6 @@
 "use client";
 import type { AnswerValue, QuizQuestion } from "@/lib/quiz/types";
+import QuizPrompt from "./QuizPrompt";
 import SingleChoice from "./inputs/SingleChoice";
 import MultiChoice from "./inputs/MultiChoice";
 import BooleanChoice from "./inputs/BooleanChoice";
@@ -51,9 +52,7 @@ export default function QuestionStage({
           {question.type}
         </span>
       </div>
-      <h2 className="text-xl font-bold leading-snug text-slate-900 sm:text-2xl">
-        {question.prompt}
-      </h2>
+      <QuizPrompt prompt={question.prompt} />
       {showHint && question.hint && (
         <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
           Hint: {question.hint}

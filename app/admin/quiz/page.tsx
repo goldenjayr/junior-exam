@@ -7,6 +7,7 @@ import {
 import { quizPresets } from "@/lib/quiz/presets";
 import type { QuizQuestion, QuizMode } from "@/lib/quiz/types";
 import { clampMinutes, minutesToSeconds } from "@/lib/time-attack";
+import QuizPrompt from "@/components/quiz/QuizPrompt";
 
 const difficulties = ["easy", "medium", "hard"] as const;
 const types: QuizQuestion["type"][] = [
@@ -372,7 +373,9 @@ export default function QuizAdminPage() {
                       <span className="text-xs font-bold uppercase text-slate-400">
                         {preview.topic} · {preview.type}
                       </span>
-                      <h2 className="mt-1 text-xl font-bold">{preview.prompt}</h2>
+                      <div className="mt-1">
+                        <QuizPrompt prompt={preview.prompt} />
+                      </div>
                       {preview.explanation && (
                         <p className="mt-3 text-sm text-slate-600">
                           {preview.explanation}
