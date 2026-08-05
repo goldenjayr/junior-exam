@@ -28,6 +28,21 @@ const difficultyBadge: Record<QuizQuestion["difficulty"], string> = {
   hard: "bg-red-50 text-red-600",
 };
 
+function toggleFilterValue(current: Set<string>, value: string): Set<string> {
+  const next = new Set(current);
+  if (next.has(value)) next.delete(value);
+  else next.add(value);
+  return next;
+}
+
+function filterPillClass(active: boolean) {
+  return `rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+    active
+      ? "bg-slate-900 text-white"
+      : "border border-slate-300 hover:bg-slate-50"
+  }`;
+}
+
 type SavedQuiz = { name: string; ids: number[] };
 
 const examinerIds = ["jayr", "jack", "iven", "andrei", "neil", "pragya"];
@@ -37,9 +52,11 @@ export default function QuizAdminPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [copied, setCopied] = useState(false);
   const [query, setQuery] = useState("");
-  const [difficulty, setDifficulty] = useState<string>("all");
-  const [topic, setTopic] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [difficultiesFilter, setDifficultiesFilter] = useState<Set<string>>(
+    () => new Set()
+  );
+  const [topicsFilter, setTopicsFilter] = useState<Set<string>>(() => new Set());
+  const [typesFilter, setTypesFilter] = useState<Set<string>>(() => new Set());
   const [onlySelected, setOnlySelected] = useState(false);
   const [examiner, setExaminer] = useState(examinerIds[0]);
   const [mode, setMode] = useState<QuizMode>("assessment");
@@ -72,9 +89,9 @@ export default function QuizAdminPage() {
   const visible = quizQuestions.filter(
     (q) =>
       (!onlySelected || selected.has(q.id)) &&
-      (difficulty === "all" || q.difficulty === difficulty) &&
-      (topic === "all" || q.topic === topic) &&
-      (typeFilter === "all" || q.type === typeFilter) &&
+      (difficultiesFilter.size === 0 || difficultiesFilter.has(q.difficulty)) &&
+      (topicsFilter.size === 0 || topicsFilter.has(q.topic)) &&
+      (typesFilter.size === 0 || typesFilter.has(q.type)) &&
       (q.prompt + q.topic + q.type)
         .toLowerCase()
         .includes(query.toLowerCase())
@@ -149,16 +166,21 @@ export default function QuizAdminPage() {
                 className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-400"
               />
               <div className="flex flex-wrap items-center gap-1.5">
-                {["all", ...difficulties].map((d) => (
+                <button
+                  type="button"
+                  onClick={() => setDifficultiesFilter(new Set())}
+                  className={filterPillClass(difficultiesFilter.size === 0)}
+                >
+                  all
+                </button>
+                {difficulties.map((d) => (
                   <button
                     key={d}
                     type="button"
-                    onClick={() => setDifficulty(d)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
-                      difficulty === d
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300 hover:bg-slate-50"
-                    }`}
+                    onClick={() =>
+                      setDifficultiesFilter((s) => toggleFilterValue(s, d))
+                    }
+                    className={filterPillClass(difficultiesFilter.has(d))}
                   >
                     {d}
                   </button>
@@ -177,32 +199,42 @@ export default function QuizAdminPage() {
                 </button>
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
-                {["all", ...quizTopics].map((t) => (
+                <button
+                  type="button"
+                  onClick={() => setTopicsFilter(new Set())}
+                  className={filterPillClass(topicsFilter.size === 0)}
+                >
+                  all
+                </button>
+                {quizTopics.map((t) => (
                   <button
                     key={t}
                     type="button"
-                    onClick={() => setTopic(t)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
-                      topic === t
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300 hover:bg-slate-50"
-                    }`}
+                    onClick={() =>
+                      setTopicsFilter((s) => toggleFilterValue(s, t))
+                    }
+                    className={filterPillClass(topicsFilter.has(t))}
                   >
                     {t}
                   </button>
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-1.5">
-                {["all", ...types].map((t) => (
+                <button
+                  type="button"
+                  onClick={() => setTypesFilter(new Set())}
+                  className={filterPillClass(typesFilter.size === 0)}
+                >
+                  all
+                </button>
+                {types.map((t) => (
                   <button
                     key={t}
                     type="button"
-                    onClick={() => setTypeFilter(t)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      typeFilter === t
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300 hover:bg-slate-50"
-                    }`}
+                    onClick={() =>
+                      setTypesFilter((s) => toggleFilterValue(s, t))
+                    }
+                    className={filterPillClass(typesFilter.has(t))}
                   >
                     {t}
                   </button>
