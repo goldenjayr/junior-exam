@@ -89,7 +89,9 @@ export default function QuestionStage({
         )}
         {question.type === "order" && (
           <OrderList
+            key={question.id}
             items={question.items}
+            correctOrder={question.correctOrder}
             value={value}
             onChange={onChange}
             disabled={disabled}

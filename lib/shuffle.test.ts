@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   parseShuffle,
   shuffleArray,
+  shuffleOrderIds,
   sessionItemOrder,
 } from "./shuffle.ts";
 
@@ -45,6 +46,20 @@ test("sessionItemOrder reshuffles when id set changes", () => {
   sessionItemOrder(store, "exam-b", [1, 2, 3], true);
   const next = sessionItemOrder(store, "exam-b", [1, 2, 3, 4], true);
   assert.deepStrictEqual([...next].sort((a, b) => a - b), [1, 2, 3, 4]);
+});
+
+test("shuffleOrderIds avoids the correct order when possible", () => {
+  const ids = ["a", "b", "c"];
+  const correct = ["a", "b", "c"];
+  for (let i = 0; i < 40; i++) {
+    const out = shuffleOrderIds(ids, correct);
+    assert.deepStrictEqual([...out].sort(), [...ids].sort());
+    assert.notDeepStrictEqual(out, correct);
+  }
+});
+
+test("shuffleOrderIds swaps when only two items", () => {
+  assert.deepStrictEqual(shuffleOrderIds(["x", "y"], ["x", "y"]), ["y", "x"]);
 });
 
 function memoryStorage(): Storage {

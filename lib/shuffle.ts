@@ -15,6 +15,30 @@ export function shuffleArray<T>(items: readonly T[]): T[] {
   return arr;
 }
 
+function sameSequence(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((id, i) => id === b[i]);
+}
+
+/**
+ * Shuffle ids for order quizzes. Retries so the result is not identical to
+ * `avoid` (typically the correct order) when more than one permutation exists.
+ */
+export function shuffleOrderIds(
+  ids: readonly string[],
+  avoid?: readonly string[]
+): string[] {
+  if (ids.length <= 1) return [...ids];
+  let next = shuffleArray(ids);
+  for (let i = 0; i < 24 && avoid && sameSequence(next, avoid); i++) {
+    next = shuffleArray(ids);
+  }
+  if (avoid && sameSequence(next, avoid)) {
+    next = [...ids];
+    [next[0], next[1]] = [next[1], next[0]];
+  }
+  return next;
+}
+
 function sameIdSet(a: number[], b: number[]): boolean {
   if (a.length !== b.length) return false;
   const sb = new Set(b);

@@ -1,21 +1,36 @@
 "use client";
+import { useEffect, useState } from "react";
+import { shuffleOrderIds } from "@/lib/shuffle";
 import type { AnswerValue, Labeled } from "@/lib/quiz/types";
 
 export default function OrderList({
   items,
+  correctOrder,
   value,
   onChange,
   disabled,
 }: {
   items: Labeled[];
+  correctOrder: string[];
   value: AnswerValue | null;
   onChange: (v: AnswerValue) => void;
   disabled?: boolean;
 }) {
-  const order =
-    value?.type === "order" && value.order.length === items.length
-      ? value.order
-      : items.map((i) => i.id);
+  const hasValue =
+    value?.type === "order" && value.order.length === items.length;
+  const [seed] = useState(() =>
+    shuffleOrderIds(
+      items.map((i) => i.id),
+      correctOrder
+    )
+  );
+
+  useEffect(() => {
+    if (disabled || hasValue) return;
+    onChange({ type: "order", order: seed });
+  }, [disabled, hasValue, onChange, seed]);
+
+  const order = hasValue ? value.order : seed;
   const byId = Object.fromEntries(items.map((i) => [i.id, i]));
 
   function move(index: number, dir: -1 | 1) {
