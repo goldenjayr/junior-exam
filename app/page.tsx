@@ -84,6 +84,19 @@ export default function Home() {
             </p>
           </Link>
           <Link
+            href="/playground"
+            className="group rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg hover:shadow-[var(--accent-glow)] sm:col-span-2"
+          >
+            <span className="text-2xl">⌘</span>
+            <h2 className="mt-3 text-lg font-bold group-hover:text-blue-600">
+              Playground →
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              Scratch JS, TypeScript, or Python in the browser — run, see the
+              console, share a link.
+            </p>
+          </Link>
+          <Link
             href="/random-exam"
             className="group rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg hover:shadow-[var(--accent-glow)] sm:col-span-2"
           >

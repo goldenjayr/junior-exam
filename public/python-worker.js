@@ -79,10 +79,45 @@ function normalizeReturnValue(result) {
 }
 
 self.onmessage = async (event) => {
-  const { problem, code } = event.data;
+  const { problem, code, mode } = event.data;
   const logs = [];
   let globals;
   let builtins;
+
+  if (mode === "playground") {
+    const start = performance.now();
+    try {
+      const pyodide = await pyodideReady;
+      pyodide.setStdout?.({ batched: (s) => logs.push(s) });
+      pyodide.setStderr?.({ batched: (s) => logs.push(`[stderr] ${s}`) });
+      globals = pyodide.toPy({});
+      builtins = pyodide.globals.get("__builtins__");
+      globals.set("__builtins__", builtins);
+      let result;
+      try {
+        result = await pyodide.runPythonAsync(code, { globals });
+      } finally {
+        destroyProxy(result);
+      }
+      self.postMessage({
+        status: "ok",
+        logs: [...logs],
+        durationMs: performance.now() - start,
+      });
+    } catch (error) {
+      self.postMessage({
+        status: "error",
+        logs: [...logs],
+        error: error instanceof Error ? error.message : String(error),
+        durationMs: performance.now() - start,
+      });
+    } finally {
+      destroyProxy(builtins);
+      destroyProxy(globals);
+    }
+    return;
+  }
+
   try {
     const pyodide = await pyodideReady;
     pyodide.setStdout?.({ batched: (s) => logs.push(s) });
