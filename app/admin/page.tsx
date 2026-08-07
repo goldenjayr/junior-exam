@@ -150,9 +150,9 @@ const minutesFor: Record<Problem["difficulty"], number> = {
 };
 
 const difficultyBadge: Record<Problem["difficulty"], string> = {
-  easy: "bg-blue-50 text-blue-600",
-  medium: "bg-purple-50 text-purple-600",
-  hard: "bg-red-50 text-red-600",
+  easy: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300",
+  medium: "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-300",
+  hard: "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-300",
 };
 
 function toggleFilterValue(current: Set<string>, value: string): Set<string> {
@@ -165,8 +165,8 @@ function toggleFilterValue(current: Set<string>, value: string): Set<string> {
 function difficultyPillClass(active: boolean) {
   return `rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
     active
-      ? "bg-slate-900 text-white"
-      : "border border-slate-300 hover:bg-slate-50"
+      ? "bg-foreground text-background"
+      : "border border-border-strong hover:bg-hover"
   }`;
 }
 
@@ -174,7 +174,7 @@ function categoryPillClass(active: boolean) {
   return `rounded-full px-2.5 py-1 text-xs font-semibold ${
     active
       ? "bg-blue-600 text-white"
-      : "border border-slate-300 hover:bg-slate-50"
+      : "border border-border-strong hover:bg-hover"
   }`;
 }
 
@@ -306,14 +306,14 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6 text-slate-900 sm:p-8">
+    <main className="min-h-screen bg-background p-6 text-foreground sm:p-8">
       <div className="mx-auto max-w-7xl">
         <header className="mb-6 animate-fade-up">
           <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
             Admin
           </p>
           <h1 className="text-3xl font-bold">Exam Builder</h1>
-          <p className="mt-1 text-slate-500">
+          <p className="mt-1 text-muted">
             Pick problems from the bank — your exam takes shape on the right.
           </p>
         </header>
@@ -321,16 +321,16 @@ export default function AdminPage() {
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           {/* Left: problem bank */}
           <section className="animate-fade-up">
-            <div className="sticky top-6 z-10 mb-4 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="sticky top-6 z-10 mb-4 flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="flex flex-wrap items-center gap-2">
                 <input
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search by title or instructions…"
-                  className="min-w-[12rem] flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-400"
+                  className="min-w-[12rem] flex-1 rounded-lg border border-border-strong px-3 py-1.5 text-sm outline-none focus:border-blue-400"
                 />
-                <span className="shrink-0 text-xs text-slate-500">
+                <span className="shrink-0 text-xs text-muted">
                   {visible.length}/{problems.length}
                 </span>
                 {filtersActive && (
@@ -345,7 +345,7 @@ export default function AdminPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
-                <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-muted-fg">
                   Diff
                 </span>
                 <button
@@ -367,14 +367,14 @@ export default function AdminPage() {
                     {d}
                   </button>
                 ))}
-                <span className="mx-1 h-4 w-px bg-slate-200" aria-hidden />
+                <span className="mx-1 h-4 w-px bg-chip" aria-hidden />
                 <button
                   type="button"
                   onClick={() => setOnlySelected(!onlySelected)}
                   className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                     onlySelected
                       ? "bg-blue-600 text-white"
-                      : "border border-slate-300 hover:bg-slate-50"
+                      : "border border-border-strong hover:bg-hover"
                   }`}
                 >
                   Selected only{selected.size ? ` (${selected.size})` : ""}
@@ -382,7 +382,7 @@ export default function AdminPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
-                <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <span className="mr-0.5 text-[11px] font-bold uppercase tracking-wider text-muted-fg">
                   Topic
                 </span>
                 <button
@@ -399,7 +399,7 @@ export default function AdminPage() {
                   >
                     {groupIndex > 0 && (
                       <span
-                        className="mx-0.5 h-4 w-px bg-slate-200"
+                        className="mx-0.5 h-4 w-px bg-chip"
                         aria-hidden
                       />
                     )}
@@ -424,9 +424,9 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card">
               {visible.length > 0 && (
-                <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/80 px-4 py-2.5">
+                <div className="flex items-center gap-3 border-b border-border bg-card-muted/80 px-4 py-2.5">
                   <input
                     type="checkbox"
                     checked={allVisibleSelected}
@@ -448,7 +448,7 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={toggleSelectVisible}
-                    className="text-xs font-semibold text-slate-600 hover:text-blue-600"
+                    className="text-xs font-semibold text-subtle hover:text-blue-600"
                   >
                     {allVisibleSelected
                       ? `Deselect all (${visible.length})`
@@ -461,8 +461,8 @@ export default function AdminPage() {
                 return (
                   <label
                     key={p.id}
-                    className={`flex cursor-pointer items-center gap-3 border-b border-slate-100 px-4 py-3 transition-colors last:border-b-0 ${
-                      checked ? "bg-blue-50/60" : "hover:bg-slate-50"
+                    className={`flex cursor-pointer items-center gap-3 border-b border-border px-4 py-3 transition-colors last:border-b-0 ${
+                      checked ? "bg-blue-50/60 dark:bg-blue-950/40" : "hover:bg-hover"
                     }`}
                   >
                     <input
@@ -482,11 +482,11 @@ export default function AdminPage() {
                           {p.difficulty}
                         </span>
                       </span>
-                      <span className="mt-0.5 block truncate text-xs text-slate-500">
+                      <span className="mt-0.5 block truncate text-xs text-muted">
                         {p.instructions}
                       </span>
                     </span>
-                    <span className="shrink-0 text-xs text-slate-400">
+                    <span className="shrink-0 text-xs text-muted-fg">
                       {categoryLabels[p.category]} · ~{minutesFor[p.difficulty]}m
                     </span>
                     <button
@@ -496,7 +496,7 @@ export default function AdminPage() {
                         setPreview(p);
                         previewDialog.current?.showModal();
                       }}
-                      className="shrink-0 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-600 transition-colors hover:border-blue-400 hover:text-blue-600"
+                      className="shrink-0 rounded-lg border border-border-strong px-2.5 py-1 text-xs font-semibold text-subtle transition-colors hover:border-blue-400 hover:text-blue-600"
                     >
                       Preview
                     </button>
@@ -504,7 +504,7 @@ export default function AdminPage() {
                 );
               })}
               {!visible.length && (
-                <div className="p-8 text-center text-sm text-slate-400">
+                <div className="p-8 text-center text-sm text-muted-fg">
                   <p>No problems match your filters.</p>
                   {filtersActive && (
                     <button
@@ -523,18 +523,18 @@ export default function AdminPage() {
           {/* Right: exam builder */}
           <aside
             style={{ animationDelay: "100ms" }}
-            className="animate-fade-up sticky top-6 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5"
+            className="animate-fade-up sticky top-6 flex flex-col gap-4 rounded-2xl border border-border bg-card p-5"
           >
             <div>
               <h2 className="flex items-center gap-2 text-sm font-bold">
                 Your Exam
                 {activeSetName && (
-                  <span className="animate-pop truncate rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-700">
+                  <span className="animate-pop truncate rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                     {activeSetName}
                   </span>
                 )}
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-muted">
                 {selected.size
                   ? `${selected.size} problems · ~${totalMinutes} min`
                   : "No problems selected yet — pick from the bank or start from a preset."}
@@ -544,12 +544,12 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={() => presetDialog.current?.showModal()}
-              className="flex items-center justify-between rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold transition-colors hover:border-blue-400 hover:text-blue-600"
+              className="flex items-center justify-between rounded-lg border border-border-strong bg-card px-3 py-2 text-sm font-semibold transition-colors hover:border-blue-400 hover:text-blue-600"
             >
               <span className="truncate">
                 {activeSetName ?? "Start from a preset…"}
               </span>
-              <span aria-hidden className="text-slate-400">
+              <span aria-hidden className="text-muted-fg">
                 ▸
               </span>
             </button>
@@ -563,7 +563,7 @@ export default function AdminPage() {
                 <div className="mb-5 flex items-start justify-between gap-4">
                   <div>
                     <h2 className="text-xl font-bold">Recommended Exams</h2>
-                    <p className="mt-0.5 text-sm text-slate-500">
+                    <p className="mt-0.5 text-sm text-muted">
                       Pick a starting point — you can add or remove problems
                       afterwards.
                     </p>
@@ -572,21 +572,21 @@ export default function AdminPage() {
                     type="button"
                     aria-label="Close"
                     onClick={() => presetDialog.current?.close()}
-                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-fg hover:bg-background hover:text-subtle"
                   >
                     ×
                   </button>
                 </div>
                 {savedExams.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                    <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-fg">
                       My Exams
                     </h3>
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                       {savedExams.map((exam) => (
                         <div
                           key={exam.name}
-                          className="relative rounded-xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md"
+                          className="relative rounded-xl border border-border bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md"
                         >
                           <button
                             type="button"
@@ -599,7 +599,7 @@ export default function AdminPage() {
                             <span className="block truncate pr-6 font-semibold">
                               {exam.name}
                             </span>
-                            <span className="mt-1 block text-sm text-slate-500">
+                            <span className="mt-1 block text-sm text-muted">
                               {exam.ids.length} problems · ~
                               {exam.ids.reduce(
                                 (sum, id) =>
@@ -621,7 +621,7 @@ export default function AdminPage() {
                                 savedExams.filter((e) => e.name !== exam.name)
                               )
                             }
-                            className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                            className="absolute right-2 top-2 grid h-6 w-6 place-items-center rounded-full text-muted-fg hover:bg-background hover:text-subtle"
                           >
                             ×
                           </button>
@@ -631,14 +631,14 @@ export default function AdminPage() {
                   </div>
                 )}
 
-                <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-fg">
                   Recommended
                 </h3>
                 <div className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {presets.map((preset) => (
                     <div
                       key={preset.name}
-                      className="rounded-xl border border-slate-200 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md"
+                      className="rounded-xl border border-border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-400 hover:shadow-md"
                     >
                       <button
                         type="button"
@@ -651,7 +651,7 @@ export default function AdminPage() {
                         <span className="block font-semibold">
                           {preset.name}
                         </span>
-                        <span className="mt-1 block text-sm text-slate-500">
+                        <span className="mt-1 block text-sm text-muted">
                           {preset.description}
                         </span>
                       </button>
@@ -661,7 +661,7 @@ export default function AdminPage() {
                           setSetPreview(preset);
                           setDialog.current?.showModal();
                         }}
-                        className="flex w-full items-center gap-1 border-t border-slate-100 px-4 py-2 text-xs font-semibold text-slate-500 hover:text-blue-600"
+                        className="flex w-full items-center gap-1 border-t border-border px-4 py-2 text-xs font-semibold text-muted hover:text-blue-600"
                       >
                         <span aria-hidden>▸</span> View {preset.ids.length}{" "}
                         problems
@@ -683,7 +683,7 @@ export default function AdminPage() {
                     <div>
                       <h2 className="text-xl font-bold">{setPreview_.name}</h2>
                       {setPreview_.description && (
-                        <p className="mt-0.5 text-sm text-slate-500">
+                        <p className="mt-0.5 text-sm text-muted">
                           {setPreview_.description}
                         </p>
                       )}
@@ -692,29 +692,29 @@ export default function AdminPage() {
                       type="button"
                       aria-label="Close"
                       onClick={() => setDialog.current?.close()}
-                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-fg hover:bg-background hover:text-subtle"
                     >
                       ×
                     </button>
                   </div>
 
-                  <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+                  <div className="mt-4 overflow-hidden rounded-xl border border-border">
                     {setPreview_.ids.map((id, i) => {
                       const prob = problems.find((p) => p.id === id)!;
                       return (
                         <div
                           key={id}
                           style={{ animationDelay: `${i * 30}ms` }}
-                          className="animate-fade-up flex items-center gap-3 border-b border-slate-100 px-4 py-2.5 text-sm last:border-b-0"
+                          className="animate-fade-up flex items-center gap-3 border-b border-border px-4 py-2.5 text-sm last:border-b-0"
                         >
-                          <span className="w-4 shrink-0 text-xs text-slate-400">
+                          <span className="w-4 shrink-0 text-xs text-muted-fg">
                             {i + 1}
                           </span>
                           <span className="min-w-0 flex-1">
                             <span className="block truncate font-semibold">
                               {prob.title}
                             </span>
-                            <span className="block truncate text-xs text-slate-500">
+                            <span className="block truncate text-xs text-muted">
                               {prob.instructions}
                             </span>
                           </span>
@@ -723,7 +723,7 @@ export default function AdminPage() {
                           >
                             {prob.difficulty}
                           </span>
-                          <span className="shrink-0 text-xs text-slate-400">
+                          <span className="shrink-0 text-xs text-muted-fg">
                             ~{minutesFor[prob.difficulty]}m
                           </span>
                         </div>
@@ -731,7 +731,7 @@ export default function AdminPage() {
                     })}
                   </div>
 
-                  <p className="mt-3 text-xs text-slate-500">
+                  <p className="mt-3 text-xs text-muted">
                     {setPreview_.ids.length} problems · ~
                     {setPreview_.ids.reduce(
                       (sum, id) =>
@@ -746,7 +746,7 @@ export default function AdminPage() {
                     <button
                       type="button"
                       onClick={() => setDialog.current?.close()}
-                      className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95"
+                      className="rounded-lg border border-border-strong px-4 py-2 text-sm font-bold transition-transform hover:bg-hover active:scale-95"
                     >
                       Close
                     </button>
@@ -781,7 +781,7 @@ export default function AdminPage() {
                         {preview.difficulty} · {preview.category}
                       </span>
                       <h2 className="text-2xl font-bold">{preview.title}</h2>
-                      <p className="mt-2 leading-relaxed text-slate-600">
+                      <p className="mt-2 leading-relaxed text-subtle">
                         {preview.instructions}
                       </p>
                     </div>
@@ -789,32 +789,32 @@ export default function AdminPage() {
                       type="button"
                       aria-label="Close"
                       onClick={() => previewDialog.current?.close()}
-                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-fg hover:bg-background hover:text-subtle"
                     >
                       ×
                     </button>
                   </div>
 
-                  <h3 className="mt-5 text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <h3 className="mt-5 text-xs font-bold uppercase tracking-wider text-muted-fg">
                     Starter Code
                   </h3>
                   <pre className="mt-2 overflow-x-auto rounded-xl bg-slate-900 p-4 font-mono text-sm leading-6 text-slate-100">
                     {preview.starterCode}
                   </pre>
 
-                  <h3 className="mt-5 text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <h3 className="mt-5 text-xs font-bold uppercase tracking-wider text-muted-fg">
                     Test Cases
                   </h3>
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {preview.tests.map((t, i) => (
                       <div
                         key={i}
-                        className="rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-xs"
+                        className="rounded-lg border border-border bg-card-muted p-3 font-mono text-xs"
                       >
-                        <p className="overflow-x-auto whitespace-nowrap text-slate-600">
+                        <p className="overflow-x-auto whitespace-nowrap text-subtle">
                           {callLabel(preview, t)}
                         </p>
-                        <p className="mt-1 font-sans text-[11px] font-semibold text-slate-400">
+                        <p className="mt-1 font-sans text-[11px] font-semibold text-muted-fg">
                           Expected
                         </p>
                         <pre className="overflow-x-auto whitespace-pre-wrap">
@@ -828,7 +828,7 @@ export default function AdminPage() {
                     <button
                       type="button"
                       onClick={() => previewDialog.current?.close()}
-                      className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95"
+                      className="rounded-lg border border-border-strong px-4 py-2 text-sm font-bold transition-transform hover:bg-hover active:scale-95"
                     >
                       Close
                     </button>
@@ -849,14 +849,14 @@ export default function AdminPage() {
 
             {savedExams.length > 0 && (
               <div>
-                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h3 className="mb-1.5 text-xs font-bold uppercase tracking-wider text-muted-fg">
                   My Exams
                 </h3>
                 <div className="flex flex-col gap-1">
                   {savedExams.map((exam) => (
                     <div
                       key={exam.name}
-                      className="flex items-center gap-1 rounded-lg border border-slate-200 py-1.5 pl-3 pr-1.5 text-sm hover:border-slate-300"
+                      className="flex items-center gap-1 rounded-lg border border-border py-1.5 pl-3 pr-1.5 text-sm hover:border-border-strong"
                     >
                       <button
                         type="button"
@@ -864,7 +864,7 @@ export default function AdminPage() {
                         className="min-w-0 flex-1 truncate text-left font-semibold hover:text-blue-600"
                       >
                         {exam.name}
-                        <span className="ml-1.5 font-normal text-slate-400">
+                        <span className="ml-1.5 font-normal text-muted-fg">
                           {exam.ids.length}
                         </span>
                       </button>
@@ -876,7 +876,7 @@ export default function AdminPage() {
                             savedExams.filter((e) => e.name !== exam.name)
                           )
                         }
-                        className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                        className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-muted-fg hover:bg-background hover:text-subtle"
                       >
                         ×
                       </button>
@@ -891,9 +891,9 @@ export default function AdminPage() {
                 {selectedProblems.map((p, i) => (
                   <div
                     key={p.id}
-                    className="animate-pop flex items-center gap-2 rounded-lg bg-slate-50 py-1.5 pl-3 pr-1.5 text-sm"
+                    className="animate-pop flex items-center gap-2 rounded-lg bg-card-muted py-1.5 pl-3 pr-1.5 text-sm"
                   >
-                    <span className="w-4 shrink-0 text-xs text-slate-400">
+                    <span className="w-4 shrink-0 text-xs text-muted-fg">
                       {i + 1}
                     </span>
                     <span className="min-w-0 flex-1 truncate font-medium">
@@ -908,7 +908,7 @@ export default function AdminPage() {
                       type="button"
                       aria-label={`Remove ${p.title}`}
                       onClick={() => toggle(p.id)}
-                      className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600"
+                      className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-muted-fg hover:bg-chip hover:text-subtle"
                     >
                       ×
                     </button>
@@ -917,9 +917,9 @@ export default function AdminPage() {
               </div>
             )}
 
-            <div className="flex flex-col gap-2 border-t border-slate-100 pt-4">
+            <div className="flex flex-col gap-2 border-t border-border pt-4">
               <label className="flex items-center gap-2 text-sm">
-                <span className="font-semibold text-slate-600">
+                <span className="font-semibold text-subtle">
                   Send results to
                 </span>
                 <select
@@ -928,7 +928,7 @@ export default function AdminPage() {
                     setExaminer(e.target.value);
                     setCopied(false);
                   }}
-                  className="flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 capitalize outline-none focus:border-blue-400"
+                  className="flex-1 rounded-lg border border-border-strong bg-card px-2 py-1.5 capitalize outline-none focus:border-blue-400"
                 >
                   {examinerIds.map((id) => (
                     <option key={id} value={id}>
@@ -939,7 +939,7 @@ export default function AdminPage() {
               </label>
 
               <div>
-                <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-muted-fg">
                   Time Attack
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -951,8 +951,8 @@ export default function AdminPage() {
                     }}
                     className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                       timeMode === "off"
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300"
+                        ? "bg-foreground text-background"
+                        : "border border-border-strong"
                     }`}
                   >
                     Off
@@ -969,7 +969,7 @@ export default function AdminPage() {
                       className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                         timeMode === "preset" && presetMin === m
                           ? "bg-blue-600 text-white"
-                          : "border border-slate-300"
+                          : "border border-border-strong"
                       }`}
                     >
                       {m}m
@@ -984,7 +984,7 @@ export default function AdminPage() {
                     className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                       timeMode === "custom"
                         ? "bg-blue-600 text-white"
-                        : "border border-slate-300"
+                        : "border border-border-strong"
                     }`}
                   >
                     Custom
@@ -1000,7 +1000,7 @@ export default function AdminPage() {
                       setCustomMin(clampMinutes(Number(e.target.value)));
                       setCopied(false);
                     }}
-                    className="mt-2 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+                    className="mt-2 w-full rounded-lg border border-border-strong px-2 py-1.5 text-sm"
                   />
                 )}
               </div>
@@ -1015,13 +1015,13 @@ export default function AdminPage() {
                   }}
                   className="h-4 w-4 accent-blue-600"
                 />
-                <span className="font-semibold text-slate-600">
+                <span className="font-semibold text-subtle">
                   Shuffle problem order
                 </span>
               </label>
 
               {link && (
-                <code className="truncate rounded-lg bg-slate-100 px-3 py-2 text-[11px]">
+                <code className="truncate rounded-lg bg-background px-3 py-2 text-[11px]">
                   {link}
                 </code>
               )}
@@ -1032,7 +1032,7 @@ export default function AdminPage() {
                   await navigator.clipboard.writeText(link);
                   setCopied(true);
                 }}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-border-strong"
               >
                 {copied ? "Copied!" : "Copy exam link"}
               </button>
@@ -1044,8 +1044,8 @@ export default function AdminPage() {
                   aria-disabled={!link}
                   className={`flex-1 rounded-lg border px-3 py-1.5 text-center text-sm font-bold ${
                     link
-                      ? "border-slate-300 transition-transform hover:bg-slate-50 active:scale-95"
-                      : "pointer-events-none border-slate-200 text-slate-300"
+                      ? "border-border-strong transition-transform hover:bg-hover active:scale-95"
+                      : "pointer-events-none border-border text-muted-fg"
                   }`}
                 >
                   Preview
@@ -1061,7 +1061,7 @@ export default function AdminPage() {
                       { name, ids },
                     ]);
                   }}
-                  className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95 disabled:cursor-not-allowed disabled:text-slate-300"
+                  className="flex-1 rounded-lg border border-border-strong px-3 py-1.5 text-sm font-bold transition-transform hover:bg-hover active:scale-95 disabled:cursor-not-allowed disabled:text-muted-fg"
                 >
                   Save
                 </button>
@@ -1069,7 +1069,7 @@ export default function AdminPage() {
                   type="button"
                   disabled={!selected.size}
                   onClick={() => loadSet([])}
-                  className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95 disabled:cursor-not-allowed disabled:text-slate-300"
+                  className="flex-1 rounded-lg border border-border-strong px-3 py-1.5 text-sm font-bold transition-transform hover:bg-hover active:scale-95 disabled:cursor-not-allowed disabled:text-muted-fg"
                 >
                   Clear
                 </button>

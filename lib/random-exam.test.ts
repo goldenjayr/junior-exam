@@ -42,6 +42,27 @@ test("filterProblems respects difficulty", () => {
   assert.ok(easy.every((p) => p.difficulty === "easy"));
 });
 
+test("filterProblems supports multi language and difficulty", () => {
+  const pool = filterProblems({
+    languages: ["javascript", "typescript"],
+    difficulties: ["easy", "medium"],
+  });
+  assert.ok(pool.length > 0);
+  for (const p of pool) {
+    assert.ok(
+      ["arrays", "strings", "objects", "logic", "react", "typescript"].includes(
+        p.category
+      )
+    );
+    assert.ok(p.difficulty === "easy" || p.difficulty === "medium");
+  }
+});
+
+test("filterProblems empty languages/difficulties means all", () => {
+  const all = filterProblems({ languages: [], difficulties: [] });
+  assert.strictEqual(all.length, problems.length);
+});
+
 test("drawProblems returns count items from pool", () => {
   const pool = filterProblems({ language: "all", difficulty: "all" });
   const drawn = drawProblems(pool, 3);

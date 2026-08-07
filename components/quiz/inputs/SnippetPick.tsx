@@ -25,13 +25,13 @@ export default function SnippetPick({
             onClick={() => onChange({ type: "snippet", id: s.id })}
             className={`rounded-xl border p-3 text-left transition-all disabled:cursor-not-allowed ${
               on
-                ? "border-blue-400 bg-blue-50 ring-2 ring-blue-100"
-                : "border-slate-200 bg-slate-900 hover:border-blue-300"
+                ? "border-blue-400 bg-blue-50 ring-2 ring-blue-100 dark:bg-blue-950 dark:ring-blue-900"
+                : "border-border bg-slate-900 hover:border-blue-300"
             }`}
           >
             <pre
               className={`overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-relaxed ${
-                on ? "text-slate-800" : "text-slate-100"
+                on ? "text-foreground dark:text-slate-100" : "text-slate-100"
               }`}
             >
               {s.code}

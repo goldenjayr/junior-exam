@@ -24,7 +24,7 @@ export default function OutputInput({
         disabled={disabled}
         placeholder="What does this output?"
         onChange={(e) => onChange({ type: "output", text: e.target.value })}
-        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-mono text-sm outline-none focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-slate-50"
+        className="w-full rounded-xl border border-border-strong bg-card px-4 py-3 font-mono text-sm outline-none focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-card-muted"
       />
     </div>
   );

@@ -32,7 +32,7 @@ export default function HotspotCode({
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
-      <p className="border-b border-slate-700 px-3 py-2 text-xs font-semibold text-slate-400">
+      <p className="border-b border-slate-700 px-3 py-2 text-xs font-semibold text-muted-fg">
         Click the line that contains the issue
       </p>
       <pre className="p-0 font-mono text-sm leading-6 text-slate-100">
@@ -56,7 +56,7 @@ export default function HotspotCode({
                     : ""
               }`}
             >
-              <span className="w-6 shrink-0 select-none text-right text-slate-500">
+              <span className="w-6 shrink-0 select-none text-right text-muted">
                 {lineNum}
               </span>
               <span className="min-w-0 flex-1 whitespace-pre-wrap">{line || " "}</span>

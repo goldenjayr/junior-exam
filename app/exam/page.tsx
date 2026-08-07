@@ -136,7 +136,7 @@ function Exam() {
   const problem = examProblems.find((p) => p.id === selectedId);
   if (!problem) {
     return (
-      <main className="grid min-h-screen place-items-center text-slate-500">
+      <main className="grid min-h-screen place-items-center text-muted">
         This exam link contains no problems. Ask your interviewer for a new
         link.
       </main>
@@ -151,7 +151,7 @@ function Exam() {
   ).length;
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6 text-slate-900 sm:p-8">
+    <main className="min-h-screen bg-background p-6 text-foreground sm:p-8">
       <div className="animate-fade-up mx-auto max-w-7xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -159,7 +159,7 @@ function Exam() {
               Junior JavaScript Assessment
             </p>
             <h1 className="text-3xl font-bold">JavaScript Fundamentals</h1>
-            <p className="mt-1 text-slate-500">
+            <p className="mt-1 text-muted">
               Complete each function, then run the tests to check your
               solution.
             </p>
@@ -168,7 +168,7 @@ function Exam() {
             {limitSeconds != null && remaining != null && (
               <TimeAttackBar remaining={remaining} limitSeconds={limitSeconds} />
             )}
-            <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold shadow-sm">
+            <div className="rounded-full bg-card px-4 py-2 text-sm font-semibold shadow-sm">
               {passedCount} / {examProblems.length} solved
             </div>
             <input
@@ -177,7 +177,7 @@ function Exam() {
               onChange={(e) => setApplicantName(e.target.value)}
               placeholder="Your name"
               aria-label="Your name"
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+              className="rounded-lg border border-border-strong bg-card px-3 py-2 text-sm outline-none focus:border-blue-400"
             />
             <button
               type="button"
@@ -203,7 +203,7 @@ function Exam() {
         </header>
 
         <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="rounded-2xl border border-slate-200 bg-white p-4">
+          <aside className="rounded-2xl border border-border bg-card p-4">
             <h2 className="mb-3 px-2 text-sm font-bold">Problems</h2>
             <div className="flex flex-col gap-1">
               {examProblems.map((p, index) => {
@@ -220,15 +220,15 @@ function Exam() {
                     }}
                     className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${
                       selected
-                        ? "border-blue-200 bg-blue-50"
-                        : "border-transparent hover:bg-slate-50"
+                        ? "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950"
+                        : "border-transparent hover:bg-hover"
                     }`}
                   >
                     <span
                       className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-bold ${
                         status === "passed"
                           ? "bg-green-100 text-green-700"
-                          : "bg-slate-100 text-slate-600"
+                          : "bg-background text-subtle"
                       }`}
                     >
                       {status === "passed" ? "✓" : index + 1}
@@ -237,7 +237,7 @@ function Exam() {
                       <span className="block truncate text-sm font-semibold">
                         {p.title}
                       </span>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-muted">
                         {status ? statusLabel[status] : "Not attempted"}
                       </span>
                     </span>
@@ -247,29 +247,29 @@ function Exam() {
             </div>
           </aside>
 
-          <section key={problem.id} className="animate-fade-up rounded-2xl border border-slate-200 bg-white p-6 sm:p-7">
-            <div className="border-b border-slate-200 pb-5">
+          <section key={problem.id} className="animate-fade-up rounded-2xl border border-border bg-card p-6 sm:p-7">
+            <div className="border-b border-border pb-5">
               <span
                 className={`mb-2 inline-block rounded-full px-2.5 py-1 text-xs font-bold capitalize ${
                   {
-                    easy: "bg-blue-50 text-blue-600",
-                    medium: "bg-purple-50 text-purple-600",
-                    hard: "bg-red-50 text-red-600",
+                    easy: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300",
+                    medium: "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-300",
+                    hard: "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-300",
                   }[problem.difficulty]
                 }`}
               >
                 {problem.difficulty} · {problem.category}
               </span>
               <h2 className="text-2xl font-bold">{problem.title}</h2>
-              <p className="mt-2 leading-relaxed text-slate-600">
+              <p className="mt-2 leading-relaxed text-subtle">
                 {problem.instructions}
               </p>
             </div>
 
             {schemaSql && (
-              <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mt-5 rounded-xl border border-border bg-card-muted p-4">
                 <h3 className="text-sm font-bold">Schema</h3>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted">
                   Table definitions available for this problem. Test data varies
                   per case.
                 </p>
@@ -284,12 +284,12 @@ function Exam() {
                 <h3 className="text-sm font-bold">Your Code</h3>
                 <div className="flex gap-2">
                   {running && problem.kind === "sql" && (
-                    <span className="self-center text-xs text-slate-500">
+                    <span className="self-center text-xs text-muted">
                       Starting Postgres…
                     </span>
                   )}
                   {running && problem.kind === "python" && (
-                    <span className="self-center text-xs text-slate-500">
+                    <span className="self-center text-xs text-muted">
                       Starting Python…
                     </span>
                   )}
@@ -297,7 +297,7 @@ function Exam() {
                     <button
                       type="button"
                       onClick={() => setShowAnswer((v) => !v)}
-                      className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800 transition-transform hover:bg-amber-100 active:scale-95"
+                      className="rounded-lg border border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950 px-4 py-2 text-sm font-bold text-amber-800 transition-transform hover:bg-amber-100 active:scale-95"
                     >
                       {showAnswer ? "Hide answer" : "Show answer"}
                     </button>
@@ -316,7 +316,7 @@ function Exam() {
                         return next;
                       });
                     }}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-lg border border-border-strong bg-card px-4 py-2 text-sm font-bold transition-transform hover:bg-hover active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Reset
                   </button>
@@ -352,11 +352,11 @@ function Exam() {
                 </div>
               </div>
               {cheat && showAnswer && (
-                <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950 p-4">
                   <p className="mb-2 text-xs font-bold uppercase tracking-wider text-amber-700">
                     Official answer (read-only)
                   </p>
-                  <pre className="overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-slate-800">
+                  <pre className="overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-foreground">
                     {getExamSolution(problem.id) ??
                       "No solution available for this problem."}
                   </pre>
@@ -373,10 +373,10 @@ function Exam() {
             </div>
 
             <div className="mt-5 grid items-start gap-4 lg:grid-cols-2">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-xl border border-border bg-card-muted p-4">
                 <h3 className="flex items-center gap-2 text-sm font-bold">
                   Test Cases
-                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+                  <span className="rounded-full bg-chip px-2 py-0.5 text-[11px] font-bold text-subtle">
                     {problem.tests.length}
                   </span>
                 </h3>
@@ -384,9 +384,9 @@ function Exam() {
                   {problem.tests.map((t, i) => (
                     <div
                       key={i}
-                      className="rounded-lg border border-slate-200 bg-white p-3"
+                      className="rounded-lg border border-border bg-card p-3"
                     >
-                      <p className="font-sans text-[11px] font-semibold text-slate-400">
+                      <p className="font-sans text-[11px] font-semibold text-muted-fg">
                         Case {i + 1}
                         {typeof t.maxMs === "number" && (
                           <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700">
@@ -396,18 +396,18 @@ function Exam() {
                       </p>
                       <div className="mt-2 flex flex-col gap-2">
                         <div>
-                          <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                          <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-muted-fg">
                             Input
                           </p>
-                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-50 p-2 font-mono text-xs text-slate-700">
+                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-card-muted p-2 font-mono text-xs text-subtle">
                             {callLabel(problem, t)}
                           </pre>
                         </div>
                         <div>
-                          <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                          <p className="font-sans text-[11px] font-semibold uppercase tracking-wider text-muted-fg">
                             Expected
                           </p>
-                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-50 p-2 font-mono text-xs text-slate-800">
+                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-card-muted p-2 font-mono text-xs text-foreground">
                             {typeof t.maxMs === "number" &&
                             Array.isArray(t.expected) &&
                             t.expected.length > 12
@@ -421,12 +421,12 @@ function Exam() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-xl border border-border bg-card-muted p-4">
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="flex items-center gap-2 text-sm font-bold">
                     Test Results
                     {result && result.tests.length > 0 && (
-                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+                      <span className="rounded-full bg-chip px-2 py-0.5 text-[11px] font-bold text-subtle">
                         {
                           result.tests.filter(
                             (t) => t.test.maxMs == null && t.passed
@@ -451,19 +451,19 @@ function Exam() {
 
                 {result?.status === "passed" &&
                   result.efficiency === "slow" && (
-                    <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                    <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950 px-3 py-2 text-sm text-amber-800">
                       Correct, but slow on large inputs — efficiency needs work.
                     </p>
                   )}
 
                 {!result && (
-                  <div className="mt-3 grid min-h-32 place-items-center rounded-lg border border-dashed border-slate-300 text-sm text-slate-400">
+                  <div className="mt-3 grid min-h-32 place-items-center rounded-lg border border-dashed border-border-strong text-sm text-muted-fg">
                     Run the tests to see your results here.
                   </div>
                 )}
 
                 {result?.error && (
-                  <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-lg border border-red-200 bg-red-50 p-3 font-mono text-sm text-red-700">
+                  <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-lg border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950 p-3 font-mono text-sm text-red-700">
                     {result.error}
                   </pre>
                 )}
@@ -476,10 +476,10 @@ function Exam() {
                       typeof t.durationMs === "number" &&
                       t.durationMs > t.test.maxMs;
                     const rowClass = t.passed
-                      ? "border-green-200 bg-green-50"
+                      ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950"
                       : isPerfSlow
-                        ? "border-amber-200 bg-amber-50"
-                        : "border-red-200 bg-red-50";
+                        ? "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950"
+                        : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950";
                     const markClass = t.passed
                       ? "bg-green-600"
                       : isPerfSlow
@@ -497,7 +497,7 @@ function Exam() {
                           >
                             {t.passed ? "✓" : isPerfSlow ? "!" : "✗"}
                           </span>
-                          <pre className="min-w-0 flex-1 whitespace-pre-wrap font-mono text-xs text-slate-600">
+                          <pre className="min-w-0 flex-1 whitespace-pre-wrap font-mono text-xs text-subtle">
                             {callLabel(problem, t.test)}
                           </pre>
                         </div>
@@ -510,7 +510,7 @@ function Exam() {
                         {!t.passed && !isPerfSlow && (
                           <div className="mt-2 grid gap-2 font-mono text-xs sm:grid-cols-2">
                             <div>
-                              <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                              <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-muted">
                                 Expected
                               </p>
                               <pre className="overflow-x-auto whitespace-pre-wrap">
@@ -518,7 +518,7 @@ function Exam() {
                               </pre>
                             </div>
                             <div>
-                              <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                              <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-muted">
                                 {t.error ? "Error" : "Received"}
                               </p>
                               <pre
@@ -531,7 +531,7 @@ function Exam() {
                         )}
                         {t.logs && t.logs.length > 0 && (
                           <div className="mt-2">
-                            <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-muted">
                               Console
                             </p>
                             <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-slate-900 p-2 font-mono text-[11px] leading-relaxed text-slate-100">
@@ -558,7 +558,7 @@ function Exam() {
               onChange={(e) => setApplicantName(e.target.value)}
               placeholder="Your name"
               aria-label="Your name"
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+              className="rounded-lg border border-border-strong bg-card px-3 py-2 text-sm outline-none focus:border-blue-400"
             />
             <button
               type="button"
@@ -591,7 +591,7 @@ export default function ExamPage() {
   return (
     <Suspense
       fallback={
-        <main className="grid min-h-screen place-items-center bg-slate-100 text-sm text-slate-400">
+        <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
           Loading exam…
         </main>
       }

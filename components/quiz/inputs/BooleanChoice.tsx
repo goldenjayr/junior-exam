@@ -27,9 +27,9 @@ export default function BooleanChoice({
             className={`rounded-2xl border-2 px-4 py-8 text-lg font-bold transition-all active:scale-[0.98] disabled:cursor-not-allowed ${
               on
                 ? v
-                  ? "border-green-500 bg-green-50 text-green-800"
-                  : "border-red-400 bg-red-50 text-red-800"
-                : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                  ? "border-green-500 bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200"
+                  : "border-red-400 bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200"
+                : "border-border bg-card text-subtle hover:border-border-strong"
             }`}
           >
             {label}

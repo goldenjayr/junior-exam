@@ -13,8 +13,8 @@ export default function FeedbackBurst({
     <div
       className={`animate-pop mt-4 rounded-xl border px-4 py-3 text-sm ${
         correct
-          ? "border-green-200 bg-green-50 text-green-800"
-          : "border-red-200 bg-red-50 text-red-800"
+          ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950 text-green-800 dark:bg-green-950 dark:text-green-200"
+          : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950 text-red-800 dark:bg-red-950 dark:text-red-200"
       }`}
       role="status"
     >

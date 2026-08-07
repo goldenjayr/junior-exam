@@ -21,7 +21,7 @@ export default function MultiChoice({
   }
   return (
     <div className="grid gap-2">
-      <p className="text-xs font-semibold text-slate-500">Select all that apply</p>
+      <p className="text-xs font-semibold text-muted">Select all that apply</p>
       {options.map((o) => {
         const on = selected.has(o.id);
         return (
@@ -32,15 +32,15 @@ export default function MultiChoice({
             onClick={() => toggle(o.id)}
             className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-all disabled:cursor-not-allowed ${
               on
-                ? "border-blue-400 bg-blue-50 text-blue-900"
-                : "border-slate-200 bg-white hover:border-slate-300"
+                ? "border-blue-400 bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-100"
+                : "border-border bg-card hover:border-border-strong"
             }`}
           >
             <span
               className={`grid h-5 w-5 shrink-0 place-items-center rounded border text-[11px] ${
                 on
                   ? "border-blue-600 bg-blue-600 text-white"
-                  : "border-slate-300 bg-white"
+                  : "border-border-strong bg-card"
               }`}
             >
               {on ? "✓" : ""}

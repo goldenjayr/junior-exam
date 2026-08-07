@@ -25,8 +25,8 @@ export default function SingleChoice({
             onClick={() => onChange({ type: "single", id: o.id })}
             className={`rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-all active:scale-[0.99] disabled:cursor-not-allowed ${
               on
-                ? "border-blue-400 bg-blue-50 text-blue-900"
-                : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                ? "border-blue-400 bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-100"
+                : "border-border bg-card hover:border-border-strong hover:bg-hover"
             }`}
           >
             {o.label}

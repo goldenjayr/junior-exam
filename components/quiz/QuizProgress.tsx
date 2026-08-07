@@ -35,10 +35,10 @@ export default function QuizProgress({
               isCurrent
                 ? "bg-blue-600 ring-2 ring-blue-200"
                 : isLocked
-                  ? "bg-slate-700"
+                  ? "bg-subtle"
                   : hasAnswer
                     ? "bg-blue-300"
-                    : "bg-slate-200 hover:bg-slate-300"
+                    : "bg-chip hover:bg-border-strong"
             } disabled:cursor-not-allowed disabled:opacity-50`}
           />
         );
