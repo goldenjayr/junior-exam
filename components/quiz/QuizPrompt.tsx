@@ -25,7 +25,7 @@ export default function QuizPrompt({ prompt }: { prompt: string }) {
           return (
             <h2
               key={i}
-              className="text-xl font-bold leading-snug whitespace-pre-wrap text-slate-900 sm:text-2xl"
+              className="text-xl font-bold leading-snug whitespace-pre-wrap text-foreground sm:text-2xl"
             >
               {text}
             </h2>
@@ -34,7 +34,7 @@ export default function QuizPrompt({ prompt }: { prompt: string }) {
         return (
           <p
             key={i}
-            className="whitespace-pre-wrap text-base leading-relaxed text-slate-700"
+            className="whitespace-pre-wrap text-base leading-relaxed text-subtle"
           >
             {text}
           </p>

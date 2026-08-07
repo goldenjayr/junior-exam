@@ -12,9 +12,9 @@ import HotspotCode from "./inputs/HotspotCode";
 import OutputInput from "./inputs/OutputInput";
 
 const difficultyBadge: Record<QuizQuestion["difficulty"], string> = {
-  easy: "bg-blue-50 text-blue-600",
-  medium: "bg-purple-50 text-purple-600",
-  hard: "bg-red-50 text-red-600",
+  easy: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300",
+  medium: "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-300",
+  hard: "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-300",
 };
 
 export default function QuestionStage({
@@ -35,9 +35,9 @@ export default function QuestionStage({
   showHint?: boolean;
 }) {
   return (
-    <div className="animate-fade-up rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+    <div className="animate-fade-up rounded-2xl border border-border bg-card p-6 sm:p-8">
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+        <span className="text-xs font-bold uppercase tracking-widest text-muted-fg">
           Question {index + 1} / {total}
         </span>
         <span
@@ -45,10 +45,10 @@ export default function QuestionStage({
         >
           {question.difficulty}
         </span>
-        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold capitalize text-slate-600">
+        <span className="rounded-full bg-background px-2.5 py-0.5 text-[10px] font-bold capitalize text-subtle">
           {question.topic}
         </span>
-        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold uppercase text-slate-500">
+        <span className="rounded-full bg-background px-2.5 py-0.5 text-[10px] font-bold uppercase text-muted">
           {question.type}
         </span>
       </div>

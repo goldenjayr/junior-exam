@@ -8,25 +8,33 @@ import {
   categoryLabels,
   drawProblems,
   filterProblems,
-  type RandomDifficulty,
-  type RandomLanguage,
+  toggleFilterValue,
+  type RandomDifficultyFilter,
+  type RandomLanguageFilter,
 } from "@/lib/random-exam";
 import type { Problem } from "@/lib/problems";
 
-const languages: { id: RandomLanguage; label: string }[] = [
+const languageOptions: { id: RandomLanguageFilter; label: string }[] = [
   { id: "javascript", label: "JavaScript" },
   { id: "typescript", label: "TypeScript" },
-  { id: "all", label: "All" },
 ];
 
-const difficulties: RandomDifficulty[] = ["all", "easy", "medium", "hard"];
+const difficultyOptions: RandomDifficultyFilter[] = ["easy", "medium", "hard"];
 const presetMinutes = [10, 15, 30, 45, 60] as const;
 
 const difficultyBadge: Record<Problem["difficulty"], string> = {
-  easy: "bg-blue-50 text-blue-600",
-  medium: "bg-purple-50 text-purple-600",
-  hard: "bg-red-50 text-red-600",
+  easy: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300",
+  medium: "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-300",
+  hard: "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-300",
 };
+
+function filterPillClass(active: boolean) {
+  return `rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${
+    active
+      ? "bg-foreground text-background"
+      : "border border-border-strong hover:bg-hover"
+  }`;
+}
 
 type Phase = "config" | "spinning" | "done";
 
@@ -36,8 +44,12 @@ function wait(ms: number) {
 
 export default function RandomExamPage() {
   const router = useRouter();
-  const [language, setLanguage] = useState<RandomLanguage>("javascript");
-  const [difficulty, setDifficulty] = useState<RandomDifficulty>("all");
+  const [languages, setLanguages] = useState<RandomLanguageFilter[]>([
+    "javascript",
+  ]);
+  const [difficulties, setDifficulties] = useState<RandomDifficultyFilter[]>(
+    []
+  );
   const [count, setCount] = useState(3);
   const [timeMode, setTimeMode] = useState<"off" | "preset" | "custom">("off");
   const [presetMin, setPresetMin] =
@@ -47,7 +59,7 @@ export default function RandomExamPage() {
   const [drawn, setDrawn] = useState<Problem[]>([]);
   const [revealedCount, setRevealedCount] = useState(0);
 
-  const pool = filterProblems({ language, difficulty });
+  const pool = filterProblems({ languages, difficulties });
   const available = pool.length;
   const clampedCount =
     available > 0 ? Math.min(Math.max(1, count), available) : 1;
@@ -88,39 +100,46 @@ export default function RandomExamPage() {
   const spinning = phase !== "config";
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6 text-slate-900 sm:p-8">
+    <main className="min-h-screen bg-background p-6 text-foreground sm:p-8">
       <div className="mx-auto max-w-2xl">
         <header className="mb-6 animate-fade-up">
           <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
             Random
           </p>
           <h1 className="text-3xl font-bold">Random Exam</h1>
-          <p className="mt-1 text-slate-500">
+          <p className="mt-1 text-muted">
             Set your filters, spin the bank, and jump straight into the exam.
           </p>
         </header>
 
-        <section className="animate-fade-up rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+        <section className="animate-fade-up rounded-2xl border border-border bg-card p-5 sm:p-6">
           <div
             className={`flex flex-col gap-5 transition-opacity ${
               spinning ? "pointer-events-none opacity-40" : ""
             }`}
           >
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-fg">
                 Language
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {languages.map((lang) => (
+                <button
+                  type="button"
+                  onClick={() => setLanguages([])}
+                  className={filterPillClass(languages.length === 0)}
+                >
+                  All
+                </button>
+                {languageOptions.map((lang) => (
                   <button
                     key={lang.id}
                     type="button"
-                    onClick={() => setLanguage(lang.id)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                      language === lang.id
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300 hover:bg-slate-50"
-                    }`}
+                    onClick={() =>
+                      setLanguages((current) =>
+                        toggleFilterValue(current, lang.id)
+                      )
+                    }
+                    className={filterPillClass(languages.includes(lang.id))}
                   >
                     {lang.label}
                   </button>
@@ -129,22 +148,29 @@ export default function RandomExamPage() {
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-fg">
                 Difficulty
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {difficulties.map((d) => (
+                <button
+                  type="button"
+                  onClick={() => setDifficulties([])}
+                  className={filterPillClass(difficulties.length === 0)}
+                >
+                  Any
+                </button>
+                {difficultyOptions.map((d) => (
                   <button
                     key={d}
                     type="button"
-                    onClick={() => setDifficulty(d)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${
-                      difficulty === d
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300 hover:bg-slate-50"
-                    }`}
+                    onClick={() =>
+                      setDifficulties((current) =>
+                        toggleFilterValue(current, d)
+                      )
+                    }
+                    className={filterPillClass(difficulties.includes(d))}
                   >
-                    {d === "all" ? "Any" : d}
+                    {d}
                   </button>
                 ))}
               </div>
@@ -152,10 +178,10 @@ export default function RandomExamPage() {
 
             <div>
               <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-fg">
                   Count
                 </p>
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-muted">
                   {available} available
                 </span>
               </div>
@@ -172,7 +198,7 @@ export default function RandomExamPage() {
                     Math.min(Math.max(1, Math.round(n)), Math.max(1, available))
                   );
                 }}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-400 disabled:bg-slate-50"
+                className="w-full rounded-lg border border-border-strong px-3 py-2 text-sm outline-none focus:border-blue-400 disabled:bg-card-muted"
               />
               {available === 0 && (
                 <p className="mt-2 text-xs font-semibold text-red-600">
@@ -182,7 +208,7 @@ export default function RandomExamPage() {
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-fg">
                 Time Attack
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -191,8 +217,8 @@ export default function RandomExamPage() {
                   onClick={() => setTimeMode("off")}
                   className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                     timeMode === "off"
-                      ? "bg-slate-900 text-white"
-                      : "border border-slate-300"
+                      ? "bg-foreground text-background"
+                      : "border border-border-strong"
                   }`}
                 >
                   Off
@@ -208,7 +234,7 @@ export default function RandomExamPage() {
                     className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                       timeMode === "preset" && presetMin === m
                         ? "bg-blue-600 text-white"
-                        : "border border-slate-300"
+                        : "border border-border-strong"
                     }`}
                   >
                     {m}m
@@ -220,7 +246,7 @@ export default function RandomExamPage() {
                   className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                     timeMode === "custom"
                       ? "bg-blue-600 text-white"
-                      : "border border-slate-300"
+                      : "border border-border-strong"
                   }`}
                 >
                   Custom
@@ -235,7 +261,7 @@ export default function RandomExamPage() {
                   onChange={(e) =>
                     setCustomMin(clampMinutes(Number(e.target.value)))
                   }
-                  className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-400"
+                  className="mt-2 w-full rounded-lg border border-border-strong px-3 py-2 text-sm outline-none focus:border-blue-400"
                 />
               )}
             </div>
@@ -245,7 +271,7 @@ export default function RandomExamPage() {
             type="button"
             disabled={available === 0 || spinning}
             onClick={spin}
-            className="mt-6 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="mt-6 w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white transition-transform hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-border-strong"
           >
             {spinning ? "Drawing…" : "Spin"}
           </button>
@@ -254,10 +280,10 @@ export default function RandomExamPage() {
         {spinning && (
           <section
             style={{ animationDelay: "60ms" }}
-            className="animate-fade-up mt-6 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6"
+            className="animate-fade-up mt-6 rounded-2xl border border-border bg-card p-5 sm:p-6"
             aria-live="polite"
           >
-            <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <p className="mb-4 text-xs font-bold uppercase tracking-wider text-muted-fg">
               {phase === "done" ? "Your exam" : "Dealing…"}
             </p>
             {revealedCount === 0 && phase === "spinning" && (
@@ -273,20 +299,20 @@ export default function RandomExamPage() {
                     key={p.id}
                     className={`rounded-xl border px-4 py-3 ${
                       revealed
-                        ? "animate-pop border-slate-200 bg-slate-50"
-                        : "border-dashed border-slate-200 bg-white"
+                        ? "animate-pop border-border bg-card-muted"
+                        : "border-dashed border-border bg-card"
                     }`}
                   >
                     {revealed ? (
                       <div className="flex items-center gap-3">
-                        <span className="w-5 shrink-0 text-xs text-slate-400">
+                        <span className="w-5 shrink-0 text-xs text-muted-fg">
                           {i + 1}
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-semibold">
                             {p.title}
                           </span>
-                          <span className="block text-xs text-slate-500">
+                          <span className="block text-xs text-muted">
                             {categoryLabels[p.category]}
                           </span>
                         </span>
@@ -297,7 +323,7 @@ export default function RandomExamPage() {
                         </span>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-3 text-sm text-slate-300">
+                      <div className="flex items-center gap-3 text-sm text-muted-fg">
                         <span className="w-5">{i + 1}</span>
                         <span>…</span>
                       </div>

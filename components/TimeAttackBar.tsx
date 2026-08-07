@@ -27,7 +27,7 @@ export default function TimeAttackBar({
 
   return (
     <div
-      className={`flex flex-col gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm ${
+      className={`flex flex-col gap-1 rounded-xl border border-border bg-card px-3 py-2 shadow-sm ${
         critical ? "animate-pulse" : ""
       }`}
       role="timer"
@@ -41,7 +41,7 @@ export default function TimeAttackBar({
             cy="18"
             r={r}
             fill="none"
-            className="stroke-slate-200"
+            className="stroke-border"
             strokeWidth="3"
           />
           <circle
@@ -62,19 +62,19 @@ export default function TimeAttackBar({
             textAnchor="middle"
             fontSize="7"
             fontWeight="700"
-            className="fill-slate-900"
+            className="fill-foreground"
           >
             {formatClock(remaining)}
           </text>
         </svg>
         <div className="text-xs">
-          <p className="font-semibold uppercase tracking-wide text-slate-500">
+          <p className="font-semibold uppercase tracking-wide text-muted">
             Time left
           </p>
-          <p className="text-slate-400">of {formatClock(limitSeconds)}</p>
+          <p className="text-muted-fg">of {formatClock(limitSeconds)}</p>
         </div>
       </div>
-      <div className="h-1 overflow-hidden rounded-full bg-slate-100">
+      <div className="h-1 overflow-hidden rounded-full bg-background">
         <div
           className={`h-full transition-[width] duration-1000 ${bar}`}
           style={{ width: `${pct * 100}%` }}

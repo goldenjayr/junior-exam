@@ -20,7 +20,7 @@ export default function FillInput({
       disabled={disabled}
       placeholder={placeholder ?? "Type your answer…"}
       onChange={(e) => onChange({ type: "fill", text: e.target.value })}
-      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-slate-50"
+      className="w-full rounded-xl border border-border-strong bg-card px-4 py-3 text-sm outline-none focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-card-muted"
     />
   );
 }

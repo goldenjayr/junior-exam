@@ -23,9 +23,9 @@ const types: QuizQuestion["type"][] = [
 ];
 
 const difficultyBadge: Record<QuizQuestion["difficulty"], string> = {
-  easy: "bg-blue-50 text-blue-600",
-  medium: "bg-purple-50 text-purple-600",
-  hard: "bg-red-50 text-red-600",
+  easy: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300",
+  medium: "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-300",
+  hard: "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-300",
 };
 
 function toggleFilterValue(current: Set<string>, value: string): Set<string> {
@@ -38,8 +38,8 @@ function toggleFilterValue(current: Set<string>, value: string): Set<string> {
 function filterPillClass(active: boolean) {
   return `rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
     active
-      ? "bg-slate-900 text-white"
-      : "border border-slate-300 hover:bg-slate-50"
+      ? "bg-foreground text-background"
+      : "border border-border-strong hover:bg-hover"
   }`;
 }
 
@@ -143,27 +143,27 @@ export default function QuizAdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6 text-slate-900 sm:p-8">
+    <main className="min-h-screen bg-background p-6 text-foreground sm:p-8">
       <div className="mx-auto max-w-7xl">
         <header className="mb-6 animate-fade-up">
           <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
             Admin
           </p>
           <h1 className="text-3xl font-bold">Quiz Builder</h1>
-          <p className="mt-1 text-slate-500">
+          <p className="mt-1 text-muted">
             Pick knowledge questions, set mode and timer, copy a shareable link.
           </p>
         </header>
 
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
           <section className="animate-fade-up">
-            <div className="sticky top-6 z-10 mb-4 flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="sticky top-6 z-10 mb-4 flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 shadow-sm">
               <input
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search questions…"
-                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm outline-none focus:border-blue-400"
+                className="rounded-lg border border-border-strong px-3 py-1.5 text-sm outline-none focus:border-blue-400"
               />
               <div className="flex flex-wrap items-center gap-1.5">
                 <button
@@ -185,14 +185,14 @@ export default function QuizAdminPage() {
                     {d}
                   </button>
                 ))}
-                <span className="mx-1 text-slate-300">|</span>
+                <span className="mx-1 text-muted-fg">|</span>
                 <button
                   type="button"
                   onClick={() => setOnlySelected(!onlySelected)}
                   className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                     onlySelected
                       ? "bg-blue-600 text-white"
-                      : "border border-slate-300 hover:bg-slate-50"
+                      : "border border-border-strong hover:bg-hover"
                   }`}
                 >
                   ✓ Selected{selected.size ? ` (${selected.size})` : ""}
@@ -242,9 +242,9 @@ export default function QuizAdminPage() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card">
               {visible.length > 0 && (
-                <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/80 px-4 py-2.5">
+                <div className="flex items-center gap-3 border-b border-border bg-card-muted/80 px-4 py-2.5">
                   <input
                     type="checkbox"
                     checked={allVisibleSelected}
@@ -266,7 +266,7 @@ export default function QuizAdminPage() {
                   <button
                     type="button"
                     onClick={toggleSelectVisible}
-                    className="text-xs font-semibold text-slate-600 hover:text-blue-600"
+                    className="text-xs font-semibold text-subtle hover:text-blue-600"
                   >
                     {allVisibleSelected
                       ? `Deselect all (${visible.length})`
@@ -279,8 +279,8 @@ export default function QuizAdminPage() {
                 return (
                   <label
                     key={q.id}
-                    className={`flex cursor-pointer items-center gap-3 border-b border-slate-100 px-4 py-3 transition-colors last:border-b-0 ${
-                      checked ? "bg-blue-50/60" : "hover:bg-slate-50"
+                    className={`flex cursor-pointer items-center gap-3 border-b border-border px-4 py-3 transition-colors last:border-b-0 ${
+                      checked ? "bg-blue-50/60 dark:bg-blue-950/40" : "hover:bg-hover"
                     }`}
                   >
                     <input
@@ -300,7 +300,7 @@ export default function QuizAdminPage() {
                           {q.difficulty}
                         </span>
                       </span>
-                      <span className="mt-0.5 block text-xs capitalize text-slate-400">
+                      <span className="mt-0.5 block text-xs capitalize text-muted-fg">
                         {q.topic} · {q.type}
                       </span>
                     </span>
@@ -311,7 +311,7 @@ export default function QuizAdminPage() {
                         setPreview(q);
                         previewDialog.current?.showModal();
                       }}
-                      className="shrink-0 rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-blue-400 hover:text-blue-600"
+                      className="shrink-0 rounded-lg border border-border-strong px-2.5 py-1 text-xs font-semibold text-subtle hover:border-blue-400 hover:text-blue-600"
                     >
                       Preview
                     </button>
@@ -319,17 +319,17 @@ export default function QuizAdminPage() {
                 );
               })}
               {!visible.length && (
-                <p className="p-8 text-center text-sm text-slate-400">
+                <p className="p-8 text-center text-sm text-muted-fg">
                   No questions match your filters.
                 </p>
               )}
             </div>
           </section>
 
-          <aside className="animate-fade-up sticky top-6 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5">
+          <aside className="animate-fade-up sticky top-6 flex flex-col gap-4 rounded-2xl border border-border bg-card p-5">
             <div>
               <h2 className="text-sm font-bold">Your Quiz</h2>
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-muted">
                 {selected.size
                   ? `${selected.size} questions`
                   : "No questions selected yet"}
@@ -339,7 +339,7 @@ export default function QuizAdminPage() {
             <button
               type="button"
               onClick={() => presetDialog.current?.showModal()}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-left text-sm font-semibold hover:border-blue-400 hover:text-blue-600"
+              className="rounded-lg border border-border-strong bg-card px-3 py-2 text-left text-sm font-semibold hover:border-blue-400 hover:text-blue-600"
             >
               Start from a preset…
             </button>
@@ -353,7 +353,7 @@ export default function QuizAdminPage() {
                 <div className="mb-5 flex items-start justify-between">
                   <div>
                     <h2 className="text-xl font-bold">Quiz presets</h2>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted">
                       Pick a starting set — edit afterwards.
                     </p>
                   </div>
@@ -361,7 +361,7 @@ export default function QuizAdminPage() {
                     type="button"
                     aria-label="Close"
                     onClick={() => presetDialog.current?.close()}
-                    className="grid h-8 w-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100"
+                    className="grid h-8 w-8 place-items-center rounded-full text-muted-fg hover:bg-background"
                   >
                     ×
                   </button>
@@ -375,13 +375,13 @@ export default function QuizAdminPage() {
                         loadSet(p.ids);
                         presetDialog.current?.close();
                       }}
-                      className="rounded-xl border border-slate-200 p-4 text-left hover:border-blue-400 hover:shadow-md"
+                      className="rounded-xl border border-border p-4 text-left hover:border-blue-400 hover:shadow-md"
                     >
                       <span className="block font-semibold">{p.name}</span>
-                      <span className="mt-1 block text-sm text-slate-500">
+                      <span className="mt-1 block text-sm text-muted">
                         {p.description}
                       </span>
-                      <span className="mt-2 block text-xs text-slate-400">
+                      <span className="mt-2 block text-xs text-muted-fg">
                         {p.ids.length} questions
                         {p.suggestedMinutes
                           ? ` · ~${p.suggestedMinutes} min`
@@ -402,14 +402,14 @@ export default function QuizAdminPage() {
                 <div className="p-6">
                   <div className="flex justify-between gap-4">
                     <div>
-                      <span className="text-xs font-bold uppercase text-slate-400">
+                      <span className="text-xs font-bold uppercase text-muted-fg">
                         {preview.topic} · {preview.type}
                       </span>
                       <div className="mt-1">
                         <QuizPrompt prompt={preview.prompt} />
                       </div>
                       {preview.explanation && (
-                        <p className="mt-3 text-sm text-slate-600">
+                        <p className="mt-3 text-sm text-subtle">
                           {preview.explanation}
                         </p>
                       )}
@@ -418,7 +418,7 @@ export default function QuizAdminPage() {
                       type="button"
                       aria-label="Close"
                       onClick={() => previewDialog.current?.close()}
-                      className="grid h-8 w-8 place-items-center rounded-full text-slate-400 hover:bg-slate-100"
+                      className="grid h-8 w-8 place-items-center rounded-full text-muted-fg hover:bg-background"
                     >
                       ×
                     </button>
@@ -427,7 +427,7 @@ export default function QuizAdminPage() {
                     <button
                       type="button"
                       onClick={() => previewDialog.current?.close()}
-                      className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-bold"
+                      className="rounded-lg border border-border-strong px-4 py-2 text-sm font-bold"
                     >
                       Close
                     </button>
@@ -451,9 +451,9 @@ export default function QuizAdminPage() {
                 {selectedQuestions.map((q, i) => (
                   <div
                     key={q.id}
-                    className="flex items-center gap-2 rounded-lg bg-slate-50 py-1.5 pl-3 pr-1.5 text-sm"
+                    className="flex items-center gap-2 rounded-lg bg-card-muted py-1.5 pl-3 pr-1.5 text-sm"
                   >
-                    <span className="w-4 text-xs text-slate-400">{i + 1}</span>
+                    <span className="w-4 text-xs text-muted-fg">{i + 1}</span>
                     <span className="min-w-0 flex-1 truncate font-medium">
                       {q.prompt}
                     </span>
@@ -461,7 +461,7 @@ export default function QuizAdminPage() {
                       type="button"
                       aria-label="Remove"
                       onClick={() => toggle(q.id)}
-                      className="grid h-6 w-6 place-items-center rounded-full text-slate-400 hover:bg-slate-200"
+                      className="grid h-6 w-6 place-items-center rounded-full text-muted-fg hover:bg-chip"
                     >
                       ×
                     </button>
@@ -470,16 +470,16 @@ export default function QuizAdminPage() {
               </div>
             )}
 
-            <div className="flex flex-col gap-3 border-t border-slate-100 pt-4">
+            <div className="flex flex-col gap-3 border-t border-border pt-4">
               <label className="flex items-center gap-2 text-sm">
-                <span className="font-semibold text-slate-600">Send to</span>
+                <span className="font-semibold text-subtle">Send to</span>
                 <select
                   value={examiner}
                   onChange={(e) => {
                     setExaminer(e.target.value);
                     setCopied(false);
                   }}
-                  className="flex-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 capitalize outline-none focus:border-blue-400"
+                  className="flex-1 rounded-lg border border-border-strong bg-card px-2 py-1.5 capitalize outline-none focus:border-blue-400"
                 >
                   {examinerIds.map((id) => (
                     <option key={id} value={id}>
@@ -489,7 +489,7 @@ export default function QuizAdminPage() {
                 </select>
               </label>
 
-              <div className="flex rounded-lg border border-slate-200 p-0.5 text-xs font-bold">
+              <div className="flex rounded-lg border border-border p-0.5 text-xs font-bold">
                 {(["assessment", "practice"] as const).map((m) => (
                   <button
                     key={m}
@@ -500,8 +500,8 @@ export default function QuizAdminPage() {
                     }}
                     className={`flex-1 rounded-md px-2 py-1.5 capitalize ${
                       mode === m
-                        ? "bg-slate-900 text-white"
-                        : "text-slate-600 hover:bg-slate-50"
+                        ? "bg-foreground text-background"
+                        : "text-subtle hover:bg-hover"
                     }`}
                   >
                     {m}
@@ -510,7 +510,7 @@ export default function QuizAdminPage() {
               </div>
 
               <div>
-                <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-muted-fg">
                   Time Attack
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -522,8 +522,8 @@ export default function QuizAdminPage() {
                     }}
                     className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                       timeMode === "off"
-                        ? "bg-slate-900 text-white"
-                        : "border border-slate-300"
+                        ? "bg-foreground text-background"
+                        : "border border-border-strong"
                     }`}
                   >
                     Off
@@ -540,7 +540,7 @@ export default function QuizAdminPage() {
                       className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                         timeMode === "preset" && presetMin === m
                           ? "bg-blue-600 text-white"
-                          : "border border-slate-300"
+                          : "border border-border-strong"
                       }`}
                     >
                       {m}m
@@ -555,7 +555,7 @@ export default function QuizAdminPage() {
                     className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                       timeMode === "custom"
                         ? "bg-blue-600 text-white"
-                        : "border border-slate-300"
+                        : "border border-border-strong"
                     }`}
                   >
                     Custom
@@ -571,7 +571,7 @@ export default function QuizAdminPage() {
                       setCustomMin(clampMinutes(Number(e.target.value)));
                       setCopied(false);
                     }}
-                    className="mt-2 w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+                    className="mt-2 w-full rounded-lg border border-border-strong px-2 py-1.5 text-sm"
                   />
                 )}
               </div>
@@ -586,13 +586,13 @@ export default function QuizAdminPage() {
                   }}
                   className="h-4 w-4 accent-blue-600"
                 />
-                <span className="font-semibold text-slate-600">
+                <span className="font-semibold text-subtle">
                   Shuffle question order
                 </span>
               </label>
 
               {link && (
-                <code className="truncate rounded-lg bg-slate-100 px-3 py-2 text-[11px]">
+                <code className="truncate rounded-lg bg-background px-3 py-2 text-[11px]">
                   {link}
                 </code>
               )}
@@ -603,7 +603,7 @@ export default function QuizAdminPage() {
                   await navigator.clipboard.writeText(link);
                   setCopied(true);
                 }}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-border-strong"
               >
                 {copied ? "Copied!" : "Copy quiz link"}
               </button>
@@ -615,8 +615,8 @@ export default function QuizAdminPage() {
                   aria-disabled={!link}
                   className={`flex-1 rounded-lg border px-3 py-1.5 text-center text-sm font-bold ${
                     link
-                      ? "border-slate-300 hover:bg-slate-50"
-                      : "pointer-events-none border-slate-200 text-slate-300"
+                      ? "border-border-strong hover:bg-hover"
+                      : "pointer-events-none border-border text-muted-fg"
                   }`}
                 >
                   Preview
@@ -632,7 +632,7 @@ export default function QuizAdminPage() {
                       { name, ids },
                     ]);
                   }}
-                  className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-bold disabled:text-slate-300"
+                  className="flex-1 rounded-lg border border-border-strong px-3 py-1.5 text-sm font-bold disabled:text-muted-fg"
                 >
                   Save
                 </button>
@@ -640,7 +640,7 @@ export default function QuizAdminPage() {
                   type="button"
                   disabled={!selected.size}
                   onClick={() => loadSet([])}
-                  className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-bold disabled:text-slate-300"
+                  className="flex-1 rounded-lg border border-border-strong px-3 py-1.5 text-sm font-bold disabled:text-muted-fg"
                 >
                   Clear
                 </button>

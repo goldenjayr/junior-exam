@@ -50,7 +50,7 @@ export default function OrderList({
 
   return (
     <div className="grid gap-2">
-      <p className="text-xs font-semibold text-slate-500">
+      <p className="text-xs font-semibold text-muted">
         Drag to reorder{disabled ? "" : " (or use arrows)"}
       </p>
       <Reorder.Group
@@ -74,18 +74,18 @@ export default function OrderList({
               cursor: "grabbing",
               zIndex: 20,
             }}
-            className={`flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 ${
+            className={`flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 ${
               disabled ? "cursor-default opacity-90" : "cursor-grab active:cursor-grabbing"
             }`}
           >
             <span
               aria-hidden
-              className="select-none text-slate-300"
+              className="select-none text-muted-fg"
               title="Drag"
             >
               ⋮⋮
             </span>
-            <span className="w-6 text-xs font-bold text-slate-400">{i + 1}</span>
+            <span className="w-6 text-xs font-bold text-muted-fg">{i + 1}</span>
             <span className="min-w-0 flex-1 text-sm font-semibold">
               {byId[id]?.label ?? id}
             </span>
@@ -95,7 +95,7 @@ export default function OrderList({
               aria-label="Move up"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => move(i, -1)}
-              className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-sm disabled:opacity-30"
+              className="grid h-8 w-8 place-items-center rounded-lg border border-border text-sm disabled:opacity-30"
             >
               ↑
             </button>
@@ -105,7 +105,7 @@ export default function OrderList({
               aria-label="Move down"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => move(i, 1)}
-              className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 text-sm disabled:opacity-30"
+              className="grid h-8 w-8 place-items-center rounded-lg border border-border text-sm disabled:opacity-30"
             >
               ↓
             </button>

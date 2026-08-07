@@ -225,9 +225,9 @@ function QuizPlayer() {
 
   if (!sessionQuestions.length) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-100 px-6 text-center text-slate-500">
+      <main className="grid min-h-screen place-items-center bg-background px-6 text-center text-muted">
         <div>
-          <p className="text-lg font-semibold text-slate-700">
+          <p className="text-lg font-semibold text-subtle">
             This quiz link has no questions.
           </p>
           <p className="mt-2 text-sm">
@@ -258,7 +258,7 @@ function QuizPlayer() {
     <button
       type="button"
       onClick={retakeQuiz}
-      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition-transform hover:bg-slate-50 active:scale-95"
+      className="rounded-lg border border-border-strong bg-card px-4 py-2 text-sm font-bold text-subtle transition-transform hover:bg-hover active:scale-95"
     >
       Retake quiz
     </button>
@@ -272,7 +272,7 @@ function QuizPlayer() {
         onChange={(e) => setApplicantName(e.target.value)}
         placeholder="Your name"
         aria-label="Your name"
-        className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+        className="rounded-lg border border-border-strong bg-card px-3 py-2 text-sm outline-none focus:border-blue-400"
       />
       <button
         type="button"
@@ -298,7 +298,7 @@ function QuizPlayer() {
   );
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6 text-slate-900 sm:p-8">
+    <main className="min-h-screen bg-background p-6 text-foreground sm:p-8">
       <div className="mx-auto max-w-3xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -308,7 +308,7 @@ function QuizPlayer() {
             <h1 className="text-3xl font-bold">
               {mode === "practice" ? "Practice mode" : "Assessment"}
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted">
               {mode === "practice"
                 ? "One question at a time. Check your answer anytime, or leave to lock it."
                 : "One question at a time. Leaving a question locks your answer."}
@@ -318,7 +318,7 @@ function QuizPlayer() {
             {limitSeconds != null && remaining != null && (
               <TimeAttackBar remaining={remaining} limitSeconds={limitSeconds} />
             )}
-            <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold shadow-sm">
+            <div className="rounded-full bg-card px-4 py-2 text-sm font-semibold shadow-sm">
               {mode === "practice"
                 ? `${correctCount} correct`
                 : `${answeredFlags.filter(Boolean).length} / ${sessionQuestions.length} answered`}
@@ -363,11 +363,11 @@ function QuizPlayer() {
                 <p className="mb-2 text-xs font-bold uppercase tracking-wider text-amber-700">
                   Correct answer (read-only)
                 </p>
-                <pre className="whitespace-pre-wrap font-mono text-sm text-slate-800">
+                <pre className="whitespace-pre-wrap font-mono text-sm text-foreground">
                   {formatCorrectAnswer(question)}
                 </pre>
                 {question.explanation && (
-                  <p className="mt-3 text-sm text-slate-600">
+                  <p className="mt-3 text-sm text-subtle">
                     {question.explanation}
                   </p>
                 )}
@@ -391,7 +391,7 @@ function QuizPlayer() {
             type="button"
             disabled={frozen || index === 0}
             onClick={() => goTo(index - 1)}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold transition-transform hover:bg-slate-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg border border-border-strong bg-card px-4 py-2 text-sm font-bold transition-transform hover:bg-hover active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
           >
             ← Back
           </button>
@@ -447,7 +447,7 @@ export default function QuizPage() {
   return (
     <Suspense
       fallback={
-        <main className="grid min-h-screen place-items-center bg-slate-100 text-sm text-slate-400">
+        <main className="grid min-h-screen place-items-center bg-background text-sm text-muted-fg">
           Loading quiz…
         </main>
       }
