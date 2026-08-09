@@ -6,6 +6,7 @@ import {
   shuffleArray,
   shuffleOrderIds,
   sessionItemOrder,
+  sessionChoiceOrder,
 } from "./shuffle.ts";
 
 test("parseShuffle accepts 1/true/yes", () => {
@@ -60,6 +61,40 @@ test("shuffleOrderIds avoids the correct order when possible", () => {
 
 test("shuffleOrderIds swaps when only two items", () => {
   assert.deepStrictEqual(shuffleOrderIds(["x", "y"], ["x", "y"]), ["y", "x"]);
+});
+
+test("sessionChoiceOrder without shuffle preserves order", () => {
+  const store = memoryStorage();
+  assert.deepStrictEqual(
+    sessionChoiceOrder(store, "quiz-a", 331, ["a", "b", "c", "d"], false),
+    ["a", "b", "c", "d"]
+  );
+});
+
+test("sessionChoiceOrder with shuffle is stable for the same question", () => {
+  const store = memoryStorage();
+  const first = sessionChoiceOrder(store, "quiz-a", 331, ["a", "b", "c", "d"], true);
+  const second = sessionChoiceOrder(store, "quiz-a", 331, ["a", "b", "c", "d"], true);
+  assert.deepStrictEqual(first, second);
+  assert.deepStrictEqual([...first].sort(), ["a", "b", "c", "d"]);
+});
+
+test("sessionChoiceOrder can differ across questions in the same session", () => {
+  const store = memoryStorage();
+  // Force different random draws by reshuffling until we get a difference, or
+  // just assert both are valid permutations (orders may coincidentally match).
+  const a = sessionChoiceOrder(store, "quiz-a", 1, ["a", "b", "c", "d"], true);
+  const b = sessionChoiceOrder(store, "quiz-a", 2, ["a", "b", "c", "d"], true);
+  assert.deepStrictEqual([...a].sort(), ["a", "b", "c", "d"]);
+  assert.deepStrictEqual([...b].sort(), ["a", "b", "c", "d"]);
+  assert.notStrictEqual(
+    store.getItem("choice-order:quiz-a:q1"),
+    null
+  );
+  assert.notStrictEqual(
+    store.getItem("choice-order:quiz-a:q2"),
+    null
+  );
 });
 
 function memoryStorage(): Storage {
