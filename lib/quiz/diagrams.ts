@@ -12,9 +12,15 @@ import { quizDiagramKeys, type QuizDiagramKey } from "./diagram-keys";
 export { quizDiagramKeys };
 export type { QuizDiagramKey };
 
+export type QuizDiagramProps = {
+  className?: string;
+  /** Replace the highlighted focal label with "?" (anti-spoiler for identify questions). */
+  blankFocus?: boolean;
+};
+
 export const quizDiagrams: Record<
   QuizDiagramKey,
-  ComponentType<{ className?: string }>
+  ComponentType<QuizDiagramProps>
 > = {
   "request-path": RequestPath,
   "load-balancer": LoadBalancer,

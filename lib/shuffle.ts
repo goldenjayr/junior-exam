@@ -80,3 +80,45 @@ export function sessionItemOrder(
   }
   return ordered;
 }
+
+function sameStringIdSet(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false;
+  const sb = new Set(b);
+  return a.every((id) => sb.has(id));
+}
+
+/**
+ * Per-session stable shuffle of choice ids (option / snippet ids).
+ * When shuffle is on, order is randomized once per sessionKey+questionId.
+ */
+export function sessionChoiceOrder(
+  storage: Storage,
+  sessionKey: string,
+  questionId: number,
+  choiceIds: string[],
+  shuffle: boolean
+): string[] {
+  if (!choiceIds.length) return [];
+  if (!shuffle) return [...choiceIds];
+
+  const key = `choice-order:${sessionKey}:q${questionId}`;
+  try {
+    const raw = storage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw) as string[];
+      if (Array.isArray(parsed) && sameStringIdSet(parsed, choiceIds)) {
+        return parsed;
+      }
+    }
+  } catch {
+    /* ignore corrupt storage */
+  }
+
+  const ordered = shuffleArray(choiceIds);
+  try {
+    storage.setItem(key, JSON.stringify(ordered));
+  } catch {
+    /* ignore quota */
+  }
+  return ordered;
+}

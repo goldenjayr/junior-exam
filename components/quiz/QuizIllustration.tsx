@@ -34,6 +34,7 @@ export default function QuizIllustration({
         {Diagram ? (
           createElement(Diagram, {
             className: "mx-auto h-auto w-full max-w-xl",
+            blankFocus: illustration.blankFocus,
           })
         ) : (
           <p className="px-2 py-6 text-center text-sm text-subtle">

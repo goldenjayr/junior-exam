@@ -366,3 +366,19 @@ test("platform quiz illustrations use known svg keys or image src", () => {
     }
   }
 });
+
+test("platform single-choice answers are not stuck in the first option slot", () => {
+  const singles = quizQuestions.filter(
+    (q): q is Extract<typeof q, { type: "single" }> =>
+      ["architecture", "nextjs", "devops"].includes(q.topic) && q.type === "single"
+  );
+  const firstSlotCorrect = singles.filter(
+    (q) => q.options[0]?.id === q.correctId
+  ).length;
+  // Allow some first-slot answers, but never “almost all”
+  assert.ok(
+    firstSlotCorrect <= Math.ceil(singles.length / 2),
+    `expected <= half of singles correct in slot 1, got ${firstSlotCorrect}/${singles.length}`
+  );
+  assert.ok(singles.length >= 20);
+});

@@ -23,6 +23,8 @@ export type QuizIllustration =
       diagram: string;
       alt: string;
       caption?: string;
+      /** Hide the highlighted focal box label (show "?") so the diagram doesn't spoil the answer. */
+      blankFocus?: boolean;
     }
   | {
       kind: "image";
