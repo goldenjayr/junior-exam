@@ -67,7 +67,7 @@ export default function Home() {
             </h2>
             <p className="mt-1 text-sm text-muted">
               One question at a time — multiple answer styles across JS, TypeScript,
-              React, Postgres, Prisma, Python, and more.
+              React, Postgres, Prisma, Python, architecture, Next.js, DevOps, and more.
             </p>
           </Link>
           <Link

@@ -8,11 +8,28 @@ export type QuizTopic =
   | "css"
   | "postgresql"
   | "prisma"
-  | "python";
+  | "python"
+  | "architecture"
+  | "nextjs"
+  | "devops";
 
 export type QuizDifficulty = "easy" | "medium" | "hard";
 
 export type QuizMode = "assessment" | "practice";
+
+export type QuizIllustration =
+  | {
+      kind: "svg";
+      diagram: string;
+      alt: string;
+      caption?: string;
+    }
+  | {
+      kind: "image";
+      src: string;
+      alt: string;
+      caption?: string;
+    };
 
 type Base = {
   id: number;
@@ -21,6 +38,7 @@ type Base = {
   prompt: string;
   hint?: string;
   explanation?: string;
+  illustration?: QuizIllustration;
 };
 
 export type Labeled = { id: string; label: string };

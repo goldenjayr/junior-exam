@@ -105,9 +105,37 @@ export const quizPresets: QuizPreset[] = [
     suggestedMinutes: 20,
   },
   {
+    name: "System Design Basics",
+    description:
+      "Reverse proxies, load balancers, CDN, caching, and request-path fundamentals.",
+    ids: [331, 332, 333, 334, 335, 337, 339, 340, 341, 342, 343, 344],
+    suggestedMinutes: 15,
+  },
+  {
+    name: "Next.js Architecture",
+    description:
+      "RSC vs client, middleware, route handlers, env boundaries, and caching basics.",
+    ids: [349, 350, 351, 352, 353, 354, 356, 357, 358, 359, 360, 362],
+    suggestedMinutes: 15,
+  },
+  {
+    name: "DevOps Screen",
+    description:
+      "CI/CD, containers, proxies, health checks, and blue-green/rolling intros.",
+    ids: [365, 366, 367, 368, 369, 371, 372, 373, 374, 376, 378, 380],
+    suggestedMinutes: 15,
+  },
+  {
+    name: "Platform Blitz",
+    description:
+      "Mixed architecture, Next.js, and DevOps for a short platform screen.",
+    ids: [331, 335, 340, 342, 349, 352, 357, 359, 365, 368, 371, 373],
+    suggestedMinutes: 20,
+  },
+  {
     name: "Full Stack Blitz",
     description:
-      "Mixed junior topics across JS, TS, React, HTML, CSS, Tailwind, Node, PostgreSQL, Prisma, and Python.",
+      "Mixed junior topics across JS, TS, React, HTML, CSS, Tailwind, Node, PostgreSQL, Prisma, Python, and platform basics.",
     ids: [
       1, 4, 9, 17, 23, // js
       31, 32, 39, 47, // ts
@@ -118,6 +146,7 @@ export const quizPresets: QuizPreset[] = [
       151, 154, 167, // node
       211, 214, 241, 244, // postgres, prisma
       271, 274, 281, // python
+      331, 349, 365, // platform
     ],
     suggestedMinutes: 25,
   },
@@ -153,6 +182,12 @@ export const quizPresets: QuizPreset[] = [
       241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252,
       // python 271-282
       271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282,
+      // architecture 331-342
+      331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341, 342,
+      // nextjs 349-360
+      349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360,
+      // devops 365-376
+      365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376,
     ],
     suggestedMinutes: 90,
   },

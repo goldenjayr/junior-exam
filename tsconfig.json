@@ -31,5 +31,8 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "docs/superpowers/plans/2026-08-09-architecture-quiz-sources/**"
+  ]
 }
