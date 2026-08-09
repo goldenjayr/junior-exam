@@ -25,6 +25,8 @@ export type QuizIllustration =
       caption?: string;
       /** Hide the highlighted focal box label (show "?") so the diagram doesn't spoil the answer. */
       blankFocus?: boolean;
+      /** Replace all box labels with 1..n so order/match questions aren't spoiled. */
+      blankLabels?: boolean;
     }
   | {
       kind: "image";
