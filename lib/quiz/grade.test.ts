@@ -369,7 +369,7 @@ test("platform quiz illustrations use known svg keys or image src", () => {
 
 test("platform single-choice answers are not stuck in the first option slot", () => {
   const singles = quizQuestions.filter(
-    (q) =>
+    (q): q is Extract<typeof q, { type: "single" }> =>
       ["architecture", "nextjs", "devops"].includes(q.topic) && q.type === "single"
   );
   const firstSlotCorrect = singles.filter(
