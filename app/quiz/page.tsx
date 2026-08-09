@@ -17,6 +17,7 @@ import { useTimeAttack } from "@/lib/use-time-attack";
 import { parseShuffle, sessionItemOrder } from "@/lib/shuffle";
 import { parseCheat } from "@/lib/cheat";
 import { formatCorrectAnswer } from "@/lib/quiz/reveal";
+import { withSessionShuffledChoices } from "@/lib/quiz/choice-order";
 
 function parseMode(raw: string | null): QuizMode {
   return raw === "practice" ? "practice" : "assessment";
@@ -66,7 +67,12 @@ function QuizPlayer() {
         : sessionItemOrder(sessionStorage, orderSessionKey, ids, shuffle);
     return orderedIds
       .map((id) => byId.get(id))
-      .filter((q): q is NonNullable<typeof q> => Boolean(q));
+      .filter((q): q is NonNullable<typeof q> => Boolean(q))
+      .map((q) =>
+        typeof window === "undefined"
+          ? q
+          : withSessionShuffledChoices(q, sessionStorage, orderSessionKey)
+      );
   }, [searchParams, shuffle, orderSessionKey]);
 
   const storageKey = `quiz-answers:${qParam}:${mode}`;
