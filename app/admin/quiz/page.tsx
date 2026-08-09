@@ -7,6 +7,7 @@ import {
 import { quizPresets } from "@/lib/quiz/presets";
 import type { QuizQuestion, QuizMode } from "@/lib/quiz/types";
 import { clampMinutes, minutesToSeconds } from "@/lib/time-attack";
+import QuizIllustration from "@/components/quiz/QuizIllustration";
 import QuizPrompt from "@/components/quiz/QuizPrompt";
 
 const difficulties = ["easy", "medium", "hard"] as const;
@@ -406,6 +407,11 @@ export default function QuizAdminPage() {
                         {preview.topic} · {preview.type}
                       </span>
                       <div className="mt-1">
+                        {preview.illustration ? (
+                          <QuizIllustration
+                            illustration={preview.illustration}
+                          />
+                        ) : null}
                         <QuizPrompt prompt={preview.prompt} />
                       </div>
                       {preview.explanation && (
