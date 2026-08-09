@@ -1,6 +1,7 @@
 // Run with: npm test
 import assert from "node:assert";
 import test from "node:test";
+import { quizDiagramKeys } from "./diagram-keys.ts";
 import { gradeAnswer, normalizeText } from "./grade.ts";
 import { quizQuestions, quizTopics } from "./index.ts";
 import type { QuizQuestion } from "./types.ts";
@@ -314,4 +315,54 @@ test("architecture topic is part of QuizTopic union via bank registration shape"
     "devops",
   ] as const;
   assert.ok(allowed.includes("architecture"));
+});
+
+test("registers the architecture question bank 331–348", () => {
+  const questions = quizQuestions.filter((q) => q.topic === "architecture");
+
+  assert.ok(quizTopics.includes("architecture"));
+  assert.strictEqual(questions.length, 18);
+  assert.strictEqual(questions[0]?.id, 331);
+  assert.strictEqual(questions.at(-1)?.id, 348);
+});
+
+test("registers the nextjs question bank 349–364", () => {
+  const questions = quizQuestions.filter((q) => q.topic === "nextjs");
+
+  assert.ok(quizTopics.includes("nextjs"));
+  assert.strictEqual(questions.length, 16);
+  assert.strictEqual(questions[0]?.id, 349);
+  assert.strictEqual(questions.at(-1)?.id, 364);
+});
+
+test("registers the devops question bank 365–380", () => {
+  const questions = quizQuestions.filter((q) => q.topic === "devops");
+
+  assert.ok(quizTopics.includes("devops"));
+  assert.strictEqual(questions.length, 16);
+  assert.strictEqual(questions[0]?.id, 365);
+  assert.strictEqual(questions.at(-1)?.id, 380);
+});
+
+test("platform quiz illustrations use known svg keys or image src", () => {
+  const platform = quizQuestions.filter((q) =>
+    ["architecture", "nextjs", "devops"].includes(q.topic)
+  );
+  const withArt = platform.filter((q) => q.illustration);
+
+  assert.ok(withArt.length >= 20, "expected ~half illustrated");
+  for (const q of withArt) {
+    const illustration = q.illustration!;
+
+    if (illustration.kind === "svg") {
+      assert.ok(
+        (quizDiagramKeys as readonly string[]).includes(illustration.diagram),
+        `unknown diagram ${illustration.diagram} on q ${q.id}`
+      );
+      assert.ok(illustration.alt.length > 0);
+    } else {
+      assert.ok(illustration.src.startsWith("/"));
+      assert.ok(illustration.alt.length > 0);
+    }
+  }
 });
