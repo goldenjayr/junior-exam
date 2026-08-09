@@ -1,4 +1,4 @@
-import { sessionChoiceOrder } from "@/lib/shuffle";
+import { sessionChoiceOrder } from "../shuffle.ts";
 import type { QuizQuestion } from "./types.ts";
 
 /**
