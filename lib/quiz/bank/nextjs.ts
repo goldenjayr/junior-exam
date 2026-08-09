@@ -136,8 +136,9 @@ export const nextjsQuestions: QuizQuestion[] = [
     illustration: {
       kind: "svg",
       diagram: "nextjs-layers",
-      alt: "Flow across Next.js layers down to data",
-      caption: "Browser → edge → server → data",
+      blankLabels: true,
+      alt: "Four unlabeled Next.js request layers left to right",
+      caption: "Match each step to positions 1→4",
     },
   },
   {

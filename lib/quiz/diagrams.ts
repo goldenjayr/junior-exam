@@ -16,6 +16,8 @@ export type QuizDiagramProps = {
   className?: string;
   /** Replace the highlighted focal label with "?" (anti-spoiler for identify questions). */
   blankFocus?: boolean;
+  /** Replace every box label with 1..n (anti-spoiler for order questions). */
+  blankLabels?: boolean;
 };
 
 export const quizDiagrams: Record<

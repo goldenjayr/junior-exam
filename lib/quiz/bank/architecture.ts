@@ -166,8 +166,9 @@ export const architectureQuestions: QuizQuestion[] = [
     illustration: {
       kind: "svg",
       diagram: "request-path",
-      alt: "Ordered hops from client through proxy and app to DB",
-      caption: "Follow the arrows left to right",
+      blankLabels: true,
+      alt: "Four unlabeled hops connected left to right",
+      caption: "Match each hop name to positions 1→4",
     },
   },
   {
