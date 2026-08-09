@@ -18,8 +18,9 @@ export const nextjsQuestions: QuizQuestion[] = [
     illustration: {
       kind: "svg",
       diagram: "nextjs-layers",
-      alt: "Browser, edge middleware, server, and data layers",
-      caption: "Middleware sits on the edge layer",
+      blankFocus: true,
+      alt: "Browser, highlighted middle layer, server, and data layers",
+      caption: "Where does middleware typically run?",
     },
   },
   {
@@ -63,8 +64,8 @@ export const nextjsQuestions: QuizQuestion[] = [
     illustration: {
       kind: "svg",
       diagram: "nextjs-layers",
-      alt: "Server layer hosting route handlers and RSC",
-      caption: "Route handlers live on the server layer",
+      alt: "Browser, edge, server, and data layers in a Next.js request",
+      caption: "Which layer typically hosts route handlers?",
     },
   },
   {
