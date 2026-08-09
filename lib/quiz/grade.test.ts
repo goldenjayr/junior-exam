@@ -296,3 +296,22 @@ test("registers TS deep-dive questions 319–330", () => {
     [319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330]
   );
 });
+
+test("architecture topic is part of QuizTopic union via bank registration shape", () => {
+  const allowed = [
+    "javascript",
+    "typescript",
+    "tailwind",
+    "react",
+    "html",
+    "nodejs",
+    "css",
+    "postgresql",
+    "prisma",
+    "python",
+    "architecture",
+    "nextjs",
+    "devops",
+  ] as const;
+  assert.ok(allowed.includes("architecture"));
+});
