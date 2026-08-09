@@ -63,8 +63,9 @@ export const devopsQuestions: QuizQuestion[] = [
     illustration: {
       kind: "svg",
       diagram: "ci-cd-pipeline",
-      alt: "Pipeline stages from commit through deploy",
-      caption: "Follow the pipeline left to right",
+      blankLabels: true,
+      alt: "Four unlabeled CI/CD pipeline stages left to right",
+      caption: "Match each stage to positions 1→4",
     },
   },
   {
