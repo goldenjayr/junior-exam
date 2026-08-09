@@ -1,4 +1,10 @@
-export default function RequestPath({ className }: { className?: string }) {
+export default function RequestPath({
+  className,
+  blankFocus = false,
+}: {
+  className?: string;
+  blankFocus?: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 480 200"
@@ -19,12 +25,18 @@ export default function RequestPath({ className }: { className?: string }) {
         </marker>
       </defs>
       {[
-        { label: "Client", x: 16, width: 78, className: "fill-card stroke-border" },
-        { label: "Edge/Proxy", x: 136, width: 104, className: "fill-violet-500/15 stroke-violet-500" },
-        { label: "App", x: 266, width: 78, className: "fill-card stroke-border" },
-        { label: "DB", x: 386, width: 78, className: "fill-card stroke-border" },
-      ].map((node) => (
-        <g key={node.label}>
+        { label: "Client", x: 16, width: 78, className: "fill-card stroke-border", focus: false },
+        {
+          label: blankFocus ? "?" : "Edge/Proxy",
+          x: 136,
+          width: 104,
+          className: "fill-violet-500/15 stroke-violet-500",
+          focus: true,
+        },
+        { label: "App", x: 266, width: 78, className: "fill-card stroke-border", focus: false },
+        { label: "DB", x: 386, width: 78, className: "fill-card stroke-border", focus: false },
+      ].map((node, i) => (
+        <g key={`${node.label}-${i}`}>
           <rect
             x={node.x}
             y="70"
@@ -39,7 +51,7 @@ export default function RequestPath({ className }: { className?: string }) {
             y="105"
             textAnchor="middle"
             className="fill-foreground"
-            style={{ fontSize: 12, fontWeight: 700 }}
+            style={{ fontSize: blankFocus && node.focus ? 18 : 12, fontWeight: 700 }}
           >
             {node.label}
           </text>

@@ -1,4 +1,10 @@
-export default function LoadBalancer({ className }: { className?: string }) {
+export default function LoadBalancer({
+  className,
+  blankFocus = false,
+}: {
+  className?: string;
+  blankFocus?: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 480 200"
@@ -25,7 +31,7 @@ export default function LoadBalancer({ className }: { className?: string }) {
       <line x1="104" y1="100" x2="160" y2="100" className="stroke-foreground" strokeWidth="2" markerEnd="url(#load-balancer-arrow)" />
       <rect x="160" y="60" width="110" height="80" rx="10" className="fill-violet-500/15 stroke-violet-500" strokeWidth="2" />
       <text x="215" y="105" textAnchor="middle" className="fill-foreground" style={{ fontSize: 12, fontWeight: 700 }}>
-        Load balancer
+        {blankFocus ? "?" : "Load balancer"}
       </text>
       <line x1="270" y1="80" x2="330" y2="50" className="stroke-foreground" strokeWidth="2" markerEnd="url(#load-balancer-arrow)" />
       <line x1="270" y1="100" x2="330" y2="100" className="stroke-foreground" strokeWidth="2" markerEnd="url(#load-balancer-arrow)" />

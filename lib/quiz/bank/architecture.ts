@@ -19,8 +19,9 @@ export const architectureQuestions: QuizQuestion[] = [
     illustration: {
       kind: "svg",
       diagram: "load-balancer",
-      alt: "Clients connect to a load balancer that fans out to App 1–3",
-      caption: "Load balancer fans traffic out to instances",
+      blankFocus: true,
+      alt: "Clients connect through a highlighted middle box that fans out to App 1–3",
+      caption: "What is the highlighted box?",
     },
   },
   {
@@ -92,8 +93,9 @@ export const architectureQuestions: QuizQuestion[] = [
     illustration: {
       kind: "svg",
       diagram: "request-path",
-      alt: "Client to edge/proxy to app to database",
-      caption: "Client → edge/proxy → app → DB",
+      blankFocus: true,
+      alt: "Request hops from client through a highlighted middle box to app and database",
+      caption: "What sits in the highlighted hop?",
     },
   },
   {
