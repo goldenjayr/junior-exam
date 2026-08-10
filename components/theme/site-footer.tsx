@@ -6,7 +6,9 @@ import { ThemeSwitcher } from "./theme-switcher";
 /** Single app-wide theme control — footer mount, Geist placement rule. */
 export function SiteFooter() {
   const pathname = usePathname();
-  if (pathname === "/playground") return null;
+  if (pathname === "/playground" || pathname?.startsWith("/system-design/play")) {
+    return null;
+  }
 
   return (
     <footer className="mt-auto border-t border-border bg-card/60">
