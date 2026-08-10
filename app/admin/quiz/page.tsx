@@ -47,7 +47,7 @@ function filterPillClass(active: boolean) {
 type SavedQuiz = { name: string; ids: number[] };
 
 const examinerIds = ["jayr", "jack", "iven", "andrei", "neil", "pragya"];
-const presetMinutes = [10, 15, 30, 45, 60] as const;
+const presetMinutes = [5, 10, 15, 30, 45, 60] as const;
 
 export default function QuizAdminPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());

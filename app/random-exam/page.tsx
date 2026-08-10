@@ -20,7 +20,7 @@ const languageOptions: { id: RandomLanguageFilter; label: string }[] = [
 ];
 
 const difficultyOptions: RandomDifficultyFilter[] = ["easy", "medium", "hard"];
-const presetMinutes = [10, 15, 30, 45, 60] as const;
+const presetMinutes = [5, 10, 15, 30, 45, 60] as const;
 
 const difficultyBadge: Record<Problem["difficulty"], string> = {
   easy: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300",

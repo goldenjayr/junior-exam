@@ -76,7 +76,7 @@ function Exam() {
     "idle" | "sending" | "sent" | "error"
   >("idle");
   const timerSessionId = `exam:${pParam}:${searchParams.get("t") ?? ""}`;
-  const { remaining, frozen, elapsed } = useTimeAttack(
+  const { remaining, frozen, elapsed, resetTimer } = useTimeAttack(
     limitSeconds,
     timerSessionId
   );
@@ -84,6 +84,26 @@ function Exam() {
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(answers));
   }, [answers, storageKey]);
+
+  function resetExam() {
+    if (
+      !window.confirm(
+        "Reset this exam? All saved code, progress, and the timer will be cleared."
+      )
+    ) {
+      return;
+    }
+    const starters = Object.fromEntries(
+      examProblems.map((p) => [p.id, p.starterCode])
+    );
+    setAnswers(starters);
+    localStorage.removeItem(storageKey);
+    setResults({});
+    setShowAnswer(false);
+    setSubmitState("idle");
+    setSelectedId(examProblems[0]?.id);
+    resetTimer();
+  }
 
   async function submitResults() {
     const entries: [number, RunResult][] = await Promise.all(
@@ -179,6 +199,13 @@ function Exam() {
               aria-label="Your name"
               className="rounded-lg border border-border-strong bg-card px-3 py-2 text-sm outline-none focus:border-blue-400"
             />
+            <button
+              type="button"
+              onClick={resetExam}
+              className="rounded-lg border border-border-strong bg-card px-4 py-2 text-sm font-bold transition-transform hover:bg-hover active:scale-95"
+            >
+              Reset all
+            </button>
             <button
               type="button"
               onClick={submitResults}
@@ -560,6 +587,13 @@ function Exam() {
               aria-label="Your name"
               className="rounded-lg border border-border-strong bg-card px-3 py-2 text-sm outline-none focus:border-blue-400"
             />
+            <button
+              type="button"
+              onClick={resetExam}
+              className="rounded-lg border border-border-strong bg-card px-4 py-2 text-sm font-bold hover:bg-hover"
+            >
+              Reset all
+            </button>
             <button
               type="button"
               onClick={submitResults}

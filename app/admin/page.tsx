@@ -182,7 +182,7 @@ type SavedExam = { name: string; ids: number[] };
 
 // ponytail: ids only — emails live server-side in app/api/submit/route.ts.
 const examinerIds = ["jayr", "jack", "iven", "andrei", "neil", "pragya"];
-const presetMinutes = [10, 15, 30, 45, 60] as const;
+const presetMinutes = [5, 10, 15, 30, 45, 60] as const;
 
 export default function AdminPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -887,33 +887,44 @@ export default function AdminPage() {
             )}
 
             {selectedProblems.length > 0 && (
-              <div className="flex max-h-72 flex-col gap-1 overflow-y-auto">
-                {selectedProblems.map((p, i) => (
-                  <div
-                    key={p.id}
-                    className="animate-pop flex items-center gap-2 rounded-lg bg-card-muted py-1.5 pl-3 pr-1.5 text-sm"
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-end">
+                  <button
+                    type="button"
+                    onClick={() => loadSet([])}
+                    className="text-xs font-semibold text-muted-fg transition-colors hover:text-subtle"
                   >
-                    <span className="w-4 shrink-0 text-xs text-muted-fg">
-                      {i + 1}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate font-medium">
-                      {p.title}
-                    </span>
-                    <span
-                      className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold capitalize ${difficultyBadge[p.difficulty]}`}
+                    Clear all
+                  </button>
+                </div>
+                <div className="flex max-h-72 flex-col gap-1 overflow-y-auto">
+                  {selectedProblems.map((p, i) => (
+                    <div
+                      key={p.id}
+                      className="animate-pop flex items-center gap-2 rounded-lg bg-card-muted py-1.5 pl-3 pr-1.5 text-sm"
                     >
-                      {p.difficulty}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label={`Remove ${p.title}`}
-                      onClick={() => toggle(p.id)}
-                      className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-muted-fg hover:bg-chip hover:text-subtle"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
+                      <span className="w-4 shrink-0 text-xs text-muted-fg">
+                        {i + 1}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate font-medium">
+                        {p.title}
+                      </span>
+                      <span
+                        className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold capitalize ${difficultyBadge[p.difficulty]}`}
+                      >
+                        {p.difficulty}
+                      </span>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${p.title}`}
+                        onClick={() => toggle(p.id)}
+                        className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-muted-fg hover:bg-chip hover:text-subtle"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
