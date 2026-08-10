@@ -1,0 +1,156 @@
+import type { ComponentDef } from "./types.ts";
+
+export const componentCatalog: ComponentDef[] = [
+  {
+    id: "client",
+    label: "Client (Web/Mobile)",
+    category: "client",
+    description: "End-user apps that initiate requests or open realtime connections.",
+    tags: ["client", "web", "mobile", "frontend"],
+    icon: "client",
+  },
+  {
+    id: "cdn",
+    label: "CDN",
+    category: "edge",
+    description: "Edge cache for static assets and low-latency content delivery.",
+    tags: ["cdn", "edge", "cache", "static"],
+    icon: "cdn",
+  },
+  {
+    id: "load-balancer",
+    label: "Load Balancer",
+    category: "edge",
+    description: "Distributes traffic across multiple service instances.",
+    tags: ["lb", "scale", "availability"],
+    icon: "load-balancer",
+  },
+  {
+    id: "api-gateway",
+    label: "API Gateway",
+    category: "edge",
+    description: "Single entry for APIs — routing, auth hooks, rate limits.",
+    tags: ["gateway", "api", "routing"],
+    icon: "api-gateway",
+  },
+  {
+    id: "auth-service",
+    label: "Auth Service",
+    category: "compute",
+    description: "Authentication and authorization (tokens, sessions, SSO).",
+    tags: ["auth", "security", "identity"],
+    icon: "auth-service",
+  },
+  {
+    id: "chat-service",
+    label: "Chat Service",
+    category: "compute",
+    description: "Domain service for messaging, rooms, and delivery orchestration.",
+    tags: ["chat", "messages", "domain"],
+    icon: "chat-service",
+  },
+  {
+    id: "notification-service",
+    label: "Notification Service",
+    category: "compute",
+    description: "Push, email, SMS, and in-app notification fan-out.",
+    tags: ["notify", "push", "email"],
+    icon: "notification-service",
+  },
+  {
+    id: "presence-service",
+    label: "Presence Service",
+    category: "compute",
+    description: "Tracks online/offline and typing indicators.",
+    tags: ["presence", "online", "realtime"],
+    icon: "presence-service",
+  },
+  {
+    id: "feed-service",
+    label: "Feed Service",
+    category: "compute",
+    description: "Builds and serves personalized or chronological feeds.",
+    tags: ["feed", "timeline", "social"],
+    icon: "feed-service",
+  },
+  {
+    id: "matching-service",
+    label: "Matching Service",
+    category: "compute",
+    description: "Matches demand to supply (rides, deliveries, jobs).",
+    tags: ["match", "geo", "dispatch"],
+    icon: "matching-service",
+  },
+  {
+    id: "rate-limiter",
+    label: "Rate Limiter",
+    category: "compute",
+    description: "Enforces request quotas to protect downstream systems.",
+    tags: ["rate", "throttle", "protect"],
+    icon: "rate-limiter",
+  },
+  {
+    id: "worker",
+    label: "Worker",
+    category: "compute",
+    description: "Background processor for async jobs and fan-out.",
+    tags: ["worker", "async", "jobs"],
+    icon: "worker",
+  },
+  {
+    id: "websocket-gateway",
+    label: "WebSocket Gateway",
+    category: "messaging",
+    description: "Maintains persistent realtime connections to clients.",
+    tags: ["websocket", "realtime", "socket"],
+    icon: "websocket-gateway",
+  },
+  {
+    id: "message-queue",
+    label: "Message Queue",
+    category: "messaging",
+    description: "Async buffer between producers and consumers.",
+    tags: ["queue", "kafka", "rabbitmq", "async"],
+    icon: "message-queue",
+  },
+  {
+    id: "cache",
+    label: "Cache (Redis)",
+    category: "data",
+    description: "In-memory cache / counters for hot reads and rate state.",
+    tags: ["redis", "cache", "memory"],
+    icon: "cache",
+  },
+  {
+    id: "database",
+    label: "Database (PostgreSQL)",
+    category: "data",
+    description: "Primary durable relational store.",
+    tags: ["postgres", "sql", "db", "durable"],
+    icon: "database",
+  },
+  {
+    id: "object-storage",
+    label: "Object Storage (S3)",
+    category: "storage",
+    description: "Blob store for files, media, and large objects.",
+    tags: ["s3", "blob", "files"],
+    icon: "object-storage",
+  },
+  {
+    id: "monitoring",
+    label: "Monitoring & Logging",
+    category: "observability",
+    description: "Metrics, logs, and traces for operational visibility.",
+    tags: ["metrics", "logs", "observability"],
+    icon: "monitoring",
+  },
+];
+
+export const componentById: Record<string, ComponentDef> = Object.fromEntries(
+  componentCatalog.map((c) => [c.id, c])
+);
+
+export function getComponent(id: string): ComponentDef | undefined {
+  return componentById[id];
+}
