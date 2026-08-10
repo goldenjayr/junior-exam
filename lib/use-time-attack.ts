@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   readStoredClock,
   remainingSeconds,
+  timeAttackStorageKey,
   type StoredClock,
 } from "@/lib/time-attack";
 
@@ -17,9 +18,11 @@ export function useTimeAttack(
   remaining: number | null;
   frozen: boolean;
   elapsed: number | null;
+  resetTimer: () => void;
 } {
   const clockRef = useRef<StoredClock | null>(null);
   const [remaining, setRemaining] = useState<number | null>(limitSeconds);
+  const [epoch, setEpoch] = useState(0);
 
   useEffect(() => {
     if (limitSeconds == null) {
@@ -39,7 +42,14 @@ export function useTimeAttack(
       window.clearTimeout(immediate);
       window.clearInterval(id);
     };
-  }, [limitSeconds, sessionId]);
+  }, [limitSeconds, sessionId, epoch]);
+
+  function resetTimer() {
+    if (limitSeconds == null) return;
+    sessionStorage.removeItem(timeAttackStorageKey(sessionId));
+    setRemaining(limitSeconds);
+    setEpoch((n) => n + 1);
+  }
 
   const frozen = limitSeconds != null && remaining === 0;
   const elapsed =
@@ -47,5 +57,5 @@ export function useTimeAttack(
       ? limitSeconds - remaining
       : null;
 
-  return { remaining, frozen, elapsed };
+  return { remaining, frozen, elapsed, resetTimer };
 }
