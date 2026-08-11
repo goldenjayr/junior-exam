@@ -6,8 +6,10 @@ import { runValidation } from "@/lib/system-design/validate";
 import { clearDraft, loadDraft, saveDraft } from "@/lib/system-design/serialize";
 import {
   getReferenceSolution,
+  SOLUTION_LEVEL_LABELS,
   type SolutionLevel,
 } from "@/lib/system-design/solutions";
+import { whyForComponent } from "@/lib/system-design/explanations";
 import { useTimeAttack } from "@/lib/use-time-attack";
 import { parseTimeLimit } from "@/lib/time-attack";
 import TimeAttackBar from "@/components/TimeAttackBar";
@@ -18,6 +20,7 @@ import ChallengeBrief from "./ChallengeBrief";
 import ValidatorPanel from "./ValidatorPanel";
 import FeedbackStrip from "./FeedbackStrip";
 import BuilderHeader from "./BuilderHeader";
+import { AnswerExplainProvider } from "./AnswerExplainDialog";
 
 const emptyGraph = (): DesignGraph => ({ nodes: [], edges: [] });
 
@@ -59,6 +62,10 @@ export default function BuilderShell({
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
+  const [nodeAnnotate, setNodeAnnotate] = useState<{
+    whyFor: (componentId: string) => string;
+    levelLabel?: string;
+  } | null>(null);
   const skipInvalidateRef = useRef(false);
 
   useEffect(() => {
@@ -69,6 +76,7 @@ export default function BuilderShell({
     setGraph(g);
     setCanvasKey((k) => k + 1);
     setResult(null);
+    setNodeAnnotate(null);
     setRevealedHints([]);
     setHintsLeft(
       Math.min(
@@ -120,6 +128,7 @@ export default function BuilderShell({
     setResult(null);
     setCanvasKey((k) => k + 1);
     clearDraft(challenge.id);
+    setNodeAnnotate(null);
   }
 
   function handleShowAnswer(level: SolutionLevel) {
@@ -138,6 +147,10 @@ export default function BuilderShell({
     setGraph(solution);
     setCanvasKey((k) => k + 1);
     setResult(runValidation(solution, challenge));
+    setNodeAnnotate({
+      whyFor: (componentId) => whyForComponent(challenge.id, componentId),
+      levelLabel: SOLUTION_LEVEL_LABELS[level],
+    });
     saveDraft(challenge.id, solution);
   }
 
@@ -254,7 +267,8 @@ export default function BuilderShell({
   }, [challenge.scale]);
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-background text-foreground">
+    <AnswerExplainProvider>
+      <div className="flex h-[100dvh] flex-col bg-background text-foreground">
       <BuilderHeader
         challenge={challenge}
         remaining={remaining}
@@ -310,6 +324,7 @@ export default function BuilderShell({
           onGraphChange={onGraphChange}
           onClear={handleClear}
           onDeleteModeChange={setDeleteMode}
+          nodeAnnotate={nodeAnnotate}
         />
         <aside className="flex min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-border bg-card">
           <div className="min-h-0 flex-1 overflow-y-auto">
@@ -374,6 +389,7 @@ export default function BuilderShell({
           </button>
         </FreezeOverlay>
       )}
-    </div>
+      </div>
+    </AnswerExplainProvider>
   );
 }

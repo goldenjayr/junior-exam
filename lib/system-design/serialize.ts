@@ -5,7 +5,12 @@ export type RfNodeLike = {
   id: string;
   type?: string;
   position: { x: number; y: number };
-  data: { componentId: string; label?: string };
+  data: {
+    componentId: string;
+    label?: string;
+    why?: string;
+    levelLabel?: string;
+  };
 };
 
 export type RfEdgeLike = {
@@ -41,7 +46,13 @@ export function toDesignGraph(
   };
 }
 
-export function fromDesignGraph(graph: DesignGraph): {
+export function fromDesignGraph(
+  graph: DesignGraph,
+  annotate?: {
+    whyFor: (componentId: string) => string;
+    levelLabel?: string;
+  }
+): {
   nodes: RfNodeLike[];
   edges: RfEdgeLike[];
 } {
@@ -50,7 +61,12 @@ export function fromDesignGraph(graph: DesignGraph): {
       id: n.id,
       type: "architecture",
       position: n.position,
-      data: { componentId: n.componentId, label: n.label },
+      data: {
+        componentId: n.componentId,
+        label: n.label,
+        why: annotate ? annotate.whyFor(n.componentId) : undefined,
+        levelLabel: annotate?.levelLabel,
+      },
     })),
     edges: graph.edges.map((e) => ({
       id: e.id,
