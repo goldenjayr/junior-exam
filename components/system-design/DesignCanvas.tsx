@@ -56,14 +56,19 @@ function CanvasInner({
   frozen,
   onGraphChange,
   onExitDeleteMode,
+  nodeAnnotate,
 }: {
   seed: DesignGraph;
   deleteMode: boolean;
   frozen: boolean;
   onGraphChange: (graph: DesignGraph) => void;
   onExitDeleteMode: () => void;
+  nodeAnnotate?: {
+    whyFor: (componentId: string) => string;
+    levelLabel?: string;
+  } | null;
 }) {
-  const boot = fromDesignGraph(seed);
+  const boot = fromDesignGraph(seed, nodeAnnotate ?? undefined);
   const [nodes, setNodes, onNodesChange] = useNodesState(boot.nodes as Node[]);
   const [edges, setEdges, onEdgesChange] = useEdgesState(boot.edges as Edge[]);
   const { screenToFlowPosition, fitView, deleteElements, getNodes, getEdges } =
@@ -207,6 +212,7 @@ export default function DesignCanvas({
   onGraphChange,
   onClear,
   onDeleteModeChange,
+  nodeAnnotate = null,
 }: {
   canvasKey: number;
   seed: DesignGraph;
@@ -216,6 +222,10 @@ export default function DesignCanvas({
   onGraphChange: (graph: DesignGraph) => void;
   onClear: () => void;
   onDeleteModeChange: (on: boolean) => void;
+  nodeAnnotate?: {
+    whyFor: (componentId: string) => string;
+    levelLabel?: string;
+  } | null;
 }) {
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -244,7 +254,9 @@ export default function DesignCanvas({
           Clear
         </button>
         <p className="ml-auto text-[11px] text-muted">
-          Drag handles to connect · Del removes · Esc clears selection
+          {nodeAnnotate
+            ? "Click ? on a node to see why it’s in this answer"
+            : "Drag handles to connect · Del removes · Esc clears selection"}
         </p>
       </div>
       <div className="relative min-h-0 flex-1">
@@ -263,6 +275,7 @@ export default function DesignCanvas({
             frozen={frozen}
             onGraphChange={onGraphChange}
             onExitDeleteMode={() => onDeleteModeChange(false)}
+            nodeAnnotate={nodeAnnotate}
           />
         </ReactFlowProvider>
       </div>
