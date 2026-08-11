@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { problems, categories } from "@/lib/problems";
 import { quizQuestions, quizTopics } from "@/lib/quiz/index";
+import { challenges } from "@/lib/system-design/challenges";
 
 export default function Home() {
   const testCount = problems.reduce((sum, p) => sum + p.tests.length, 0);
@@ -84,6 +85,32 @@ export default function Home() {
             </p>
           </Link>
           <Link
+            href="/system-design"
+            className="group rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-1 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-500/15"
+          >
+            <span className="text-2xl">🏗️</span>
+            <h2 className="mt-3 text-lg font-bold group-hover:text-cyan-600 dark:group-hover:text-cyan-400">
+              System Design Builder →
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              Drag components onto a canvas, connect them, and validate against
+              challenge briefs.
+            </p>
+          </Link>
+          <Link
+            href="/admin/system-design"
+            className="group rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-1 hover:border-cyan-400 hover:shadow-lg hover:shadow-cyan-500/15"
+          >
+            <span className="text-2xl">📐</span>
+            <h2 className="mt-3 text-lg font-bold group-hover:text-cyan-600 dark:group-hover:text-cyan-400">
+              Build a Design Challenge →
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              Pick a system design prompt, optional Time Attack, copy a shareable
+              link.
+            </p>
+          </Link>
+          <Link
             href="/playground"
             className="group rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg hover:shadow-[var(--accent-glow)] sm:col-span-2"
           >
@@ -121,6 +148,7 @@ export default function Home() {
             [testCount, "test cases"],
             [quizQuestions.length, "quiz items"],
             [quizTopics.length, "quiz topics"],
+            [challenges.length, "design challenges"],
           ].map(([value, label]) => (
             <div key={label}>
               <dt className="text-2xl font-bold">{value}</dt>

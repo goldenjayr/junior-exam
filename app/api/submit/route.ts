@@ -33,15 +33,29 @@ type QuizResult = {
   explanation?: string;
 };
 
+type SystemDesignResult = {
+  challengeId: string;
+  challengeTitle: string;
+  difficulty: string;
+  hardPassed: number;
+  hardTotal: number;
+  softScore: number;
+  requirements: { label: string; passed: boolean }[];
+  dimensions: { dimension: string; score: number }[];
+  bottlenecks: string[];
+  componentsUsed: string[];
+  edgeCount: number;
+};
+
 type Submission = {
-  kind?: "exam" | "quiz";
+  kind?: "exam" | "quiz" | "system-design";
   examiner?: string;
   applicantName: string;
   timedOut?: boolean;
   timeLimitSeconds?: number;
   timeUsedSeconds?: number;
   mode?: "assessment" | "practice";
-  results: ExamResult[] | QuizResult[];
+  results: ExamResult[] | QuizResult[] | SystemDesignResult[];
 };
 
 const esc = (s: string) =>
@@ -114,13 +128,65 @@ function quizHtml(name: string, body: Submission, results: QuizResult[]) {
       .join("")}`;
 }
 
+function systemDesignHtml(
+  name: string,
+  body: Submission,
+  results: SystemDesignResult[]
+) {
+  const r = results[0];
+  if (!r) {
+    return `<h2>${esc(name)} — System Design</h2><p>No results.</p>`;
+  }
+  return `
+    <h2>${esc(name)} — System Design Challenge</h2>
+    <p><strong>${esc(r.challengeTitle)}</strong> (${esc(
+      r.difficulty
+    )}) · ${new Date().toDateString()}</p>
+    ${timerMetaHtml(body)}
+    <p>Hard requirements: <strong>${r.hardPassed}/${r.hardTotal}</strong></p>
+    <p>Soft score: <strong>${r.softScore}</strong> / 100</p>
+    <h3>Requirements</h3>
+    <ul>
+      ${r.requirements
+        .map(
+          (req) =>
+            `<li>${req.passed ? "✅" : "❌"} ${esc(req.label)}</li>`
+        )
+        .join("")}
+    </ul>
+    <h3>Quality dimensions</h3>
+    <ul>
+      ${r.dimensions
+        .map(
+          (d) =>
+            `<li>${esc(d.dimension)}: ${Math.round(d.score * 100)}%</li>`
+        )
+        .join("")}
+    </ul>
+    ${
+      r.bottlenecks?.length
+        ? `<h3>Bottlenecks</h3><ul>${r.bottlenecks
+            .map((b) => `<li>${esc(b)}</li>`)
+            .join("")}</ul>`
+        : ""
+    }
+    <p style="color:#64748b;font-size:13px">Components: ${esc(
+      (r.componentsUsed ?? []).join(", ")
+    )} · Edges: ${r.edgeCount ?? 0}</p>`;
+}
+
 export async function POST(request: Request) {
   const body = (await request.json()) as Submission;
   const to =
     EXAMINERS[body.examiner ?? ""] ?? EXAMINERS[DEFAULT_EXAMINER];
 
   const name = (body.applicantName || "Applicant").slice(0, 100);
-  const kind = body.kind === "quiz" ? "quiz" : "exam";
+  const kind =
+    body.kind === "quiz"
+      ? "quiz"
+      : body.kind === "system-design"
+        ? "system-design"
+        : "exam";
 
   let html: string;
   let subject: string;
@@ -130,6 +196,11 @@ export async function POST(request: Request) {
     const correct = results.filter((r) => r.correct).length;
     html = quizHtml(name, body, results);
     subject = `Quiz results: ${name} (${correct}/${results.length})`;
+  } else if (kind === "system-design") {
+    const results = body.results as SystemDesignResult[];
+    const r = results[0];
+    html = systemDesignHtml(name, body, results);
+    subject = `System design: ${name} (${r?.challengeTitle ?? "challenge"} · ${r?.softScore ?? 0} pts)`;
   } else {
     const results = body.results as ExamResult[];
     const solved = results.filter((r) => r.status === "passed").length;
