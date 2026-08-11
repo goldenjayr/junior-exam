@@ -1,15 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Challenge, DesignGraph, EdgeKind, ValidationResult } from "@/lib/system-design/types";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Challenge, DesignGraph, ValidationResult } from "@/lib/system-design/types";
 import { runValidation } from "@/lib/system-design/validate";
 import { clearDraft, loadDraft, saveDraft } from "@/lib/system-design/serialize";
+import {
+  getReferenceSolution,
+  type SolutionLevel,
+} from "@/lib/system-design/solutions";
 import { useTimeAttack } from "@/lib/use-time-attack";
 import { parseTimeLimit } from "@/lib/time-attack";
 import TimeAttackBar from "@/components/TimeAttackBar";
 import FreezeOverlay from "@/components/FreezeOverlay";
 import ComponentPalette from "./ComponentPalette";
-import DesignCanvas, { type CanvasTool } from "./DesignCanvas";
+import DesignCanvas from "./DesignCanvas";
 import ChallengeBrief from "./ChallengeBrief";
 import ValidatorPanel from "./ValidatorPanel";
 import FeedbackStrip from "./FeedbackStrip";
@@ -22,11 +26,13 @@ export default function BuilderShell({
   mode,
   examiner,
   timeLimitParam,
+  cheat = false,
 }: {
   challenge: Challenge;
   mode: "practice" | "challenge";
   examiner: string;
   timeLimitParam: string | null;
+  cheat?: boolean;
 }) {
   const limitSeconds =
     mode === "challenge" ? parseTimeLimit(timeLimitParam) : null;
@@ -36,28 +42,61 @@ export default function BuilderShell({
   const [seed, setSeed] = useState<DesignGraph>(() => emptyGraph());
   const [graph, setGraph] = useState<DesignGraph>(() => emptyGraph());
   const [canvasKey, setCanvasKey] = useState(0);
-  const [tool, setTool] = useState<CanvasTool>("select");
-  const [edgeKind, setEdgeKind] = useState<EdgeKind>("request");
+  const [deleteMode, setDeleteMode] = useState(false);
   const [result, setResult] = useState<ValidationResult | null>(null);
-  const [hintsLeft, setHintsLeft] = useState(3);
+  const hintBudget = useMemo(
+    () =>
+      Math.min(
+        3,
+        challenge.hardRequirements.filter((r) => Boolean(r.hint)).length
+      ),
+    [challenge.hardRequirements]
+  );
+  const [hintsLeft, setHintsLeft] = useState(hintBudget);
   const [revealedHints, setRevealedHints] = useState<string[]>([]);
   const [showConstraints, setShowConstraints] = useState(false);
   const [name, setName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<string | null>(null);
   const [savedFlash, setSavedFlash] = useState(false);
+  const skipInvalidateRef = useRef(false);
 
   useEffect(() => {
     const draft = loadDraft(challenge.id);
     const g = draft ?? emptyGraph();
+    skipInvalidateRef.current = true;
     setSeed(g);
     setGraph(g);
     setCanvasKey((k) => k + 1);
     setResult(null);
-  }, [challenge.id]);
+    setRevealedHints([]);
+    setHintsLeft(
+      Math.min(
+        3,
+        challenge.hardRequirements.filter((r) => Boolean(r.hint)).length
+      )
+    );
+  }, [challenge.id, challenge.hardRequirements]);
 
   const onGraphChange = useCallback((g: DesignGraph) => {
-    setGraph(g);
+    setGraph((prev) => {
+      if (skipInvalidateRef.current) {
+        skipInvalidateRef.current = false;
+        return g;
+      }
+      const prevSig = [
+        ...prev.nodes.map((n) => `${n.id}:${n.componentId}`),
+        ...prev.edges.map((e) => `${e.id}:${e.source}->${e.target}`),
+      ].join("|");
+      const nextSig = [
+        ...g.nodes.map((n) => `${n.id}:${n.componentId}`),
+        ...g.edges.map((e) => `${e.id}:${e.source}->${e.target}`),
+      ].join("|");
+      if (prevSig !== nextSig) {
+        queueMicrotask(() => setResult(null));
+      }
+      return g;
+    });
   }, []);
 
   // Autosave drafts (debounced lightly via effect)
@@ -83,10 +122,57 @@ export default function BuilderShell({
     clearDraft(challenge.id);
   }
 
+  function handleShowAnswer(level: SolutionLevel) {
+    const solution = getReferenceSolution(challenge.id, level);
+    if (!solution) return;
+    if (
+      graph.nodes.length > 0 &&
+      !confirm(
+        `Replace your canvas with the ${level} reference design?`
+      )
+    ) {
+      return;
+    }
+    skipInvalidateRef.current = true;
+    setSeed(solution);
+    setGraph(solution);
+    setCanvasKey((k) => k + 1);
+    setResult(runValidation(solution, challenge));
+    saveDraft(challenge.id, solution);
+  }
+
   function handleSave() {
     saveDraft(challenge.id, graph);
     setSavedFlash(true);
     window.setTimeout(() => setSavedFlash(false), 1500);
+  }
+
+  function handleCopyReport() {
+    const v = result ?? runValidation(graph, challenge);
+    if (!result) setResult(v);
+    const lines = [
+      `# ${challenge.title}`,
+      `Hard: ${v.hardPassed}/${v.hardTotal}`,
+      `Soft score: ${v.softScore}`,
+      "",
+      "## Requirements",
+      ...v.hard.map(
+        (h) => `- [${h.passed ? "x" : " "}] ${h.label}${h.detail ? ` — ${h.detail}` : ""}`
+      ),
+      "",
+      "## Dimensions",
+      ...v.dimensions.map(
+        (d) => `- ${d.dimension}: ${Math.round(d.score * 100)}%`
+      ),
+      "",
+      "## Components",
+      [...new Set(graph.nodes.map((n) => n.componentId))].join(", ") || "(none)",
+      `Edges: ${graph.edges.length}`,
+    ];
+    if (v.bottlenecks.length) {
+      lines.push("", "## Bottlenecks", ...v.bottlenecks.map((b) => `- ${b}`));
+    }
+    void navigator.clipboard.writeText(lines.join("\n"));
   }
 
   function revealHint() {
@@ -177,6 +263,8 @@ export default function BuilderShell({
         showConstraints={showConstraints}
         onToggleConstraints={() => setShowConstraints((v) => !v)}
         onRevealHint={revealHint}
+        cheat={cheat}
+        onShowAnswer={handleShowAnswer}
       />
 
       {limitSeconds != null && remaining != null && (
@@ -210,22 +298,31 @@ export default function BuilderShell({
       <div className="flex min-h-0 flex-1">
         <ComponentPalette
           allowedIds={challenge.allowedComponents}
+          suggestedIds={challenge.suggestedComponents}
           disabled={frozen}
         />
         <DesignCanvas
           canvasKey={canvasKey}
           seed={seed}
           graphNodeCount={graph.nodes.length}
-          edgeKind={edgeKind}
-          tool={tool}
+          deleteMode={deleteMode}
           frozen={frozen}
           onGraphChange={onGraphChange}
           onClear={handleClear}
-          onToolChange={setTool}
-          onEdgeKindChange={setEdgeKind}
+          onDeleteModeChange={setDeleteMode}
         />
-        <aside className="flex w-80 shrink-0 flex-col border-l border-border bg-card">
-          <ChallengeBrief challenge={challenge} hardResults={result?.hard ?? null} />
+        <aside className="flex min-h-0 w-80 shrink-0 flex-col overflow-hidden border-l border-border bg-card">
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <ChallengeBrief
+              challenge={challenge}
+              hardResults={result?.hard ?? null}
+              allHardPassed={
+                !!result &&
+                result.hardTotal > 0 &&
+                result.hardPassed === result.hardTotal
+              }
+            />
+          </div>
           <ValidatorPanel
             result={result}
             validating={false}
@@ -235,6 +332,8 @@ export default function BuilderShell({
             submitting={submitting}
             applicantName={name}
             onApplicantNameChange={setName}
+            showCopyReport={mode === "practice"}
+            onCopyReport={handleCopyReport}
           />
         </aside>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import type { Challenge, HardResult } from "@/lib/system-design/types";
+import { getComponent } from "@/lib/system-design/components";
 
 const difficultyBadge: Record<Challenge["difficulty"], string> = {
   easy: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300",
@@ -11,11 +12,16 @@ const difficultyBadge: Record<Challenge["difficulty"], string> = {
 export default function ChallengeBrief({
   challenge,
   hardResults,
+  allHardPassed,
 }: {
   challenge: Challenge;
   hardResults: HardResult[] | null;
+  allHardPassed?: boolean;
 }) {
   const byId = new Map(hardResults?.map((h) => [h.id, h]) ?? []);
+  const suggested = (challenge.suggestedComponents ?? [])
+    .map((id) => getComponent(id)?.label ?? id)
+    .slice(0, 8);
 
   return (
     <section className="space-y-3 border-b border-border p-4">
@@ -28,13 +34,31 @@ export default function ChallengeBrief({
             {challenge.title}
           </h2>
         </div>
-        <span
-          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${difficultyBadge[challenge.difficulty]}`}
-        >
-          {challenge.difficulty}
-        </span>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${difficultyBadge[challenge.difficulty]}`}
+          >
+            {challenge.difficulty}
+          </span>
+          {allHardPassed && (
+            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-700 dark:text-emerald-300">
+              Complete
+            </span>
+          )}
+        </div>
       </div>
       <p className="text-xs text-muted">{challenge.objective}</p>
+
+      {suggested.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted">
+            Suggested components
+          </p>
+          <p className="mt-1 text-[11px] leading-relaxed text-subtle">
+            {suggested.join(" · ")}
+          </p>
+        </div>
+      )}
 
       <div>
         <p className="text-[10px] font-bold uppercase tracking-wider text-muted">
@@ -58,7 +82,14 @@ export default function ChallengeBrief({
                 >
                   {passed === true ? "✓" : passed === false ? "!" : ""}
                 </span>
-                <span className="text-foreground">{req.label}</span>
+                <span className="min-w-0">
+                  <span className="text-foreground">{req.label}</span>
+                  {passed === false && result?.detail && (
+                    <span className="mt-0.5 block text-[11px] text-red-600/90 dark:text-red-400">
+                      {result.detail}
+                    </span>
+                  )}
+                </span>
               </li>
             );
           })}

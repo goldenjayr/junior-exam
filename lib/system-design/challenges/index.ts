@@ -5,6 +5,8 @@ import { newsFeed } from "./news-feed.ts";
 import { fileStorage } from "./file-storage.ts";
 import { rideMatching } from "./ride-matching.ts";
 import { rateLimiterChallenge } from "./rate-limiter.ts";
+import { searchSystem } from "./search-system.ts";
+import { pushNotifications } from "./push-notifications.ts";
 
 export const challenges: Challenge[] = [
   realtimeChat,
@@ -13,6 +15,8 @@ export const challenges: Challenge[] = [
   fileStorage,
   rideMatching,
   rateLimiterChallenge,
+  searchSystem,
+  pushNotifications,
 ];
 
 export const challengeById: Record<string, Challenge> = Object.fromEntries(

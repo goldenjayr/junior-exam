@@ -1,6 +1,6 @@
 import type { SoftRubricRule } from "../types.ts";
 
-/** Shared soft-dimension defaults; challenges can spread and override. */
+/** Shared soft-dimension defaults; overrides replace all rules for that dimension. */
 export function defaultSoftRubric(overrides: SoftRubricRule[] = []): SoftRubricRule[] {
   const base: SoftRubricRule[] = [
     {
@@ -47,14 +47,6 @@ export function defaultSoftRubric(overrides: SoftRubricRule[] = []): SoftRubricR
     },
   ];
 
-  // Overrides replace same dimension+predicate if provided, else append
-  const out = [...base];
-  for (const o of overrides) {
-    const idx = out.findIndex(
-      (b) => b.dimension === o.dimension && b.predicate === o.predicate
-    );
-    if (idx >= 0) out[idx] = { ...out[idx], ...o };
-    else out.push(o);
-  }
-  return out;
+  const replaced = new Set(overrides.map((o) => o.dimension));
+  return [...base.filter((b) => !replaced.has(b.dimension)), ...overrides];
 }

@@ -8,7 +8,7 @@ describe("challenge bank integrity", () => {
   it("has unique ids and expected count", () => {
     const ids = challenges.map((c) => c.id);
     assert.equal(new Set(ids).size, ids.length);
-    assert.equal(challenges.length, 6);
+    assert.equal(challenges.length, 8);
   });
 
   it("every predicate exists and allowed components are valid", () => {

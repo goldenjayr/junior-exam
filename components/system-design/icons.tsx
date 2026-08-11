@@ -150,6 +150,17 @@ const icons: Record<string, (p: IconProps) => React.ReactNode> = {
       <path d="M3 12h3l2-6 3 12 2-8 2 4h6" />
     </Svg>
   ),
+  "search-service": ({ className, color }) => (
+    <Svg className={className} color={color}>
+      <circle cx="11" cy="11" r="6" />
+      <path d="M16 16l4 4" />
+    </Svg>
+  ),
+  analytics: ({ className, color }) => (
+    <Svg className={className} color={color}>
+      <path d="M4 20V10M10 20V4M16 20v-7M22 20V8" />
+    </Svg>
+  ),
 };
 
 export function ComponentIcon({

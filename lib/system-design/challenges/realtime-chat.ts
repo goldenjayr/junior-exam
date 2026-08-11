@@ -46,6 +46,12 @@ export const realtimeChat: Challenge = {
       params: { componentIds: ["chat-service"] },
     },
     {
+      id: "chat-path",
+      label: "Client reaches the chat service",
+      predicate: "pathExists",
+      params: { from: "client", to: "chat-service" },
+    },
+    {
       id: "async",
       label: "Async fan-out via message queue",
       hint: "Don't make every write wait on every recipient.",
@@ -56,6 +62,11 @@ export const realtimeChat: Challenge = {
       label: "Durable message store (database)",
       predicate: "hasComponent",
       params: { componentId: "database" },
+    },
+    {
+      id: "cache-path",
+      label: "Cache in front of the database",
+      predicate: "hasCacheBeforeDb",
     },
     {
       id: "no-direct-db",

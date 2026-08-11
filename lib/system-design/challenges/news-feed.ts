@@ -35,21 +35,19 @@ export const newsFeed: Challenge = {
     },
     {
       id: "async",
-      label: "Async fan-out via queue + worker",
+      label: "Async fan-out via queue",
       hint: "Writing to every follower synchronously won't scale.",
       predicate: "hasQueueForWritePath",
     },
     {
-      id: "worker",
-      label: "Background worker for fan-out jobs",
-      predicate: "hasComponent",
-      params: { componentId: "worker" },
+      id: "worker-path",
+      label: "Queue feeds a background worker",
+      predicate: "hasQueueWorkerPath",
     },
     {
-      id: "cache",
-      label: "Cache for hot timelines",
-      predicate: "hasComponent",
-      params: { componentId: "cache" },
+      id: "cache-path",
+      label: "Cache sits in front of the database",
+      predicate: "hasCacheBeforeDb",
     },
     {
       id: "db",

@@ -145,6 +145,22 @@ export const componentCatalog: ComponentDef[] = [
     tags: ["metrics", "logs", "observability"],
     icon: "monitoring",
   },
+  {
+    id: "search-service",
+    label: "Search Service",
+    category: "compute",
+    description: "Full-text / faceted search over indexed documents.",
+    tags: ["search", "index", "elasticsearch"],
+    icon: "search-service",
+  },
+  {
+    id: "analytics",
+    label: "Analytics Pipeline",
+    category: "observability",
+    description: "Clickstream and product analytics ingestion.",
+    tags: ["analytics", "events", "metrics"],
+    icon: "analytics",
+  },
 ];
 
 export const componentById: Record<string, ComponentDef> = Object.fromEntries(

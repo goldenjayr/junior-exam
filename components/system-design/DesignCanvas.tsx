@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useRef,
   type DragEvent,
 } from "react";
 import {
@@ -11,7 +10,6 @@ import {
   ReactFlowProvider,
   Background,
   Controls,
-  MiniMap,
   addEdge,
   useEdgesState,
   useNodesState,
@@ -34,8 +32,7 @@ import ArchitectureNode, {
 } from "./ArchitectureNode";
 
 const nodeTypes = { architecture: ArchitectureNode };
-
-export type CanvasTool = "select" | "connect" | "delete";
+const DEFAULT_EDGE_KIND: EdgeKind = "request";
 
 function edgeStyle(kind: EdgeKind): Partial<Edge> {
   if (kind === "observe" || kind === "async") {
@@ -55,49 +52,44 @@ function edgeStyle(kind: EdgeKind): Partial<Edge> {
 
 function CanvasInner({
   seed,
-  edgeKind,
-  tool,
+  deleteMode,
   frozen,
   onGraphChange,
+  onExitDeleteMode,
 }: {
   seed: DesignGraph;
-  edgeKind: EdgeKind;
-  tool: CanvasTool;
+  deleteMode: boolean;
   frozen: boolean;
   onGraphChange: (graph: DesignGraph) => void;
+  onExitDeleteMode: () => void;
 }) {
   const boot = fromDesignGraph(seed);
   const [nodes, setNodes, onNodesChange] = useNodesState(boot.nodes as Node[]);
   const [edges, setEdges, onEdgesChange] = useEdgesState(boot.edges as Edge[]);
   const { screenToFlowPosition, fitView, deleteElements, getNodes, getEdges } =
     useReactFlow();
-  const skipNotify = useRef(true);
 
   useEffect(() => {
-    if (skipNotify.current) {
-      skipNotify.current = false;
-      // still notify once so parent syncs
-    }
     onGraphChange(toDesignGraph(nodes as never, edges as never));
   }, [nodes, edges, onGraphChange]);
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      if (frozen) return;
+      if (frozen || deleteMode) return;
       const id = `e-${connection.source}-${connection.target}-${Date.now()}`;
       setEdges((eds) =>
         addEdge(
           {
             ...connection,
             id,
-            data: { kind: edgeKind },
-            ...edgeStyle(edgeKind),
+            data: { kind: DEFAULT_EDGE_KIND },
+            ...edgeStyle(DEFAULT_EDGE_KIND),
           },
           eds
         )
       );
     },
-    [edgeKind, frozen, setEdges]
+    [deleteMode, frozen, setEdges]
   );
 
   const onDragOver = useCallback((e: DragEvent) => {
@@ -126,28 +118,40 @@ function CanvasInner({
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      if (frozen || tool !== "delete") return;
+      if (frozen || !deleteMode) return;
       deleteElements({ nodes: [{ id: node.id }] });
     },
-    [deleteElements, frozen, tool]
+    [deleteElements, deleteMode, frozen]
   );
 
   const onEdgeClick = useCallback(
     (_: React.MouseEvent, edge: Edge) => {
-      if (frozen || tool !== "delete") return;
+      if (frozen || !deleteMode) return;
       deleteElements({ edges: [{ id: edge.id }] });
     },
-    [deleteElements, frozen, tool]
+    [deleteElements, deleteMode, frozen]
   );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (frozen) return;
-      if (e.key !== "Delete" && e.key !== "Backspace") return;
       const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) {
+      if (
+        t &&
+        (t.tagName === "INPUT" ||
+          t.tagName === "TEXTAREA" ||
+          t.isContentEditable)
+      ) {
         return;
       }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setNodes((nds) => nds.map((n) => ({ ...n, selected: false })));
+        setEdges((eds) => eds.map((ed) => ({ ...ed, selected: false })));
+        onExitDeleteMode();
+        return;
+      }
+      if (e.key !== "Delete" && e.key !== "Backspace") return;
       const selectedNodes = getNodes().filter((n) => n.selected);
       const selectedEdges = getEdges().filter((ed) => ed.selected);
       if (selectedNodes.length || selectedEdges.length) {
@@ -157,7 +161,15 @@ function CanvasInner({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [deleteElements, frozen, getEdges, getNodes]);
+  }, [
+    deleteElements,
+    frozen,
+    getEdges,
+    getNodes,
+    onExitDeleteMode,
+    setEdges,
+    setNodes,
+  ]);
 
   return (
     <ReactFlow
@@ -172,8 +184,8 @@ function CanvasInner({
       onEdgeClick={onEdgeClick}
       nodeTypes={nodeTypes}
       fitView
-      nodesDraggable={!frozen && tool !== "delete"}
-      nodesConnectable={!frozen}
+      nodesDraggable={!frozen && !deleteMode}
+      nodesConnectable={!frozen && !deleteMode}
       elementsSelectable={!frozen}
       connectionMode={ConnectionMode.Loose}
       onInit={() => fitView({ padding: 0.2 })}
@@ -182,12 +194,6 @@ function CanvasInner({
     >
       <Background gap={18} size={1} />
       <Controls showInteractive={!frozen} />
-      <MiniMap
-        pannable
-        zoomable
-        className="!bg-card !border-border"
-        maskColor="rgb(0 0 0 / 0.15)"
-      />
     </ReactFlow>
   );
 }
@@ -196,71 +202,39 @@ export default function DesignCanvas({
   canvasKey,
   seed,
   graphNodeCount,
-  edgeKind,
-  tool,
+  deleteMode,
   frozen,
   onGraphChange,
   onClear,
-  onToolChange,
-  onEdgeKindChange,
+  onDeleteModeChange,
 }: {
   canvasKey: number;
   seed: DesignGraph;
   graphNodeCount: number;
-  edgeKind: EdgeKind;
-  tool: CanvasTool;
+  deleteMode: boolean;
   frozen: boolean;
   onGraphChange: (graph: DesignGraph) => void;
   onClear: () => void;
-  onToolChange: (tool: CanvasTool) => void;
-  onEdgeKindChange: (kind: EdgeKind) => void;
+  onDeleteModeChange: (on: boolean) => void;
 }) {
-  const tools: { id: CanvasTool; label: string }[] = [
-    { id: "select", label: "Select" },
-    { id: "connect", label: "Connect" },
-    { id: "delete", label: "Delete" },
-  ];
-  const kinds: EdgeKind[] = ["request", "async", "data", "observe"];
-
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2">
         <p className="mr-2 text-xs font-bold uppercase tracking-widest text-muted">
           Build the architecture
         </p>
-        <div className="flex gap-1">
-          {tools.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              disabled={frozen}
-              onClick={() => onToolChange(t.id)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${
-                tool === t.id
-                  ? "bg-cyan-600 text-white"
-                  : "border border-border hover:bg-hover"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div className="mx-1 h-4 w-px bg-border" />
-        <label className="flex items-center gap-1.5 text-xs text-muted">
-          Edge
-          <select
-            value={edgeKind}
-            disabled={frozen}
-            onChange={(e) => onEdgeKindChange(e.target.value as EdgeKind)}
-            className="rounded-md border border-border bg-background px-1.5 py-1 text-xs text-foreground"
-          >
-            {kinds.map((k) => (
-              <option key={k} value={k}>
-                {k}
-              </option>
-            ))}
-          </select>
-        </label>
+        <button
+          type="button"
+          disabled={frozen}
+          onClick={() => onDeleteModeChange(!deleteMode)}
+          className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${
+            deleteMode
+              ? "bg-cyan-600 text-white"
+              : "border border-border hover:bg-hover"
+          }`}
+        >
+          Delete
+        </button>
         <button
           type="button"
           disabled={frozen}
@@ -269,6 +243,9 @@ export default function DesignCanvas({
         >
           Clear
         </button>
+        <p className="ml-auto text-[11px] text-muted">
+          Drag handles to connect · Del removes · Esc clears selection
+        </p>
       </div>
       <div className="relative min-h-0 flex-1">
         {graphNodeCount === 0 && (
@@ -282,10 +259,10 @@ export default function DesignCanvas({
           <CanvasInner
             key={canvasKey}
             seed={seed}
-            edgeKind={edgeKind}
-            tool={tool}
+            deleteMode={deleteMode}
             frozen={frozen}
             onGraphChange={onGraphChange}
+            onExitDeleteMode={() => onDeleteModeChange(false)}
           />
         </ReactFlowProvider>
       </div>

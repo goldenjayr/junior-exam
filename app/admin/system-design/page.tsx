@@ -23,6 +23,17 @@ export default function SystemDesignAdminPage() {
   const [customMin, setCustomMin] = useState(20);
   const [copied, setCopied] = useState(false);
   const [query, setQuery] = useState("");
+  const [saveName, setSaveName] = useState("");
+  const [savedLinks, setSavedLinks] = useState<
+    { name: string; path: string }[]
+  >(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      return JSON.parse(localStorage.getItem("saved-sd-links") ?? "[]");
+    } catch {
+      return [];
+    }
+  });
 
   const visible = useMemo(
     () =>
@@ -54,6 +65,22 @@ export default function SystemDesignAdminPage() {
     await navigator.clipboard.writeText(full);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1500);
+  }
+
+  function persistSaved(next: { name: string; path: string }[]) {
+    setSavedLinks(next);
+    localStorage.setItem("saved-sd-links", JSON.stringify(next));
+  }
+
+  function saveCurrentLink() {
+    const name = saveName.trim();
+    if (!name || !linkPath) return;
+    const next = [
+      { name, path: linkPath },
+      ...savedLinks.filter((s) => s.name !== name),
+    ].slice(0, 20);
+    persistSaved(next);
+    setSaveName("");
   }
 
   return (
@@ -205,6 +232,60 @@ export default function SystemDesignAdminPage() {
             {linkPath && (
               <p className="mt-2 break-all text-[10px] text-muted">{linkPath}</p>
             )}
+
+            <div className="mt-4 border-t border-border pt-3">
+              <p className="text-xs font-semibold">Save link</p>
+              <div className="mt-1.5 flex gap-1">
+                <input
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                  placeholder="Name"
+                  className="min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={saveCurrentLink}
+                  disabled={!saveName.trim() || !linkPath}
+                  className="rounded-lg border border-border px-2.5 text-xs font-semibold hover:bg-hover disabled:opacity-40"
+                >
+                  Save
+                </button>
+              </div>
+              {savedLinks.length > 0 && (
+                <ul className="mt-2 space-y-1">
+                  {savedLinks.map((s) => (
+                    <li
+                      key={s.name}
+                      className="flex items-center justify-between gap-2 text-xs"
+                    >
+                      <button
+                        type="button"
+                        className="truncate text-left font-medium text-cyan-700 hover:underline dark:text-cyan-400"
+                        onClick={() => {
+                          void navigator.clipboard.writeText(
+                            `${window.location.origin}${s.path}`
+                          );
+                          setCopied(true);
+                          window.setTimeout(() => setCopied(false), 1500);
+                        }}
+                        title={s.path}
+                      >
+                        {s.name}
+                      </button>
+                      <button
+                        type="button"
+                        className="text-muted hover:text-red-600"
+                        onClick={() =>
+                          persistSaved(savedLinks.filter((x) => x.name !== s.name))
+                        }
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </aside>
         </div>
       </div>

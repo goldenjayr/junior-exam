@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import { getChallenge } from "@/lib/system-design/challenges";
+import { parseCheat } from "@/lib/cheat";
 import BuilderShell from "@/components/system-design/BuilderShell";
 
 function PlayInner() {
@@ -14,6 +15,7 @@ function PlayInner() {
   const mode = modeParam === "challenge" ? "challenge" : "practice";
   const examiner = params.get("e") ?? "jayr";
   const t = params.get("t");
+  const cheat = parseCheat(params.get("cheat"));
 
   const challenge = useMemo(() => getChallenge(challengeId), [challengeId]);
 
@@ -42,6 +44,7 @@ function PlayInner() {
       mode={mode}
       examiner={examiner}
       timeLimitParam={t}
+      cheat={cheat}
     />
   );
 }

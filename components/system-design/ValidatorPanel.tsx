@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { SoftDimension, ValidationResult } from "@/lib/system-design/types";
 
 const labels: Record<SoftDimension, string> = {
@@ -20,6 +21,8 @@ export default function ValidatorPanel({
   submitting,
   applicantName,
   onApplicantNameChange,
+  onCopyReport,
+  showCopyReport,
 }: {
   result: ValidationResult | null;
   validating: boolean;
@@ -29,9 +32,20 @@ export default function ValidatorPanel({
   submitting?: boolean;
   applicantName?: string;
   onApplicantNameChange?: (name: string) => void;
+  onCopyReport?: () => void;
+  showCopyReport?: boolean;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    if (!onCopyReport) return;
+    onCopyReport();
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
+  }
+
   return (
-    <section className="flex min-h-0 flex-1 flex-col p-4">
+    <section className="flex shrink-0 flex-col border-t border-border bg-card p-4">
       <p className="text-[10px] font-bold uppercase tracking-widest text-muted">
         Validate design
       </p>
@@ -40,16 +54,20 @@ export default function ValidatorPanel({
       </p>
 
       <ul className="mt-3 space-y-2">
-        {(
-          Object.keys(labels) as SoftDimension[]
-        ).map((dim) => {
+        {(Object.keys(labels) as SoftDimension[]).map((dim) => {
           const score =
             result?.dimensions.find((d) => d.dimension === dim)?.score ?? null;
           const filled = score == null ? 0 : Math.round(score * 4);
           return (
-            <li key={dim} className="flex items-center justify-between gap-2 text-xs">
+            <li
+              key={dim}
+              className="flex items-center justify-between gap-2 text-xs"
+            >
               <span>{labels[dim]}</span>
-              <span className="flex gap-0.5" aria-label={`${labels[dim]} ${filled}/4`}>
+              <span
+                className="flex gap-0.5"
+                aria-label={`${labels[dim]} ${filled}/4`}
+              >
                 {[0, 1, 2, 3].map((i) => (
                   <span
                     key={i}
@@ -75,6 +93,9 @@ export default function ValidatorPanel({
             <span className="font-bold">
               {result.hardPassed}/{result.hardTotal}
             </span>
+            {result.hardPassed === result.hardTotal && (
+              <span className="ml-2 font-bold text-emerald-600">Complete</span>
+            )}
           </p>
           <p className="mt-1">
             Soft score: <span className="font-bold">{result.softScore}</span>
@@ -82,7 +103,7 @@ export default function ValidatorPanel({
         </div>
       )}
 
-      <div className="mt-auto space-y-2 pt-4">
+      <div className="mt-3 space-y-2">
         {canSubmit && onApplicantNameChange && (
           <input
             value={applicantName ?? ""}
@@ -95,10 +116,20 @@ export default function ValidatorPanel({
           type="button"
           onClick={onValidate}
           disabled={validating}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-sm font-semibold hover:bg-hover disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm font-semibold hover:bg-hover disabled:opacity-60"
         >
           ▶ Run Validation
         </button>
+        {showCopyReport && (
+          <button
+            type="button"
+            onClick={handleCopy}
+            disabled={!result}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-semibold hover:bg-hover disabled:opacity-40"
+          >
+            {copied ? "Copied!" : "Copy report"}
+          </button>
+        )}
         {canSubmit && onSubmit && (
           <button
             type="button"

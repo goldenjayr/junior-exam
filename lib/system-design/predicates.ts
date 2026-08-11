@@ -148,6 +148,9 @@ const hasEdgeKindBetween: PredicateFn = (ctx, params) => {
 };
 
 const noDirectClientToDb: PredicateFn = (ctx) => {
+  if (ctx.graph.nodes.length === 0) {
+    return { passed: false, detail: "Empty design" };
+  }
   const clients = new Set(nodesOfType(ctx, "client"));
   const dbs = new Set(nodesOfType(ctx, "database"));
   const bad = ctx.graph.edges.some(
@@ -160,23 +163,23 @@ const noDirectClientToDb: PredicateFn = (ctx) => {
 };
 
 const hasCacheBeforeDb: PredicateFn = (ctx) => {
-  const hasCache = nodesOfType(ctx, "cache").length > 0;
-  const hasDb = nodesOfType(ctx, "database").length > 0;
-  if (!hasDb) return { passed: false, detail: "No database in design" };
-  if (!hasCache) return { passed: false, detail: "Add a cache on the read path" };
-  // Prefer: something reaches DB and cache exists; stronger: path via cache
-  const cacheIds = new Set(nodesOfType(ctx, "cache"));
-  const dbIds = new Set(nodesOfType(ctx, "database"));
+  const caches = nodesOfType(ctx, "cache");
+  const dbs = nodesOfType(ctx, "database");
+  if (dbs.length === 0) {
+    return { passed: false, detail: "No database in design" };
+  }
+  if (caches.length === 0) {
+    return { passed: false, detail: "Add a cache on the read path" };
+  }
+  const cacheIds = new Set(caches);
+  const dbIds = new Set(dbs);
+  // Require at least one cache → database edge (cache sits in front of DB)
   const viaCache = ctx.graph.edges.some(
     (e) => cacheIds.has(e.source) && dbIds.has(e.target)
   );
-  const anyToDb = [...ctx.componentIds.keys()].some((id) =>
-    hasPath(ctx, [id], dbIds)
-  );
-  const ok = viaCache || (hasCache && anyToDb);
   return {
-    passed: ok,
-    detail: ok ? undefined : "Wire cache on the path to the database",
+    passed: viaCache,
+    detail: viaCache ? undefined : "Wire cache → database on the read path",
   };
 };
 
@@ -192,11 +195,15 @@ const hasQueueForWritePath: PredicateFn = (ctx) => {
     "notification-service",
     "matching-service",
     "worker",
+    "search-service",
   ];
   const present = new Set(ctx.componentIds.values());
   const hasProducer = producers.some((p) => present.has(p));
   if (!hasProducer) {
-    return { passed: true, detail: "Queue present" };
+    return {
+      passed: false,
+      detail: "Add a producing service connected into the queue",
+    };
   }
   const queueSet = new Set(queues);
   const ok = ctx.graph.edges.some((e) => {
@@ -210,6 +217,20 @@ const hasQueueForWritePath: PredicateFn = (ctx) => {
   return {
     passed: ok,
     detail: ok ? undefined : "Connect a service into the message queue",
+  };
+};
+
+const hasQueueWorkerPath: PredicateFn = (ctx) => {
+  const ok =
+    pathExistsBetweenTypes(ctx, "message-queue", "worker") ||
+    ctx.graph.edges.some((e) => {
+      const s = ctx.componentIds.get(e.source);
+      const t = ctx.componentIds.get(e.target);
+      return s === "message-queue" && t === "worker";
+    });
+  return {
+    passed: ok,
+    detail: ok ? undefined : "Connect message queue → worker for async jobs",
   };
 };
 
@@ -296,20 +317,23 @@ const maxFanIn: PredicateFn = (ctx, params) => {
 };
 
 const hasRealtimePath: PredicateFn = (ctx) => {
-  const ok =
-    pathExistsBetweenTypes(ctx, "client", "websocket-gateway") ||
-    (nodesOfType(ctx, "websocket-gateway").length > 0 &&
-      nodesOfType(ctx, "client").length > 0 &&
-      ctx.graph.edges.some((e) => {
-        const s = ctx.componentIds.get(e.source);
-        const t = ctx.componentIds.get(e.target);
-        return (
-          (s === "client" && t === "websocket-gateway") ||
-          (s === "websocket-gateway" && t === "client") ||
-          (s === "load-balancer" && t === "websocket-gateway") ||
-          (s === "api-gateway" && t === "websocket-gateway")
-        );
-      }));
+  const clients = nodesOfType(ctx, "client");
+  const wsNodes = nodesOfType(ctx, "websocket-gateway");
+  if (clients.length === 0 || wsNodes.length === 0) {
+    return {
+      passed: false,
+      detail: "Need both client and WebSocket gateway",
+    };
+  }
+  const clientSet = new Set(clients);
+  const wsSet = new Set(wsNodes);
+  const direct = ctx.graph.edges.some(
+    (e) =>
+      (clientSet.has(e.source) && wsSet.has(e.target)) ||
+      (wsSet.has(e.source) && clientSet.has(e.target))
+  );
+  const path = pathExistsBetweenTypes(ctx, "client", "websocket-gateway");
+  const ok = direct || path;
   return {
     passed: ok,
     detail: ok
@@ -327,6 +351,7 @@ export const predicates: Record<string, PredicateFn> = {
   noDirectClientToDb,
   hasCacheBeforeDb,
   hasQueueForWritePath,
+  hasQueueWorkerPath,
   hasObservability,
   hasRedundancySignal,
   componentCountAtLeast,

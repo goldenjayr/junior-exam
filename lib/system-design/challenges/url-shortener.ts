@@ -31,6 +31,12 @@ export const urlShortener: Challenge = {
       params: { componentIds: ["cdn", "load-balancer", "api-gateway"] },
     },
     {
+      id: "client-path",
+      label: "Client reaches the API gateway",
+      predicate: "pathExists",
+      params: { from: "client", to: "api-gateway" },
+    },
+    {
       id: "store",
       label: "Persistent mapping store (database)",
       predicate: "hasComponent",

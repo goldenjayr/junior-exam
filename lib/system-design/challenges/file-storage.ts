@@ -51,6 +51,13 @@ export const fileStorage: Challenge = {
       params: { componentId: "cdn" },
     },
     {
+      id: "cdn-path",
+      label: "CDN path reaches object storage",
+      hint: "Edge should pull or proxy blobs from object storage.",
+      predicate: "pathExists",
+      params: { from: "cdn", to: "object-storage" },
+    },
+    {
       id: "no-direct",
       label: "No direct client→DB",
       predicate: "noDirectClientToDb",

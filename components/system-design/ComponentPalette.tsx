@@ -20,12 +20,18 @@ const categoryOrder: ComponentCategory[] = [
 
 export default function ComponentPalette({
   allowedIds,
+  suggestedIds,
   disabled,
 }: {
   allowedIds?: string[];
+  suggestedIds?: string[];
   disabled?: boolean;
 }) {
   const [query, setQuery] = useState("");
+  const suggested = useMemo(
+    () => new Set(suggestedIds ?? []),
+    [suggestedIds]
+  );
 
   const items = useMemo(() => {
     const allow = allowedIds ? new Set(allowedIds) : null;
@@ -47,10 +53,18 @@ export default function ComponentPalette({
     for (const item of items) {
       map.get(item.category)?.push(item);
     }
+    // Suggested first within each group
+    for (const [, list] of map) {
+      list.sort((a, b) => {
+        const as = suggested.has(a.id) ? 0 : 1;
+        const bs = suggested.has(b.id) ? 0 : 1;
+        return as - bs;
+      });
+    }
     return categoryOrder
       .map((cat) => ({ cat, items: map.get(cat) ?? [] }))
       .filter((g) => g.items.length > 0);
-  }, [items]);
+  }, [items, suggested]);
 
   function onDragStart(e: React.DragEvent, componentId: string) {
     if (disabled) {
@@ -73,6 +87,11 @@ export default function ComponentPalette({
           placeholder="Search components…"
           className="mt-2 w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm outline-none focus:border-cyan-500"
         />
+        {suggested.size > 0 && (
+          <p className="mt-1.5 text-[10px] text-cyan-700 dark:text-cyan-400">
+            Highlighted items are suggested for this challenge
+          </p>
+        )}
       </div>
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3">
         {grouped.map(({ cat, items: group }) => (
@@ -83,13 +102,18 @@ export default function ComponentPalette({
             <ul className="space-y-1.5">
               {group.map((c) => {
                 const accent = categoryAccent(c.category);
+                const isSuggested = suggested.has(c.id);
                 return (
                   <li
                     key={c.id}
                     draggable={!disabled}
                     onDragStart={(e) => onDragStart(e, c.id)}
                     title={c.description}
-                    className={`flex cursor-grab items-center gap-2 rounded-lg border border-border bg-background px-2 py-1.5 active:cursor-grabbing ${
+                    className={`flex cursor-grab items-center gap-2 rounded-lg border bg-background px-2 py-1.5 active:cursor-grabbing ${
+                      isSuggested
+                        ? "border-cyan-500/70 ring-1 ring-cyan-500/20"
+                        : "border-border"
+                    } ${
                       disabled ? "opacity-50" : "hover:border-cyan-500/60"
                     }`}
                   >
@@ -106,9 +130,14 @@ export default function ComponentPalette({
                         className="h-3.5 w-3.5"
                       />
                     </span>
-                    <span className="truncate text-xs font-medium">
+                    <span className="min-w-0 flex-1 truncate text-xs font-medium">
                       {c.label}
                     </span>
+                    {isSuggested && (
+                      <span className="shrink-0 text-[9px] font-bold uppercase tracking-wide text-cyan-600 dark:text-cyan-400">
+                        tip
+                      </span>
+                    )}
                   </li>
                 );
               })}

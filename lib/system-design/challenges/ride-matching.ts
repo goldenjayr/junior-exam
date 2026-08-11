@@ -46,10 +46,21 @@ export const rideMatching: Challenge = {
       predicate: "hasQueueForWritePath",
     },
     {
+      id: "worker-path",
+      label: "Workers consume match jobs from the queue",
+      predicate: "hasQueueWorkerPath",
+    },
+    {
       id: "notify",
       label: "Notification service for ride events",
       predicate: "hasComponent",
       params: { componentId: "notification-service" },
+    },
+    {
+      id: "cache-path",
+      label: "Geo/nearby cache in front of DB",
+      hint: "Matching without an in-memory geo index will be too slow.",
+      predicate: "hasCacheBeforeDb",
     },
     {
       id: "store",

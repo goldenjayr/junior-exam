@@ -26,7 +26,7 @@ export default function FeedbackStrip({
     : live.bottlenecks;
 
   return (
-    <footer className="flex flex-wrap items-start gap-3 border-t border-border bg-card px-4 py-3">
+    <footer className="relative z-10 flex shrink-0 flex-wrap items-start gap-3 border-t border-border bg-card px-4 py-3">
       <div className="min-w-0 flex-1 space-y-1 text-xs">
         {tips.slice(0, 2).map((t) => (
           <p key={t}>
